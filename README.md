@@ -63,7 +63,7 @@ You might be interested in getting a jump-start in Blockchain technology. For th
 
 
 ### Note
-A final remark on this page: We are going to use Github for results only - and this page ist jzst trying to get you on board.
+A final remark on this page: We are going to use Github for results only - and this page ist just trying to get you on board.
 
 You will find a live version of this document at https://cryptpad.fr/code/#/2/code/view/eDHWRRRvBDlpg0pX6BSnak3bkIXWTtAlK5ChqxRhsv0/
 
