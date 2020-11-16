@@ -57,7 +57,7 @@ In this course we shall be **using the following tools**.
 * **Github** for achieved **results**, such as documentation (preferably in markdown as this can be edited directly) and code. Our repository is https://github.com/clecap/sector-coop. To get access to this private repository, get a github account and send a mail with your account id to clemens.cap AT uni-rostock.de
 * **Cryptpad** for shared **real-time edit** such as discussions, brainstorming and organizational work, where multiple persons need edit rights. In particular it supports shared Kanban, shared markdown and shared drive, just as Google Docs does but without their privacy problems. 
 * **Youtube** for some instructional videos. (TODO: GOE)
-* **Mailing list** for notifications and actively pushed information. (TODO: HRO)
+* **Mailing list** for notifications and actively pushed information: iuk-ksws@uni-rostock.de
 
 ### Technologies
 
