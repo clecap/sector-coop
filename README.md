@@ -30,6 +30,10 @@ Imagine a scientist publishes his or her thoughts **on a blog** and gets good re
 1. From then on, we shall have **regular weekly meetings** on Zoom. In between we shall be working on specification and programming tasks. 
 1. There will be **occasional lectures and tutorials** on blockchain technology and other aspects we shall need. There is plenty of material online for that, including a blockchain course from Göttingen and a blockchain summerschool Rostock had organized in Tallinn some time ago. 
 
+### What is the Zoom link?
+Join Zoom Meeting https://uni-rostock-de.zoom.us/j/86513967064?pwd=RW4rbHpJSHhOWEMwZjd1TmRDTHAyUT09
+Meeting ID: 865 1396 7064 Passcode: 958354
+
 
 ### What am I expected to do?
 
