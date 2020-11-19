@@ -27,7 +27,7 @@ Imagine a scientist publishes his or her thoughts **on a blog** and gets good re
 ### How will this continue?
 
 1. There is a **kick-off event on Zoom** on **November 5 at 12:00**. Registered parties will receive an email with the Zoom link. So please make sure you register at StudIP or by sending an email to clemens.cap AT uni-rostock.de.
-1. From then on, we shall have **regular weekly meetings** on Zoom. In between we shall be working on specification and programming tasks. 
+1. From then on, we shall have **regular weekly meetings** on Zoom **every Thursday at 12:00**. In between we shall be working on specification and programming tasks. 
 1. There will be **occasional lectures and tutorials** on blockchain technology and other aspects we shall need. There is plenty of material online for that, including a blockchain course from Göttingen and a blockchain summerschool Rostock had organized in Tallinn some time ago. 
 
 ### What is the Zoom link?
