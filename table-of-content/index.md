@@ -2,412 +2,54 @@
 
 ## Table of Conents
 
-<div class="documentation">
 
 ### Documentation
 
-<table>
-
-<tbody>
-
-<tr>
-
-<th>Title</th>
-
-<th>Content</th>
-
-<th>Authors</th>
-
-<th>Last Modified</th>
-
-<th>Link</th>
-
-</tr>
-
-<tr>
-
-<td>Entity Relationship Diagram</td>
-
-<td>ER Diagram for storage node</td>
-
-<td>Jonas</td>
-
-<td>01.12.2020</td>
-
-<td>[Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/new%20entity%20relationship%20diagram.png)</td>
-
-</tr>
-
-<tr>
-
-<td>Sequence Diagram</td>
-
-<td>Core System functionality, e.g. Account creation etc</td>
-
-<td>Anant, Jonathan</td>
-
-<td>14.12.2020</td>
-
-<td>[Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/Sequence_Diagram_20201214.pdf)</td>
-
-</tr>
-
-<tr>
-
-<td>Block Diagram</td>
-
-<td>System snapshot for rough system parts with functionality</td>
-
-<td>Jonas</td>
-
-<td>09.12.2020</td>
-
-<td>[Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/block%20Diagram.png)</td>
-
-</tr>
-
-<tr>
-
-<td>Nodes</td>
-
-<td>Relation of full, light and mining nodes</td>
-
-<td>Jonas</td>
-
-<td>13.12.2020</td>
-
-<td>[Full](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/full%20node.png) [Light](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/light%20node.png) [Mining](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/mining%20node.png)</td>
-
-</tr>
-
-<tr>
-
-<td>Flow Diagram</td>
-
-<td>Flow for various system use cases</td>
-
-<td>Jonas</td>
-
-<td>06.01.2021</td>
-
-<td>[Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/flowdiagramn.png)</td>
-
-</tr>
-
-<tr>
-
-<td>API</td>
-
-<td>Identity API functions that need implementing</td>
-
-<td>Anant, Jonathan</td>
-
-<td>04.12.2020</td>
-
-<td>[Link](https://cryptpad.fr/code/#/3/code/edit/e60d754bae7261e868e50e0d117197b8/)</td>
-
-</tr>
-
-<tr>
-
-<td>Data Structures</td>
-
-<td>Data structures and types needed for the identity handling</td>
-
-<td>Anant, Jonathan</td>
-
-<td>04.12.2020</td>
-
-<td>[Link](https://cryptpad.fr/code/#/3/code/edit/8d7b4122dcfa4cbf5205218806883a47/)</td>
-
-</tr>
-
-<tr>
-<td>Class Diagram</td>
-<td></td>
-<td>Jonas</td>
-<td>06.01.2021</td>
-<td>[Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/class%20diagram.png)</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-</div>
-
-### Table in "nice" (?) md
-This sort of format seems to be easier to work with in terms of adding things, but a real pain to read in raw markdown format if one quickly wants to update something. Do we want to stick to that?
-
-| Title | Content | Authors | Last Modified | Link |
+| Title | Content | Authors| Last Modified | Link |
 | --- | --- | --- | --- | --- |
 | Entity Relationship Diagram | ER Diagram for storage node | Jonas | 01.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/new%20entity%20relationship%20diagram.png) |
-| Sequence Diagram | Core System functionality, e.g. Account creation etc. | Anant, Jonathan | 14.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/Sequence_Diagram_20201214.pdf) |
-| Block Diagram | System snapshot for rough system parts with functionality | Jonas | 09.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/block%20Diagram.png) |
+| Sequence Diagram | Core System functionality, e.g. Account creation etc | Anant, Jonathan | 14.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/Sequence_Diagram_20201214.pdf) 
+| Block Diagram | System snapshot for rough system parts with functionality | Jonas | 09.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/block%20Diagram.png) 
+| Nodes | Relation of full, light and mining nodes | Jonas | 13.12.2020 | [Full](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/full%20node.png), [Light](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/light%20node.png), [Mining](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/mining%20node.png) 
+| Flow Diagram | Flow for various system use cases | Jonas | 06.01.2021 | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/flowdiagramn.png) 
+| API | Identity API functions that need implementing | Anant, Jonathan | 04.12.2020 | [Link](https://cryptpad.fr/code/#/3/code/edit/e60d754bae7261e868e50e0d117197b8/) 
+| Data Structures | Data structures and types needed for the identity handling | Anant, Jonathan | 04.12.2020 | [Link](https://cryptpad.fr/code/#/3/code/edit/8d7b4122dcfa4cbf5205218806883a47/) 
+| Class Diagram | | Jonas | 06.01.2021 | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/class%20diagram.png) 
 
-<div class="informal-thoughts">
+
 
 ### Informal thoughts
 
-<table>
-
-<tbody>
-
-<tr>
-
-<th>Topic</th>
-
-<th>Authors</th>
-
-<th>Link</th>
-
-</tr>
-
-<tr>
-
-<td>Reference Architecture</td>
-
-<td>Clemens</td>
-
-<td>[Link](https://www.overleaf.com/project/5fd13d6f13a41fe683dfbbb1)</td>
-
-</tr>
-
-<tr>
-
-<td>Useful Libraries</td>
-
-<td>Jonathan (open for contributions)</td>
-
-<td>[Link](https://cryptpad.fr/code/#/3/code/edit/6557eb1cf8b674434e270e38372d2827/)</td>
-
-</tr>
-
-<tr>
-
-<td>DSA Blind Signature Protocol</td>
-
-<td>Anant</td>
-
-<td>[Link](https://cryptpad.fr/pad/#/3/pad/edit/b96c5b2eb6fa9ebd6cc3dd55655bbe70/)</td>
-
-</tr>
-
-<tr>
-
-<td>How to sign blindly</td>
-
-<td>Jonathan</td>
-
-<td>[Link](https://cryptpad.fr/code/#/3/code/edit/b09386c4602332ab09e1d119b4c3bb9b/)</td>
-
-</tr>
-
-<tr>
-
-<td>Identity</td>
-
-<td>Jonathan</td>
-
-<td>[Link](https://cryptpad.fr/code/#/3/code/edit/bb43d3738ee2bd0bca14249050b0289d/)</td>
-
-</tr>
-
-<tr>
-
-<td>Self-certifying storage (SFS)</td>
-
-<td>Dominik</td>
-
-<td>[Link](https://cryptpad.fr/code/#/3/code/edit/77912ebf2294dc2437c4e132233008c8/)</td>
-
-</tr>
-
-<tr>
-
-<td>Self-certifying storage (SFS)</td>
-
-<td>Clemens</td>
-
-<td>[Link](https://www.overleaf.com/project/5fb3af44d95e01586e3c79fb)</td>
-
-</tr>
-
-<tr>
-
-<td>Possible issues with digital signatures</td>
-
-<td>Dominik</td>
-
-<td>[Link](https://cryptpad.fr/code/#/3/code/edit/3ea85d7bec3c96da3ce05d36132db077/)</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-</div>
+| Topic | Authors | Link |
+| --- | --- | --- |
+| Reference Architecture | Clemens | [Link](https://www.overleaf.com/project/5fd13d6f13a41fe683dfbbb1) 
+| Useful Libraries | Jonathan (open for contributions) | [Link](https://cryptpad.fr/code/#/3/code/edit/6557eb1cf8b674434e270e38372d2827/) 
+| DSA Blind Signature Protocol | Anant | [Link](https://cryptpad.fr/pad/#/3/pad/edit/b96c5b2eb6fa9ebd6cc3dd55655bbe70/) 
+| How to sign blindly | Jonathan | [Link](https://cryptpad.fr/code/#/3/code/edit/b09386c4602332ab09e1d119b4c3bb9b/) 
+| Identity | Jonathan | [Link](https://cryptpad.fr/code/#/3/code/edit/bb43d3738ee2bd0bca14249050b0289d/) 
+| Self-certifying storage (SFS) | Dominik | [Dominik](https://cryptpad.fr/code/#/3/code/edit/77912ebf2294dc2437c4e132233008c8/), [Clemens](https://www.overleaf.com/project/5fb3af44d95e01586e3c79fb) 
+| Possible issues with digital signatures | Dominik | [Link](https://cryptpad.fr/code/#/3/code/edit/3ea85d7bec3c96da3ce05d36132db077/) 
 
 * * *
 
-<div class="glossary">
-
 ## Glossary
 
-**ATTENTION:** So far this contains only information as stated [here](https://cryptpad.fr/code/#/3/code/edit/86d118623093bc3f51e4bb2567f7486a/). Please look through this in order for us to discuss this during the next meeting to finally settle on these definitions as I cannot decide that myself on your behalves ;)
-
-<table>
-
-<tbody>
-
-<tr>
-
-<th>Terminus</th>
-
-<th>Definition</th>
-
-</tr>
-
-<tr>
-
-<td>Blind Signature</td>
-
-<td>A way of having a party sign something without the party knowing what it exactly signed and later still being able to verify the signature. See [this](https://cryptpad.fr/code/#/3/code/edit/b09386c4602332ab09e1d119b4c3bb9b/) for more informaiton.</td>
-
-</tr>
-
-<tr>
-
-<td>Blockchain</td>
-
-<td>An Ethereum private blockchain used to verify certain events happening in our system. The blockchain saves public pseudonym information, document hashes and claims about pseudonyms.</td>
-
-</tr>
-
-<tr>
-
-<td>Central Authority (CA)</td>
-
-<td>A pseudonym that is authorized by to sign other pseudonym to make them patrons. Could also be implemented as a hierarchy similar to SSL signing hierarchy.</td>
-
-</tr>
-
-<tr>
-
-<td>Datablob</td>
-
-<td>Encrypted user data related to a user account saved in the Identity Storage of a user. The encryption is based on AES256 key which is also attached to the user account but encrypted using the password. The identity storage should at no point be able to decrypt the datablob.</td>
-
-</tr>
-
-<tr>
-
-<td>Document</td>
-
-<td>Any file (usually pdf) that is uploaded to the document storage. Can either be a new paper, a new version to an existing paper, a comment or a review to a paper. For the document storage to accept a document its hash must be present on the blockchain an verified such that the author of the document has paid the required amount of tokens.</td>
-
-</tr>
-
-<tr>
-
-<td>Document Hash</td>
-
-<td>The Sha256 hash of a document. Needs to be part of a transaction that adds the document to the system such that the document storage can find the document on the blockchain.</td>
-
-</tr>
-
-<tr>
-
-<td>Document Storage</td>
-
-<td>A storage component that accepts documents and can be searched. Before accepting a new document, it needs to calculate the Document Hash and check if the hash is present in an accepted transaction on the blockchain. Can also be searched.</td>
-
-</tr>
-
-<tr>
-
-<td>DSA</td>
-
-<td>Digital Signature Algorithm, a way of digitally signing documents which can be adapted to perform blind signatures. See [this](https://cryptpad.fr/code/#/3/code/edit/b09386c4602332ab09e1d119b4c3bb9b/)for more information.</td>
-
-</tr>
-
-<tr>
-
-<td>EthrDID</td>
-
-<td>Refers to the data structure used to store pseudonym data as imposed by [this Github repository](https://github.com/uport-project/ethr-did), a EthrDID is part of each Pseudonym.</td>
-
-</tr>
-
-<tr>
-
-<td>Identity</td>
-
-<td>Represents the true identity of a person. A single SecTor Account should exists for each identity and one identity may have any number of pseudonyms. Not to be confused with EthrDID which is part of the technical implementation of pseudonyms.</td>
-
-</tr>
-
-<tr>
-
-<td>Identity Storage</td>
-
-<td>A storage component that only supports CRUD operations for SecTor Acc and only receives encrypted user data. It only serves as a private backup for user data, so users only have to hold on to their SecTor Acc password.</td>
-
-</tr>
-
-<tr>
-
-<td>Patron</td>
-
-<td>A special pseudonym on the blockchain that is allowed to sign other pseudonyms to give them tokens. This can for example be a university. To become a patron the signature needs to be signed by a super pseudonym which can either be one central authority pseudonym or part of a key hierarchy (similar to SSL certificate hierarchy). For example a university could be such a patron, handing out tokens to its researchers.</td>
-
-</tr>
-
-<tr>
-
-<td>Pseudonym</td>
-
-<td>A pseudonym is one name under which a user can publish documents. A pseudonym is always related to an identity but the identity doesn't need to be public on the blockchain for the pseudonym to be valid. Before a user can publish under a pseudonym, a patron needs to sign that pseudonym.</td>
-
-</tr>
-
-<tr>
-
-<td>RSA</td>
-
-<td>Rivest-Shamir-Adleman, public-key cryptosystem, relatively simple to implement and with existing implementations of blind signature, was however considered to be too insecure for our intents. See [this](https://cryptpad.fr/code/#/3/code/edit/b09386c4602332ab09e1d119b4c3bb9b/) for more information.</td>
-
-</tr>
-
-<tr>
-
-<td>SecTOR Account</td>
-
-<td>A useraccount on our Identity Storage system. For each user a keypair is generated to represent that users identity which is used for proof of authorship. The Identity storage sees a username and linked to it a datablob. Given the correct password, the identity storage will allow reads, updates and delete to the user account and datablob. One SecTor Acc may have any number of identities.</td>
-
-</tr>
-
-<tr>
-
-<td>Token</td>
-
-<td>A sort of currency that is bound to a pseudonym and cannot be traded with other identities. By registering a pseudonym with a patron, one is granted tokens. To submit documents one needs to make an transaction which costs a certain amount of tokens.</td>
-
-</tr>
-
-<tr>
-
-<td>UserClient</td>
-
-<td>JS Userinterface, which handles most of the logic. Allows login to the identity storage to downloaded ones own user data and display it. One can handle its identities here, create new identities, apply to a patron for tokens, use tokens to upload a new document and search for documents. Should also support exporting and importing data blobs, such that users don't have to use the Identity Storage or can make backups for themselves.</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-</div>
+| Terminus | Definition |
+| --- | --- |
+| Blind Signature | A way of having a party sign something without the party knowing what it exactly signed and later still being able to verify the signature. See [this](https://cryptpad.fr/code/#/3/code/edit/b09386c4602332ab09e1d119b4c3bb9b/) for more information. 
+| Blockchain | An Ethereum private blockchain used to verify certain events happening in our system. The blockchain saves public pseudonym information, document hashes and claims about pseudonyms. 
+| Central Authority (CA) | A pseudonym that is authorized by to sign other pseudonym to make them patrons. Could also be implemented as a hierarchy similar to SSL signing hierarchy. 
+| Datablob | Encrypted user data related to a user account saved in the Identity Storage of a user. The encryption is based on AES256 key which is also attached to the user account but encrypted using the password. The identity storage should at no point be able to decrypt the datablob. 
+| Document | Any file (usually pdf) that is uploaded to the document storage. Can either be a new paper, a new version to an existing paper, a comment or a review to a paper. For the document storage to accept a document its hash must be present on the blockchain an verified such that the author of the document has paid the required amount of tokens. 
+| Document Hash | The Sha256 hash of a document. Needs to be part of a transaction that adds the document to the system such that the document storage can find the document on the blockchain. 
+| Document Storage | A storage component that accepts documents and can be searched. Before accepting a new document, it needs to calculate the Document Hash and check if the hash is present in an accepted transaction on the blockchain. Can also be searched. 
+| DSA | Digital Signature Algorithm, a way of digitally signing documents which can be adapted to perform blind signatures. See [this](https://cryptpad.fr/code/#/3/code/edit/b09386c4602332ab09e1d119b4c3bb9b/)for more information. 
+| EthrDID | Refers to the data structure used to store pseudonym data as imposed by [this Github repository](https://github.com/uport-project/ethr-did), a EthrDID is part of each Pseudonym. 
+| Identity | Represents the true identity of a person. A single SecTor Account should exists for each identity and one identity may have any number of pseudonyms. Not to be confused with EthrDID which is part of the technical implementation of pseudonyms. 
+| Identity Storage | A storage component that only supports CRUD operations for SecTor Acc and only receives encrypted user data. It only serves as a private backup for user data, so users only have to hold on to their SecTor Acc password. 
+| Patron | A special pseudonym on the blockchain that is allowed to sign other pseudonyms to give them tokens. This can for example be a university. To become a patron the signature needs to be signed by a super pseudonym which can either be one central authority pseudonym or part of a key hierarchy (similar to SSL certificate hierarchy). For example a university could be such a patron, handing out tokens to its researchers. 
+| Pseudonym | A pseudonym is one name under which a user can publish documents. A pseudonym is always related to an identity but the identity doesn't need to be public on the blockchain for the pseudonym to be valid. Before a user can publish under a pseudonym, a patron needs to sign that pseudonym. 
+| RSA | Rivest-Shamir-Adleman, public-key cryptosystem, relatively simple to implement and with existing implementations of blind signature, was however considered to be too insecure for our intents. See [this](https://cryptpad.fr/code/#/3/code/edit/b09386c4602332ab09e1d119b4c3bb9b/) for more information. 
+| SecTOR Account | A useraccount on our Identity Storage system. For each user a keypair is generated to represent that users identity which is used for proof of authorship. The Identity storage sees a username and linked to it a datablob. Given the correct password, the identity storage will allow reads, updates and delete to the user account and datablob. One SecTor Acc may have any number of identities. 
+| Token | A sort of currency that is bound to a pseudonym and cannot be traded with other identities. By registering a pseudonym with a patron, one is granted tokens. To submit documents one needs to make an transaction which costs a certain amount of tokens. 
+| UserClient | JS Userinterface, which handles most of the logic. Allows login to the identity storage to downloaded ones own user data and display it. One can handle its identities here, create new identities, apply to a patron for tokens, use tokens to upload a new document and search for documents. Should also support exporting and importing data blobs, such that users don't have to use the Identity Storage or can make backups for themselves. 
