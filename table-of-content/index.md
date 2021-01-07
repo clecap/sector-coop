@@ -88,9 +88,9 @@
 
 <td>Jonas</td>
 
-<td>01.12.2020</td>
+<td>06.01.2021</td>
 
-<td>[Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/flowdiagram1.png)</td>
+<td>[Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/flowdiagramn.png)</td>
 
 </tr>
 
@@ -119,6 +119,15 @@
 <td>04.12.2020</td>
 
 <td>[Link](https://cryptpad.fr/code/#/3/code/edit/8d7b4122dcfa4cbf5205218806883a47/)</td>
+
+</tr>
+
+<tr>
+<td>Class Diagram</td>
+<td></td>
+<td>Jonas</td>
+<td>06.01.2021</td>
+<td>[Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/class%20diagram.png)</td>
 
 </tr>
 
