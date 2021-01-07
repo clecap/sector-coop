@@ -358,7 +358,7 @@
 
 <tr>
 
-<td>DSA</td>
+<td>RSA</td>
 
 <td>Rivest-Shamir-Adleman, public-key cryptosystem, relatively simple to implement and with existing implementations of blind signature, was however considered to be too insecure for our intents. See [this](https://cryptpad.fr/code/#/3/code/edit/b09386c4602332ab09e1d119b4c3bb9b/) for more information.</td>
 
