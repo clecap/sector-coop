@@ -128,6 +128,15 @@
 
 </div>
 
+### Table in "nice" (?) md
+This sort of format seems to be easier to work with in terms of adding things, but a real pain to read in raw markdown format if one quickly wants to update something. Do we want to stick to that?
+
+| Title | Content | Authors | Last Modified | Link |
+| --- | --- | --- | --- | --- |
+| Entity Relationship Diagram | ER Diagram for storage node | Jonas | 01.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/new%20entity%20relationship%20diagram.png) |
+| Sequence Diagram | Core System functionality, e.g. Account creation etc. | Anant, Jonathan | 14.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/Sequence_Diagram_20201214.pdf) |
+| Block Diagram | System snapshot for rough system parts with functionality | Jonas | 09.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/block%20Diagram.png) |
+
 <div class="informal-thoughts">
 
 ### Informal thoughts
