@@ -149,7 +149,7 @@ contract SecTor {
     constructor() public{
         initialTokenGrant = 10; // The number of initially granted tokens
         documentUploadCost = 2;
-        ca = msg.sender;
+        ca = 0x6a160606e0E4177d52E786a8622862C2891ddD7F;
     }
 
     struct Pseudonym {
