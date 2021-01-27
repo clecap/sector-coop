@@ -3,13 +3,14 @@
 <head>
     <meta charset="utf-8"/>
     <title>Login</title>
+    <script type="module" src="scripts/login.js"></script>
 </head>
 <body>
 
 <div class="login_form">
     Please provide your username and private key:
 
-    <form>
+    <form action="javascript:login(username,key)">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username">
         <br>
@@ -18,8 +19,9 @@
         <br><br>
         <input type="submit" value="Login">
     </form>
+    
 
-    <script src="scripts/login.js"></script>
+    
 
     <a href="home.html">Go to your home page</a>
 </div>
