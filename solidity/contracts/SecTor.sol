@@ -135,7 +135,7 @@ library SolRsaVerify {
 }
 
 contract SecTor {
-    address ca; // Hardcoded address of the central authority
+    address ca = 0x7B5FB9A5535f2976cdc99c57d19111B2Ed3cB925; // Hardcoded address of the central authority
     mapping(address => Pseudonym) pseudonyms;
     mapping(address => Pseudonym) patrons;
     mapping(address => mapping(bytes => Document)) docs;
@@ -149,7 +149,7 @@ contract SecTor {
     constructor() public{
         initialTokenGrant = 10; // The number of initially granted tokens
         documentUploadCost = 2;
-        ca = 0x6a160606e0E4177d52E786a8622862C2891ddD7F;
+        ca = 0x7B5FB9A5535f2976cdc99c57d19111B2Ed3cB925;
     }
 
     struct Pseudonym {
