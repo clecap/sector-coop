@@ -1,6 +1,25 @@
-console.log("Registration process initiated.")
+var identityServer = "http://127.0.0.1:6000/register";
 
-//some math magic
-
-
-console.log("Registration process complete.") 
+$(function () {
+    $("#register-button").on('click', function(e) {
+        e.preventDefault();
+        
+        var _username = $('#username').val();
+        var _password = $('#password').val();
+        console.log("Username: " + _username + ", password: " + password);
+        var payload = JSON.stringify({"username" : _username, "password" : _password});
+        
+        $.post(identityServer, payload, function (res) {
+            console.log(res)
+          },
+        'json');
+        
+        /*$.ajax({
+            type: "POST",
+            url: identityServer,
+            data: payload,
+            success: success,
+            dataType: "json"
+        })*/
+    })
+});
