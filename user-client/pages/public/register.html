@@ -3,12 +3,26 @@
 <head>
     <meta charset="utf-8"/>
     <title>Register</title>
+    <script src="scripts/jQuery.js"></script>
 </head>
 <body>
 
-<div>
-    <script src="scripts/register.js"></script>
-</div>
+    <div class="register_form">
+        Please provide a username and password:
+    
+        <form id="register-form" name="register-form">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username">
+            <br>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password">
+            <br><br>
+            <input type="button" id="register-button" value="register">
+        </form>
+        <script src="scripts/register.js"></script>
+        
+    </div>
+
 
 </body>
 </html> 
