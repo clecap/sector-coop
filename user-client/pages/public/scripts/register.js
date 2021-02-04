@@ -6,9 +6,9 @@ $(function () {
         
         var _username = $('#username').val();
         var _password = $('#password').val();
-        console.log("Username: " + _username + ", password: " + password);
         var payload = JSON.stringify({"username" : _username, "password" : _password});
         
+
         $.post(identityServer, payload, function (res) {
             console.log(res)
           },

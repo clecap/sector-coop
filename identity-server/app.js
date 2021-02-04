@@ -1,6 +1,7 @@
 const express = require('express');
 app = express();
 const bcrypt = require('bcrypt');
+var bodyParser = require('body-parser');
 
 app.use(express.json());
 
@@ -28,6 +29,7 @@ app.post('/login', async(req, res) => {
 })
 
 app.post('/register', async(req,res) => {
+    req = bodyParser.json(req);
     console.log("Registration initiated with " + req.body.username);
     try {
         const salt = await bcrypt.genSalt()
