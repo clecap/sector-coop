@@ -1,18 +1,21 @@
-const express = require('express');
+var express = require('express');
 app = express();
-const bcrypt = require('bcrypt');
-var bodyParser = require('body-parser');
+var bcrypt = require('bcrypt');
 
 app.use(express.json());
 
-const hostname = '127.0.0.1';
-const port = 6000;
+var hostname = '127.0.0.1';
+var port = 6000;
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+})
 
 //this needs to be replaced by a database connection in the future!!
 var user = [];
 
 app.post('/login', async(req, res) => {
-    const user = users.find(user => user.username === req.body.username)
+    var user = users.find(user => user.username === req.body.username)
     if(user == null) {
         return res.status(400).send('Cannot find user')
     }
@@ -29,13 +32,13 @@ app.post('/login', async(req, res) => {
 })
 
 app.post('/register', async(req,res) => {
-    req = bodyParser.json(req);
+
     console.log("Registration initiated with " + req.body.username);
     try {
-        const salt = await bcrypt.genSalt()
-        const hashedPassword = await bcrypt.hash(req.body.password, salt)
+        var salt = await bcrypt.genSalt()
+        var hashedPassword = await bcrypt.hash(req.body.password, salt)
         console.log("Password is now: " + hashedPassword);
-        const user = {username: req.body.username, password: hashedPassword}
+        var user = {username: req.body.username, password: hashedPassword}
         users.push(user)
         res.status(201).send()
     } catch {
