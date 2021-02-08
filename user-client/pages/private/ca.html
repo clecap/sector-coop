@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+    <head>
+        <title></title>
+        <meta charset="utf-8" />
+    </head>
+    <body>
+        <h2>Look at the console for demo</h2>
+        
+        <!-- <script src="/file/demo-bundle.js"></script> -->
+	<script src="/script/web3.js-1.3.4/dist/web3.min.js"></script>
+        <script src="/script/sector-abi.js"></script>
+	<script src="/script/rsablind-bundle.js"></script>
+        <script>
+         console.log("Connecting to private chain");
+         let web3 = new Web3("http://141.5.102.54:8545");
+	 var patron1_rsa_publickey = "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq6+5l07nAEA6UA5oUKfQ\n3qSP3eGwlUAIWteBh+PSWbnGorGHGlkAAIn5YctiR5mYpo5d95B7LGn15+TZt1ji\nSbYCBstdRn2Wa24hMyr10eCMWrTyh5I8FHjHSoEApYWXk2HLWlx3yOJHtclMXwi0\nJW4hKV3id44PiXVpl0mtMhBVSfVEjWDMuXLBKv4dHplvq+j71Dg9EWKNGSw61dBt\n3kN/fSzVaOKqa3FXkbBXFsBuocIrsw6sYFPia2+jxLho5JIVslJ1XYdSirUg6mCZ\nwHdlKiUlrYWF83I254PyOmswAlg8o3ZZyg6Hcwl3z25OIotSn016/2strKxaEds/\nMwIDAQAB\n-----END PUBLIC KEY-----";
+
+	 var ca_keystore = {"address":"7b5fb9a5535f2976cdc99c57d19111b2ed3cb925",
+			    "crypto":{"cipher":"aes-128-ctr",
+				      "ciphertext":"da0a2895031a9a773277fdf42e8534a9e6c55c580c8b71a714aa27a908d538ec",
+				      "cipherparams":{"iv":"a15a517abd181dc28b6790896d7d1796"},
+				      "kdf":"scrypt",
+				      "kdfparams":{"dklen":32,
+						   "n":262144,
+						   "p":1,
+						   "r":8,
+						   "salt":"44074d0e02e9e40e53d791bfecc452a603dece2a7eb84f21202d29888d3cc96d"},
+				      "mac":"e8c0e97cdbedcd59d5d7adeaca0c688622970bc3b8e29d8cc0f38915bbe7eafd"},
+			    "id":"b40ac0fb-3b9c-4c92-97c1-400cefc289dc",
+			    "version":3};
+         
+         console.log("Decrypting CA account");
+	 ca_account = web3.eth.accounts.decrypt(ca_keystore, "test");
+	 console.log(ca_account);
+	 web3.eth.accounts.wallet.add(ca_account);
+         web3.eth.getAccounts(console.log);
+
+         
+         console.log("Loading Smart Contract Transaction");
+	 
+         contract = null;
+         web3.eth.getTransactionReceipt('0x11db14d1d9b4b6a6de56dbb56a915254f47724328e17749f34ea0f88efbfd40c')
+             .then(function(tx_receipt){
+                 console.log("Reading Smart Contract");
+                 contract = new web3.eth.Contract(abi, tx_receipt.contractAddress);
+                 console.log(contract.methods);
+             });
+	 
+         /* 
+          *          console.log("Decrypting Patron1 account");
+          *          patron1_account = web3.eth.accounts.decrypt(patron1_keystore, "patron1");
+          *          console.log(patron1_account);
+          *          
+          *          console.log("Decrypting Psuedonym1 account");
+          *          psuedo1_account = web3.eth.accounts.decrypt(psuedo1_keystore, "psuedo1");
+          *          console.log(psuedo1_account); */
+	 NodeRSA = window.myexports.NodeRSA;
+	 const patronKey = new NodeRSA(patron1_rsa_publickey);
+	 const pkcs1_patronKey = patronKey.exportKey("pkcs1-public-der");
+	 console.log(patronKey);
+	 var result = null; 
+         function ca_create_patron(){
+	     result = contract.methods.createPatron("0x394d8968bfe3427a7e7c2f02db31dd1022951306", pkcs1_patronKey /* patron1_rsa_publickey */) //patron's ethereum address and rsa public key
+			      .send({
+				  from:"0x7B5FB9A5535f2976cdc99c57d19111B2Ed3cB925", //CA's address
+				  gas:100000
+			      })
+			      .on('confirmation', (confirmationNumber, receipt, latestBlockHash) => {
+				  console.log("Smart Contract receipt received");
+				  console.log(confirmationNumber,receipt,latestBlockHash);
+			      });
+         }
+        </script>
+        
+    </body>
+</html>
+<!-- {blockHash: "0x3b5c66cbe8e6fb31efd68d5d2a64dcc338b281698657fd6deb1b13be510656c5", blockNumber: 29310, contractAddress: null, cumulativeGasUsed: 121035, from: "0x7b5fb9a5535f2976cdc99c57d19111b2ed3cb925", …}blockHash: "0x3b5c66cbe8e6fb31efd68d5d2a64dcc338b281698657fd6deb1b13be510656c5"blockNumber: 29310contractAddress: nullcumulativeGasUsed: 121035events: {}from: "0x7b5fb9a5535f2976cdc99c57d19111b2ed3cb925"gasUsed: 121035logsBloom: "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"status: trueto: "0x9edab474a5ed43a56a9bb1481b9ba8347fc4a8b1"transactionHash: "0x3f3beab05443abad96d574b457d483aa09e003d5a6b78af8543cbad7649184f7"transactionIndex: 0__proto__: Object -->
+
+
+<!-- "0x3f3beab05443abad96d574b457d483aa09e003d5a6b78af8543cbad7649184f7" -->
