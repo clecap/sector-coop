@@ -4,7 +4,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 ## Development server
 
-Run `npm install` and `ng serve` for a dev server. Navigate to `http://localhost:4200/`. .
+Run `npm install` and `ng serve` and then for a dev server, Navigate to `http://localhost:4200/`. 
 
 
 ## Build (if needed)
