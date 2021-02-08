@@ -27,7 +27,7 @@
 | DSA Blind Signature Protocol | Anant | [Link](https://cryptpad.fr/pad/#/3/pad/edit/b96c5b2eb6fa9ebd6cc3dd55655bbe70/) 
 | How to sign blindly | Jonathan | [Link](https://cryptpad.fr/code/#/3/code/edit/b09386c4602332ab09e1d119b4c3bb9b/) 
 | Identity | Jonathan | [Link](https://cryptpad.fr/code/#/3/code/edit/bb43d3738ee2bd0bca14249050b0289d/) 
-| Self-certifying storage (SFS) | Dominik | [Dominik](https://cryptpad.fr/code/#/3/code/edit/77912ebf2294dc2437c4e132233008c8/), [Clemens](https://www.overleaf.com/project/5fb3af44d95e01586e3c79fb) 
+| Self-certifying storage (SFS) | Dominik, Clemens | [Dominik](https://cryptpad.fr/code/#/3/code/edit/77912ebf2294dc2437c4e132233008c8/), [Clemens](https://www.overleaf.com/project/5fb3af44d95e01586e3c79fb) 
 | Possible issues with digital signatures | Dominik | [Link](https://cryptpad.fr/code/#/3/code/edit/3ea85d7bec3c96da3ce05d36132db077/) 
 
 * * *
