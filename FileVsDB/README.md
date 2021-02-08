@@ -6,4 +6,4 @@ Please first configure the back-end
 
 ## After Installation
 
-Navigate to `http://localhost:4200/`. The app will be ready to use 
+Navigate to `http://localhost:4200/`. To use the application
