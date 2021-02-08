@@ -1,6 +1,8 @@
 # Installation Instruction
 
-Go to the back-end/ and front-end/ and follow the instructions on how to install them
+Go to the back-end/ and front-end/ and follow the instructions on how to install them.
+Please first configure the back-end
+
 
 ## After Installation
 

@@ -1,27 +1,47 @@
-# FrontEnd
+# BackEnd Installation 
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.14.
+## PostgreSQL Installation
 
-## Development server
+If you don't have postgresql installed follow this link to download `https://www.postgresql.org/download/`. 
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## PostgreSQL Configuration
+Setup Database, Database User, password and Host with this credentials 
+``
+        HOST: localhost,
+        database: postgres,
+        user:     postgres,
+        password: postgres
+``. 
 
-## Code scaffolding
+If you are having problem with the setup you can follow the instruction on this link `https://www.javatpoint.com/install-postgresql` , `https://www.javatpoint.com/postgresql-create-database`
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+
+## Knex Installation
+
+Run 
+`npm install knex -g
+ npm install knex --save
+ npm install pg --save
+` 
+NB: if this command was properly executed , then is you run `Knex` on this terminal at this point, you should get a response showing list of knex commands, if not try installing again.
 
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+``
+cd pgconfig and Run `npm install`.
+cd .. (ie the root of back-end)
+Run `npm install`
 
-## Running unit tests
+``
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## Database Migration
+At the root of back-end, 
+Run `Knex migrate:latest`.
 
-## Running end-to-end tests
+## Starting Back-end Server
+At the root of back-end, 
+Run `node server.js` or `nodemon server`.
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+## final
 
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+Your server should be running on port 5000 right now.
