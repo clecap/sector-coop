@@ -1,4 +1,5 @@
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
 
 //import {SolRsaVerify} from './SolRsaVerify.sol';
 
@@ -137,8 +138,11 @@ library SolRsaVerify {
 contract SecTor {
     address ca = 0x7B5FB9A5535f2976cdc99c57d19111B2Ed3cB925; // Hardcoded address of the central authority
     mapping(address => Pseudonym) pseudonyms;
+    address[] pseudoList;
     mapping(address => Pseudonym) patrons;
-    mapping(address => mapping(bytes => Document)) docs;
+    address[] patList;
+    mapping(bytes => Document) docs;
+    bytes[] docHashes;
     uint initialTokenGrant = 10; // The number of initially granted tokens
     uint documentUploadCost = 2;
 
@@ -147,9 +151,7 @@ contract SecTor {
     */
 
     constructor() public{
-        initialTokenGrant = 10; // The number of initially granted tokens
-        documentUploadCost = 2;
-        ca = 0x7B5FB9A5535f2976cdc99c57d19111B2Ed3cB925;
+
     }
 
     struct Pseudonym {
@@ -168,6 +170,8 @@ contract SecTor {
 
     struct Document {
         bytes hash;
+        address author;
+        // space for meta data
         // bool accepted;
     }
 
@@ -179,7 +183,7 @@ contract SecTor {
         _;
     }
 
-    function createPatron(address _patron, bytes memory _RSAPublicKey) public caOnly returns (bool){
+    function createPatron(address _patron, bytes memory _RSAPublicKey) public caOnly returns (Pseudonym memory){
 
         // Create new patron
         Pseudonym memory patron = Pseudonym({
@@ -194,11 +198,12 @@ contract SecTor {
             publicIdentitySignature: ""
             });
         patrons[_patron] = patron;
+        patList.push(_patron);
 
-        return true;
+        return patrons[_patron];
     }
 
-    function addPseudonym(address _patron, bytes memory _patronBlindSignature, bytes memory _exponent, bytes memory _modulus) public returns (bool){
+    function addPseudonym(address _patron, bytes memory _patronBlindSignature, bytes memory _exponent, bytes memory _modulus) public returns (Pseudonym memory){
         // Validate blind Signature of Patron
         Pseudonym storage patron = patrons[_patron];
         require(patron.isPatron != true, "Given address must be a patron.");
@@ -218,11 +223,12 @@ contract SecTor {
             publicIdentitySignature: ""
             });
         pseudonyms[msg.sender] = pseudo;
+        pseudoList.push(msg.sender);
 
-        return true;
+        return pseudonyms[msg.sender];
     }
 
-    function grantInitialTokens() public returns (bool){
+    function grantInitialTokens() public returns (Pseudonym memory){
         Pseudonym memory pseudo = pseudonyms[msg.sender];
 
         // Check if tokens were already granted
@@ -233,10 +239,10 @@ contract SecTor {
         pseudo.gotInitialTokens = true;
         pseudonyms[msg.sender] = pseudo;
 
-        return true;
+        return pseudonyms[msg.sender];
     }
 
-    function addDocumentHash(bytes memory _hash) public returns (bool){
+    function addDocumentHash(bytes memory _hash) public returns (Document memory){
         Pseudonym memory pseudo = pseudonyms[msg.sender];
 
         // Check if enough tokens are available
@@ -247,15 +253,17 @@ contract SecTor {
 
         // add the document hash
         Document memory doc = Document({
-            hash: _hash
+            hash: _hash,
+            author: msg.sender
             });
-        docs[msg.sender][_hash] = doc;
+        docs[_hash] = doc;
         pseudonyms[msg.sender] = pseudo;
+        docHashes.push(_hash);
 
-        return true;
+        return docs[_hash];
     }
 
-    function proveAuthorship(bytes memory _publicIdentity, bytes memory _publicIdentitySignature, bytes memory _exponent, bytes memory _modulus) public returns (bool){
+    function proveAuthorship(bytes memory _publicIdentity, bytes memory _publicIdentitySignature, bytes memory _exponent, bytes memory _modulus) public returns (Pseudonym memory){
         Pseudonym memory pseudo = pseudonyms[msg.sender];
         // Validate _publicIdentitySignature signature of the ethereum address aka msg.sender
         require(SolRsaVerify.pkcs1Sha256VerifyRaw(abi.encodePacked(msg.sender), _publicIdentitySignature, _exponent, _modulus) == 0, "Signature does not match sender address.");
@@ -265,6 +273,44 @@ contract SecTor {
         pseudo.publicIdentitySignature = _publicIdentitySignature;
         pseudonyms[msg.sender] = pseudo;
 
-        return true;
+        return pseudonyms[msg.sender];
+    }
+
+    // Getter functions
+
+    function getCA() public view returns(address) {
+        return ca;
+    }
+
+    function getPseudoList() public view returns (address[] memory){
+        return pseudoList;
+    }
+
+    function getPseudonym(address _owner) public view returns (Pseudonym memory){
+        return pseudonyms[_owner];
+    }
+
+    function getPatList() public view returns (address[] memory){
+        return patList;
+    }
+
+    function getPatron(address _owner) public view returns (Pseudonym memory){
+        return patrons[_owner];
+    }
+
+    function getDocHashes() public view returns (bytes[] memory){
+        return docHashes;
+    }
+
+    function getDocument(bytes memory _hash) public view returns(Document memory){
+        return docs[_hash];
+    }
+
+    function getInitialTokenGrant() public view returns (uint){
+        return initialTokenGrant;
+    }
+
+    function getDocumentUploadCost() public view returns (uint){
+        return documentUploadCost;
     }
 }
