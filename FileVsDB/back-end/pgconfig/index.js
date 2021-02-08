@@ -4,7 +4,7 @@ const config = {
     database: "postgres",
     host: "localhost",
     user: "postgres",
-    password: "china@01#",
+    password: "postgres",
     max: 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000
