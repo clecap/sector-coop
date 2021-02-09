@@ -1,11 +1,19 @@
 CREATE TABLE identity.users(
 	id 					BIGINT,
 	username 			VARCHAR(64) NOT NULL,
-	hashed_password 	VARCHAR(64) NOT NULL,
-	aes256_key 			VARCHAR(128),
-	datablob 			VARCHAR(100),				
+	hashed_password 	VARCHAR(256) NOT NULL,
+	aes256_key 			VARCHAR(256),
+	datablob 			VARCHAR(1000),				
 	created 			TIMESTAMP with time zone,
 	PRIMARY KEY(id)
+);
+
+CREATE TABLE identity.keys(
+	id						BIGINT,
+	aes256_key			VARCHAR(256),
+	datablob				VARCHAR(1000),
+	created				TIMESTAMP with time zone,
+	FOREIGN KEY (id) REFERENCES identity.users(id)
 );
 
 CREATE TABLE identity.pseudonyms(
@@ -13,37 +21,31 @@ CREATE TABLE identity.pseudonyms(
 	pseudonym			VARCHAR(64) NOT NULL,
 	associated_user		BIGINT NOT NULL,
 	PRIMARY KEY(id),
-	FOREIGN KEY (associated_user) REFERENCES (identity.users.id)
+	FOREIGN KEY (associated_user) REFERENCES identity.users(id)
 );
 
--- what the documentation suggests:
+
 CREATE TABLE documents.documents(
-	id 					BIGINT;
-	hash 				VARCHAR(64) NOT NULL,
-	object_url 			VARCHAR(128),
-	created 			TIMESTAMP with time zone,
-	accepted 			TIMESTAMP with time zone,
-	PRIMARY KEY(id)
-);
-
-----------------------------------------------------------------
--- instead, if the document itself is stored in the db:
-CREATE TABLE documents.hashes(
-	id					BIGINT;
-	hash				VARCHAR(64) NOT NULL,
-	PRIMARY KEY(id),
-	FOREIGN KEY (hash) REFERENCES (documents.data.hash)
-);
-
-CREATE TABLE documents.data(
-	hash				VARCHAR(64),
+	hash				VARCHAR(128),
 	binfile				BYTEA NOT NULL,
 	PRIMARY KEY(hash)
 );
 
 CREATE TABLE documents.meta(
-	id					BIGINT,
-	created 			TIMESTAMP with time zone,
+	hash						VARCHAR(128),
+	created 				TIMESTAMP with time zone,
 	accepted 			TIMESTAMP with time zone,
-	FOREIGN KEY (id) REFERENCES (documents.hashes.id)
+	-- other metadata can be added...
+	FOREIGN KEY (hash) REFERENCES documents.documents(hash)
+);
+
+CREATE TABLE documents.publicData(
+	-- if an author wishes to provide these...
+	hash						VARCHAR(128),
+	authors					VARCHAR(128),
+	dateOfPublication		DATE,
+	affiliations			VARCHAR(128),
+	keywords					VARCHAR(128),
+	-- and so on...
+	FOREIGN KEY (hash) REFERENCES documents.documents(hash)
 );
