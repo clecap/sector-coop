@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+    <head>
+	<title></title>
+	<meta charset="utf-8" />
+    </head>
+    <body>
+	<h1>Patron. Check console</h1>
+	<script src="/script/rsablind-bundle.js"></script>
+	<script src="/script/socket.io-client-3.1.1/dist/socket.io.min.js"></script>
+	<script>
+	 var BlindSignature = window.myexports.BlindSignature;
+	 var patron1_keystore = { "address": "394d8968bfe3427a7e7c2f02db31dd1022951306",
+				  "crypto": { "cipher": "aes-128-ctr",
+					      "ciphertext": "ad8417807f2b4a97f711c9bf8dd44e0164ab02fc4169694994fdce4a45fc01fb",
+					      "cipherparams": { "iv": "9f11cd8e8926186f685b77240a6c3a75" },
+					      "kdf": "scrypt",
+					      "kdfparams": { "dklen": 32,
+							     "n": 262144,
+							     "p": 1,
+							     "r": 8,
+							     "salt": "a32396e0d6e89cbf25c11b2b66407b7f39650b5f5579e9c36c77963e016f9d0b" },
+					      "mac": "d9534e3edce850347da8a4df438ed786e6c35359627bb728056b738d75016f1e" },
+				  "id": "8a0cc03b-1a70-4f04-afa8-b73c7c51ed08",
+				  "version": 3 };
+	 if (!confirm("Wait for Signing Request?")){
+	     throw new Error("Cannot proceed without user's go.");
+	 }
+	 console.log("Generating 2048 Bit RSA key");
+	 const Bob = {
+	     key: BlindSignature.keyGeneration({ b:2048}),
+	     blinded: null,
+	     unblinded: null,
+	     message: null,
+	 };
+	 
+	 console.log("Generation completed. Establishing socket with server, waiting for psuedonym");
+	 
+	 const socket = io({auth: {role:"patron",
+				   token:"uniquePatronToken",
+				   roomCode:"patronRoom",
+				   publicKey:{n : Bob.key.keyPair.n.toString(16),
+					      e : Bob.key.keyPair.e.toString(16)}}});
+
+	 socket.on('psuedonymSigningRequest', (blindedHash) => {
+	     console.log("Recieved Signing Request from Psuedonym");
+	     Bob.blinded = blindedHash;
+	     const signed = BlindSignature.signHEX({
+		 blinded: Bob.blinded,
+		 key: Bob.key
+	     });
+	     console.log('Sending blindSignature');
+	    
+	     socket.emit('signingResponse', signed.toString(16));
+	 });
+	 
+	</script>
+    </body>
+</html>
