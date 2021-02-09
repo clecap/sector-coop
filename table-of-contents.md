@@ -12,23 +12,23 @@
 | Block Diagram | System snapshot for rough system parts with functionality | Jonas | 09.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/block%20Diagram.png) 
 | Nodes | Relation of full, light and mining nodes | Jonas | 13.12.2020 | [Full](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/full%20node.png), [Light](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/light%20node.png), [Mining](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/mining%20node.png) 
 | Flow Diagram | Flow for various system use cases | Jonas | 06.01.2021 | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/flowdiagramn.png) 
-| API | Identity API functions that need implementing | Anant, Jonathan | 04.12.2020 | [Link](https://cryptpad.fr/code/#/3/code/edit/e60d754bae7261e868e50e0d117197b8/) 
-| Data Structures | Data structures and types needed for the identity handling | Anant, Jonathan | 04.12.2020 | [Link](https://cryptpad.fr/code/#/3/code/edit/8d7b4122dcfa4cbf5205218806883a47/) 
+| API | Identity API functions that need implementing | Anant, Jonathan | 04.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/API%20functions%20for%20identity%20component.md) 
+| Data Structures | Data structures and types needed for the identity handling | Anant, Jonathan | 04.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/Datastructures%20for%20Identity%20Component.md) 
 | Class Diagram | | Jonas | 06.01.2021 | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/sequence-diagram/class%20diagram.png) 
-
-
+| Feature Progress | Current progress of planned features visualized with traffic lights | Jonathan, Anant, Dominik | 09.02.2021 | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/Feature%20Progress.md)
+| Test setup instructions | Step by step guide for setting up a test environment with a private Ethereum blockchain | Jonathan | 09.02.2021 | [Link](https://github.com/clecap/sector-coop/blob/cloud-SC/testchain/README.md)
 
 ### Informal thoughts
 
 | Topic | Authors | Link |
 | --- | --- | --- |
 | Reference Architecture | Clemens | [Link](https://www.overleaf.com/project/5fd13d6f13a41fe683dfbbb1) 
-| Useful Libraries | Jonathan (open for contributions) | [Link](https://cryptpad.fr/code/#/3/code/edit/6557eb1cf8b674434e270e38372d2827/) 
-| DSA Blind Signature Protocol | Anant | [Link](https://cryptpad.fr/pad/#/3/pad/edit/b96c5b2eb6fa9ebd6cc3dd55655bbe70/) 
+| DSA Blind Signature Protocol | Anant | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/DSA%20Blind%20Signature%20Protocol.md) 
 | How to sign blindly | Jonathan | [Link](https://cryptpad.fr/code/#/3/code/edit/b09386c4602332ab09e1d119b4c3bb9b/) 
-| Identity | Jonathan | [Link](https://cryptpad.fr/code/#/3/code/edit/bb43d3738ee2bd0bca14249050b0289d/) 
-| Self-certifying storage (SFS) | Dominik, Clemens | [Dominik](https://cryptpad.fr/code/#/3/code/edit/77912ebf2294dc2437c4e132233008c8/), [Clemens](https://www.overleaf.com/project/5fb3af44d95e01586e3c79fb) 
-| Possible issues with digital signatures | Dominik | [Link](https://cryptpad.fr/code/#/3/code/edit/3ea85d7bec3c96da3ce05d36132db077/) 
+| Identity | Jonathan | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/How%20to%20blind%20signature.md) 
+| Self-certifying storage (SFS) | Dominik, Clemens | [Dominik](https://github.com/clecap/sector-coop/blob/main/identity-group/Self-certifying%20storage%20(SFS).md), [Clemens](https://www.overleaf.com/project/5fb3af44d95e01586e3c79fb) 
+| Possible issues with digital signatures | Dominik | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/Possible%20issues%20with%20digital%20signatures.md) 
+| Of the Record private proof of identity | Anant | [Link](https://github.com/clecap/sector-coop/blob/main/identity-group/OTR%20implementation%20for%20Private%20Linking.md)
 
 * * *
 
