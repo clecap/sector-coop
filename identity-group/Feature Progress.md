@@ -43,17 +43,17 @@ Private Ethereum chain miner accepts 0 gas transactions | Start script for the E
 Patron keys can be revoked | | |<span style="color:white; font-size: 150%">&#11044;</span> 
 User keys can be revoked | | | <span style="color:white; font-size: 150%">&#11044;</span>
 **Storage Group** | - | - | -
-User sends document to document storage | | | <span style="color:red; font-size: 150%">&#11044;</span>
+User sends document to document storage |  | | <span style="color:red; font-size: 150%">&#11044;</span>
 Document storage uses Self Certifying File System | | | <span style="color:gray; font-size: 150%">&#11044;</span> 
-Document storage saves document | | | <span style="color:red; font-size: 150%">&#11044;</span>
+Document storage saves document | The database needs to be set up in its final location, but the SQL statements for creating it are available. | | <span style="color:yellow; font-size: 150%">&#11044;</span>
 Document storage checks on the blockchain for document hash | | | 
 Document storage is searchable | | | 
 Document storage has defined data structure | | | 
 Documents have searchable metadata | Fields for meta data were accounted for but not populated yet| | <span style="color:red; font-size: 150%">&#11044;</span>
 **Open** | - | - | -
-User can create a SecTor account | | | <span style="color:yellow; font-size: 150%">&#11044;</span>
-User can Login | | |<span style="color:yellow; font-size: 150%">&#11044;</span> 
-User can Logout | | | <span style="color:yellow; font-size: 150%">&#11044;</span>
+User can create a SecTor account | Basic UAC management is being worked on at the moment and will be finished soon | | <span style="color:yellow; font-size: 150%">&#11044;</span>
+User can Login | See above | |<span style="color:yellow; font-size: 150%">&#11044;</span> 
+User can Logout | See above | | <span style="color:yellow; font-size: 150%">&#11044;</span>
 User data can be exported locally  | | |<span style="color:white; font-size: 150%">&#11044;</span>
 User data can be saved in encrypted form to an identity Storage server | | |<span style="color:yellow; font-size: 150%">&#11044;</span> 
 User can create an identity (keypair)  | | |<span style="color:yellow; font-size: 150%">&#11044;</span>
