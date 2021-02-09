@@ -19,7 +19,7 @@ Papers can be grouped in a Journal | | |![White](/identity-group/Circles/white.p
 Meta data can be attached to a document  | Fields for meta data in database and in the smart contract are open but not used yet| |![Red](/identity-group/Circles/red.png)
 A user can verify integrity of a document  | Smart Contract will save document hash but is still in development| |![Yellow](/identity-group/Circles/yellow.png)
 Identifier in the system can be linked to ORCID | | |![White](/identity-group/Circles/white.png)
-Frontend user client for users | | |![Red](/identity-group/Circles/red.png)
+Frontend user client for users | Raw html pages exist for very basic interactions | Does not incorporate fancy CSS yet |![Red](/identity-group/Circles/red.png)
 Blockchain runs in a decentralized P2P network where universities can join and leave any time | | |![White](/identity-group/Circles/white.png)
 Document/Identity storage run in a decentralized P2P network where universities can join and leave any time | | | ![White](/identity-group/Circles/white.png)
 Document search works across a decentralized P2P network  | | |![White](/identity-group/Circles/white.png)
@@ -47,8 +47,8 @@ User sends document to document storage |  | | ![Red](/identity-group/Circles/re
 Document storage uses Self Certifying File System | | | ![Grey](/identity-group/Circles/grey.png)
 Document storage saves document | The database needs to be set up in its final location, but the SQL statements for creating it are available. | | ![Yellow](/identity-group/Circles/yellow.png)
 Document storage checks on the blockchain for document hash | | | 
-Document storage is searchable | | | 
-Document storage has defined data structure | | | 
+Document storage is searchable | | Will be as soon as the database is set up | ![Red](/identity-group/Circles/red.png)
+Document storage has defined data structure | How the documents are stored is more or less agreed upon | Last check (db vs fs) needs to be finally settled | ![Yellow](/identity-group/Circles/yellow.png) 
 Documents have searchable metadata | Fields for meta data were accounted for but not populated yet| | ![Red](/identity-group/Circles/red.png)
 **Open** | - | - | -
 User can create a SecTor account | Basic UAC management is being worked on at the moment and will be finished soon | | ![Yellow](/identity-group/Circles/yellow.png)
