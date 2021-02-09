@@ -212,6 +212,12 @@ print(str(contract.functions))
 You need to have web3 installed via pip and run this in the solidity folder.
 This should return the data of the latest block as well as an object signature for the contract.
 
+## Testing and debugging with Remix
+Remix is an IDE for development of smart contracts in solidity and allows testing functions via graphical interface and has a debug feature to go through the execution of contracts step by step. This makes it easier to test out what inputs are accepted by each function and which cause problems.
+
+For working with a local or remote testchain, download and install the Desktop version of Remix IDE https://github.com/ethereum/remix-desktop/releases and set it up to connect to the private chain by switchting on the left side to the "Deploy & Run Transactions" tab and in the very top select "Web3 Provider" and in the dialog enter the IP of the VM running the private chain, the port is by default set in 2020-start-alone.sh to 8545. Then load the contract into the IDE either from a local repository or directly download it from Github. Press Compile SecTor.sol in the compiler interface and then Deploy in the deploy & run interface. If an error "authentication needed: password or unlock" pops up in the console, you need to execute `personal.unlockAccount("<address>")` in the console running the blockchain.
+If everything worked you should have a deployed contract in the deploy and run tab in Remix which you can expand to test each function.
+
 ## Additional notes
 While the miner is configured to accept 0 gas transactions and calls to the contract, truffle and any caller programmed also need to be told that they can just send 0 gas and don't need to match the estimated gas price.
 
