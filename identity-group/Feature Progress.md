@@ -46,7 +46,7 @@ User keys can be revoked | | | ![White](/identity-group/Circles/white.png)
 User sends document to document storage |  | | ![Red](/identity-group/Circles/red.png)
 Document storage uses Self Certifying File System | | | ![Grey](/identity-group/Circles/grey.png)
 Document storage saves document | The database needs to be set up in its final location, but the SQL statements for creating it are available. | | ![Yellow](/identity-group/Circles/yellow.png)
-Document storage checks on the blockchain for document hash | | | 
+Document storage checks on the blockchain for document hash | | |  ![White](/identity-group/Circles/white.png)
 Document storage is searchable | | Will be as soon as the database is set up | ![Red](/identity-group/Circles/red.png)
 Document storage has defined data structure | How the documents are stored is more or less agreed upon | Last check (db vs fs) needs to be finally settled | ![Yellow](/identity-group/Circles/yellow.png) 
 Documents have searchable metadata | Fields for meta data were accounted for but not populated yet| | ![Red](/identity-group/Circles/red.png)
