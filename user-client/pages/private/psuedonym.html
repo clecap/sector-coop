@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+    <head>
+	<title></title>
+	<meta charset="utf-8" />
+    </head>
+    <body>
+	<h1>Psuedonym. Check console</h1>
+	<script src="/script/web3.js-1.3.4/dist/web3.min.js"></script>
+	<script src="/script/rsablind-bundle.js"></script>
+	<script src="/script/sector-abi.js"></script>
+	<script src="/script/socket.io-client-3.1.1/dist/socket.io.min.js"></script>
+	<script>
+	 var BlindSignature = window.myexports.BlindSignature;
+	 var NodeRSA = window.myexports.NodeRSA;
+	 
+	 var patron1_ethraddress = "0x394d8968bfe3427a7e7c2f02db31dd1022951306";
+	 var psuedo1_keystore =	{"address":"5e9bb7ae8277d33ae1191dffa16ef6f36c4b9da4",
+				 "crypto":{"cipher":"aes-128-ctr",
+					   "ciphertext":"c531d1eb8f15e7d91c7ef23e27106fcfde128ae39e75631062d203cbd208c37c",
+					   "cipherparams":{"iv":"f3ee887019f2d5a209c1a03aa2902957"},
+					   "kdf":"scrypt",
+					   "kdfparams":{"dklen":32,
+							"n":262144,
+							"p":1,
+							"r":8,
+							"salt":"68b6c8f5cbd80bd7b0e1a6ceb69a60847185342e6d7e46c93febcaa499d12db3"},
+					   "mac":"663e570792471e3bc443d063d85e24c0b2ac82a1d9c3e982c9ffb0791f1641b1"},
+				 "id":"7fea9bfa-10ae-4d2a-b893-a5a07565bbb2",
+				 "version":3};
+	 if (!confirm("Request for Signature?")){
+	     throw new Error("Cannot proceed without user's go.");
+	 }
+	 const socket = io({auth: {role:"psuedonym",
+				   token:"uniquePsuedonymToken",
+				   roomCode:"patronRoom"}}); // roomCode must be fetched from patron prior to this connection can proceed.
+	 PSUEDONYM_ADDR="0x".concat( psuedo1_keystore.address );
+	 const Psuedonym = {
+	     message: PSUEDONYM_ADDR,
+	     N: null,
+	     E: null,
+	     r: null,
+	     signed: null,
+	     unblinded: null,
+	 };
+	 
+	 socket.on("disconnect", (reason) => {
+	     console.log("Socket Disconnected. Reason: "+reason)
+	 });
+	 
+	 socket.on('patronPubKey', (patronPubKey) => {
+	     console.log("Recieved Patron's Public Key");
+	     
+	     Psuedonym.N = patronPubKey.n;
+	     Psuedonym.E = patronPubKey.e;
+	     /* console.log(Psuedonym.N.toString()); */
+	     // N, E
+	     const { blinded, r } = BlindSignature.blindHEX({
+		 message: Psuedonym.message,
+		 N: Psuedonym.N,
+		 E: Psuedonym.E,
+	     }); // Psuedonym blinds message
+	     Psuedonym.r = r;
+	     console.log("Sending Blinded Hash");
+	     socket.emit("signingRequest", blinded.toString(16));
+	 });
+
+	 socket.on('psuedonymSigningResponse', (blindSignature) => {
+	     Psuedonym.signed = blindSignature;
+	     console.log("Recieved Blindly signed Signature");
+	     const unblinded = BlindSignature.unblindHEX({
+		 signed: Psuedonym.signed,
+		 N: Psuedonym.N,
+		 r: Psuedonym.r,
+	     }); // Psuedonym unblinds
+	     Psuedonym.unblinded = unblinded;
+	     // Psuedonym verifies
+	     // N, E
+	     const result = BlindSignature.verifyHEX({
+		 unblinded: Psuedonym.unblinded,
+		 N: Psuedonym.N,
+		 E: Psuedonym.E,
+		 message: Psuedonym.message,
+	     });
+
+// Hex generation and outputs:
+
+	     SMART_CONTRACT_ARGS={PATRON_ADDRESS : patron1_ethraddress,
+				  MODULUS_HEX : "0x".concat(Psuedonym.N.toString(16)),
+				  EXPONENT_HEX : "0x".concat(Psuedonym.E.toString(16)),
+				  SIGNATURE_UNBLINDED_HEX : "0x".concat(Psuedonym.unblinded.toString(16)),
+				  MESSAGE_PLAIN : Psuedonym.message };
+	     var psuedonym_add= () => {
+		 console.log("Connecting to private chain");
+		 let web3 = new Web3("http://141.5.102.54:8545");
+		 contract = null;
+		 web3.eth.getTransactionReceipt('0x11db14d1d9b4b6a6de56dbb56a915254f47724328e17749f34ea0f88efbfd40c')
+		     .then(function(tx_reciept){
+			 console.log("Reading Smart Contract");
+			 contract = new web3.eth.Contract(abi, tx_reciept.contractAddress);
+			 console.log(contract.methods);
+			 storage = [];
+			 for (index = 0; index < 1000; index++){
+			     storage.push(web3.eth.getStorageAt(contract._address, index));
+}
+			 /* 			 console.log(storage); */
+			 function unpack(str) {// https://gist.github.com/lihnux/2aa4a6f5a9170974f6aa#gistcomment-2663997
+			     var bytes = [];
+			     for(var i = 0; i < str.length; i++) {
+				 var char = str.charCodeAt(i);
+				 bytes.push(char >>> 8);
+				 bytes.push(char & 0xFF);
+			     }
+			     return bytes;
+			 }
+			 console.log("Attempting to decrypt and unlock psuedonym's ethereum account");
+			 console.log("Unlocking Psuedonym's ethereum account "+PSUEDONYM_ADDR+" for 60 seconds");
+			 console.log(PSUEDONYM_ADDR);
+
+			 psuedonymAccount = web3.eth.accounts.decrypt(psuedo1_keystore, "test");
+			 web3.eth.accounts.wallet.add(psuedonymAccount);
+			 contract.defaultAccount = psuedonymAccount.address;
+			 contract.methods.addPseudonym(SMART_CONTRACT_ARGS.PATRON_ADDRESS,
+						       SMART_CONTRACT_ARGS.SIGNATURE_UNBLINDED_HEX,
+						       SMART_CONTRACT_ARGS.EXPONENT_HEX,
+						       SMART_CONTRACT_ARGS.MODULUS_HEX)
+				 .send({
+				     from:PSUEDONYM_ADDR,
+				     gas:400000
+				 })
+				 .on('receipt', (receipt) => {
+				     console.log("Smart Contract receipt received");
+				     console.log(receipt);
+				 });
+		     });
+	     };
+	     console.log(SMART_CONTRACT_ARGS);
+	     if (result) {
+		 console.log('Psuedonym: Signatures verify!');
+		 if(confirm("Contact Ethereum Smart Contract for Tokens?")){
+		     psuedonym_add();
+		 };
+	     } else {
+		 console.log('Psuedonym: Invalid signature');
+	     }
+	 });
+	</script>
+    </body>
+</html>
