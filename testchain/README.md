@@ -122,7 +122,8 @@ Further another the --gasprice 0 flag is also added in `2020-start-alone.sh` whi
 
 ## Deploying the contract
 Keep the miner running and open a new terminal.
-Navigate to the solidity folder in the repository.
+For clarity, the terminal running the blockchain and the miner will be called terminal B (for blockchain) and the new terminal will be called terminal T (for truffle).
+On terminal T navigate to the solidity folder in the repository.
 ```
 cd sector-coop
 cd solidity
@@ -133,7 +134,7 @@ The hard coded line in the contract needs to replaced with one of the addresses 
 Open `sector-coop/solidity/contracts/SeCTor.sol` with a text editor and scroll to line 138. Or in case this was changed, it is the very first line after `contract SeCTor {` and says `address ca = <some address>`.
 Replace the address with one of the initialized addresses.
 
-To compile the contract run 
+To compile the contract run
 ```
 truffle compile
 ```
@@ -142,32 +143,32 @@ To deploy the contract, truffle needs to know from which address the contract sh
 Open `truffle.js` with your favorite text editor and replace the value of the from field with one of the addresses that were granted initial funds via the genesis block.
 
 Next to deploy the contract, the account must either be unlocked or truffle must be provided with the password. Here we will just unlock the account.
-In the first terminal that is currently running the chain, execute and provide the passphrase for that address
+In terminal B execute and provide the passphrase for that address
 ```
 personal.unlockAccount("<address of the account>")
 ```
 The address must be the same as the one used in the from field in truffle.js. Also omit the 0x at the beginning of the address.
 
-Back to the second console, run
+Back to terminal T, run
 ```
 truffle migrate --network 2020
 ```
-This deploys the contracts on the chain. You should see the miner producing a few more blocks in the first console.
-After the truffle migration the second console shows some information for two contract deployments `Migrations` and `SecTor`. We care only about the second the`SecTor` contract.
+This deploys the contracts on the chain. You should see the miner producing a few more blocks in terminal B.
+After the truffle migration, terminal T shows some information for two contract deployments `Migrations` and `SecTor`. We care only about the second, the`SecTor` contract.
 The output shows among other things a contract address, note down this address.
 
 ## Redeploying
 After making changes the contract needs to be redeployed to the chain.
-So again run 
+So again run in terminal T
 ```
 truffle compile
 ```
 until the compiler accepts your changes.
-Then unlock the account again
+Then unlock the account again in terminal B
 ```
 personal.unlockAccount("<address of the account>")
 ```
-and then migrate
+and then migrate in terminal T
 ```
 truffle migrate --network 2020
 ```
@@ -186,45 +187,24 @@ Follow the instructions for the web3 library in the programming language of your
 
 In order to call upon the contract, the address of the contract as well as the ABI of the contract are required. The address was noted down, when deploying the contract, the ABI can be found under `/sector-coop/solidty/build/contracts/SeCTor.json`.
 
-A guide on how to access the contract storage is given [here](https://medium.com/aigang-network/how-to-read-ethereum-contract-storage-44252c8af925).
+Have a look at the contract itself to see which functions are available. Getter functions for all storage fields are provided.
 
 ## Sample code
-Using web3.py
-```py
-from web3 import Web3
-import json
+The file `/sector-coop/testchain/ethereum_test.py` provides some sample code on how to interact with the contract. 
 
-with open("./build/contracts/SecTor.json") as f:
-	info_json = json.load(f)
-abi = info_json["abi"]
+web3 needs to be installed via pip for this to work.
 
-w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545/"))
+Open the file with a text editor and change the ca_address, patron_address and pseudonym_address to three different valid ethereum addresses on the test chain. If necessary create additional accounts.
+Further, change contract address to the address of the latest contract deployment and in the calls to unlockAccount, give the respective passphrase to each of the accounts.
 
-print(w3.eth.get_block('latest'))
-
-contract_address = "0x6a818F043dBFf83ec9EB01e1e4e25bc9aB58eDD9" # Replace this with your contract address
-
-contract = w3.eth.contract(address=contract_address, abi=abi)
-
-print(str(contract.functions))
-```
-
-You need to have web3 installed via pip and run this in the solidity folder.
-This should return the data of the latest block as well as an object signature for the contract.
-
-## Testing and debugging with Remix
-Remix is an IDE for development of smart contracts in solidity and allows testing functions via graphical interface and has a debug feature to go through the execution of contracts step by step. This makes it easier to test out what inputs are accepted by each function and which cause problems.
-
-For working with a local or remote testchain, download and install the Desktop version of Remix IDE https://github.com/ethereum/remix-desktop/releases and set it up to connect to the private chain by switchting on the left side to the "Deploy & Run Transactions" tab and in the very top select "Web3 Provider" and in the dialog enter the IP of the VM running the private chain, the port is by default set in 2020-start-alone.sh to 8545. Then load the contract into the IDE either from a local repository or directly download it from Github. Press Compile SecTor.sol in the compiler interface and then Deploy in the deploy & run interface. If an error "authentication needed: password or unlock" pops up in the console, you need to execute `personal.unlockAccount("<address>")` in the console running the blockchain.
-If everything worked you should have a deployed contract in the deploy and run tab in Remix which you can expand to test each function.
-
-When trying to call functions in the smart contract that require `bytes` as input, sending hex might be easier as it gets converted to bytes internally. A hex sequence must start with `0x` and its length must be divisible by 2.
+Executing the python file creates a new RSA key in memory, uses it to create a new Patron and to add a pseudonym based on that patron.
 
 ## Additional notes
 While the miner is configured to accept 0 gas transactions and calls to the contract, truffle and any caller programmed also need to be told that they can just send 0 gas and don't need to match the estimated gas price.
 
 The chain id is 2020.
 
+When calling add Pseudonym a signature must be given, this signature must use RSA PKCS1 v1.5 and be based on SHA256 of an encoding of the senders address. To encode the address the same encoder must be used as the one used in the contract, for the contract provides the function toBytes(address).
 
 ## Copyright notes
 The test chain uses a modified version of  [go-ethereum](https://github.com/ethereum/go-ethereum) for changing the block difficulty calculation.
