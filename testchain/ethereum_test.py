@@ -49,7 +49,6 @@ def createPatron(contract, key):
     print("patronRSApubkeyModulus: " + Web3.toHex(patron_pseudo[3]))
     print("isPatron: " + str(patron_pseudo[5]))
     print("--------------------------------------------------------------------------------------------------------------------------------------")
-    return key
 
 
 def addPseudonym(contract, key):
