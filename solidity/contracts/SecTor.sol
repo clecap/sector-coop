@@ -157,7 +157,8 @@ contract SecTor {
     struct Pseudonym {
         address owner;
         address patron;
-        bytes patronRSAPubKey;
+        bytes patronRSAPubKeyExponent;
+        bytes patronRSAPubKeyModulus;
         bytes patronBlindSignature;
         uint tokens;
 
@@ -182,13 +183,26 @@ contract SecTor {
         );
         _;
     }
+    
+    function verifyRSATest(address _data, bytes memory _signature, bytes memory _exponent, bytes memory _modulus) public view returns(uint){
+        return SolRsaVerify.pkcs1Sha256VerifyRaw(abi.encodePacked(_data), _signature, _exponent, _modulus);
+    }
+    
+   
+   function toBytes(address a) public pure returns (bytes memory b) {
+    b = new bytes(20);
+    for (uint i = 0; i < 20; i++)
+        b[i] = byte(uint8(uint(a) / (2**(8*(19 - i)))));
+    }
 
-    function createPatron(address _patron, bytes memory _RSAPublicKey) public caOnly returns (Pseudonym memory){
+
+    function createPatron(address _patron, bytes memory _RSAPublicKeyExponent, bytes memory _RSAPublicKeyModulus) public caOnly returns (Pseudonym memory){
 
         // Create new patron
         Pseudonym memory patron = Pseudonym({
             owner: _patron,
-            patronRSAPubKey: _RSAPublicKey,
+            patronRSAPubKeyExponent: _RSAPublicKeyExponent,
+            patronRSAPubKeyModulus: _RSAPublicKeyModulus,
             patron: ca,
             patronBlindSignature: "",
             tokens: 0,
@@ -203,17 +217,18 @@ contract SecTor {
         return patrons[_patron];
     }
 
-    function addPseudonym(address _patron, bytes memory _patronBlindSignature, bytes memory _exponent, bytes memory _modulus) public returns (Pseudonym memory){
+    function addPseudonym(address _patron, bytes memory _patronBlindSignature) public returns (Pseudonym memory){
         // Validate blind Signature of Patron
         Pseudonym storage patron = patrons[_patron];
         require(patron.isPatron == true, "Given address must be a patron.");
         // Use RSA library here, signature should have been unblinded already
-        require(SolRsaVerify.pkcs1Sha256VerifyRaw(abi.encodePacked(msg.sender), _patronBlindSignature, _exponent, _modulus) == 0, "Signature does not match sender address.");
+        require( SolRsaVerify.pkcs1Sha256VerifyRaw(abi.encodePacked(msg.sender), _patronBlindSignature, patron.patronRSAPubKeyExponent , patron.patronRSAPubKeyModulus) == 0, "Signature does not match sender address.");
 
         // Create new Pseudonym
         Pseudonym memory pseudo = Pseudonym({
             owner: msg.sender,
-            patronRSAPubKey: "",
+            patronRSAPubKeyExponent: "",
+            patronRSAPubKeyModulus: "",
             patron: _patron,
             patronBlindSignature: _patronBlindSignature,
             tokens: 0,
