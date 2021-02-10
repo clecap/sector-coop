@@ -206,7 +206,7 @@ contract SecTor {
     function addPseudonym(address _patron, bytes memory _patronBlindSignature, bytes memory _exponent, bytes memory _modulus) public returns (Pseudonym memory){
         // Validate blind Signature of Patron
         Pseudonym storage patron = patrons[_patron];
-        require(patron.isPatron != true, "Given address must be a patron.");
+        require(patron.isPatron == true, "Given address must be a patron.");
         // Use RSA library here, signature should have been unblinded already
         require(SolRsaVerify.pkcs1Sha256VerifyRaw(abi.encodePacked(msg.sender), _patronBlindSignature, _exponent, _modulus) == 0, "Signature does not match sender address.");
 
