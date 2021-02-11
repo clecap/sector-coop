@@ -1,0 +1,20 @@
+"0x6a160606e0e4177d52e786a8622862c2891ddd7f"module.exports = {
+  networks: {
+    development: {
+      host: "127.0.0.1",
+      port: 7545,
+      network_id: "*" // Match any network id
+    },
+	  2020: {
+	    host: "127.0.0.1",
+	    port: 8545,
+	    network_id: "*",
+	    from: "0x6a160606e0e4177d52e786a8622862c2891ddd7f"	  
+	  }
+  },
+  compilers: {
+    solc: {
+      version: "0.6.0"
+    }
+  }
+};
