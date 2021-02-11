@@ -151,7 +151,7 @@ pseudonym_address = "0xb8d3CAF65Fe089fFd186283a6653A44292AA7AC3"
 
 w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545/"))
 
-with open("./SecTor.json") as f:
+with open("./build/contracts/SecTor.json") as f:
     info_json = json.load(f)
 abi = info_json["abi"]
 
