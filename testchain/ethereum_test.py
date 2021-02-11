@@ -1,3 +1,10 @@
+"""
+This file demonstrates how to call the createPatron and addPseudonym functions on the SecTor.sol smart contract.
+Those two are the most complicated functions on the contract.
+
+:author: Jonathan Decker
+"""
+
 from time import sleep
 
 from web3 import Web3
@@ -8,6 +15,7 @@ from Crypto.Hash import SHA256
 
 
 def getDocumentUploadCostAndInitalTokenGrant(contract):
+    # two ways of calling functions that don't require transactions
     print("Document upload cost: " + str(contract.caller.getDocumentUploadCost()))
     print("Initial token grant: " + str(contract.functions.getInitialTokenGrant().call()))
     print("--------------------------------------------------------------------------------------------------------------------------------------")
@@ -49,12 +57,14 @@ def createPatron(contract, key):
     print("patronRSApubkeyModulus: " + Web3.toHex(patron_pseudo[3]))
     print("isPatron: " + str(patron_pseudo[5]))
     print("--------------------------------------------------------------------------------------------------------------------------------------")
+    return key
 
 
 def addPseudonym(contract, key):
-    # Sign the hashed encoded pseudonym_address with PKCS1_v1_5
+    # Solidity does encoding somewhat different with the abi.encodePacked(data) function, so for now we also use it
+    # The toBytes function does the same as abi.encodePacked
     pseudonym_address_bytes = contract.caller.toBytes(pseudonym_address)
-
+    # Sign the hashed encoded pseudonym_address with PKCS1_v1_5
     signature_bytes = PKCS1_v1_5.new(key).sign(SHA256.new(pseudonym_address_bytes))
     signature_hex = signature_bytes.hex()
 
@@ -78,7 +88,6 @@ def addPseudonym(contract, key):
         PKCS1_v1_5.new(constructed_key).verify(SHA256.new(pseudonym_address_bytes), signature_bytes)))
     print("--------------------------------------------------------------------------------------------------------------------------------------")
 
-
     response = contract.functions.addPseudonym(patron_address, signature_hex).transact(
         {"from": pseudonym_address})
 
@@ -100,13 +109,12 @@ def addPseudonym(contract, key):
 
 
 def verifyRSATest(contract, key):
-
-    data = pseudonym_address
-
-    data_hex = data.encode().hex()
+    # This function demonstrates how the RSA signature validation works by calling verifyRSATest which directly forwards
+    # the inputs to the library that does the validation.
+    data_bytes = contract.caller.toBytes(pseudonym_address)
 
     # Sign the hashed encoded pseudonym_address with PKCS1_v1_5
-    signature_bytes = PKCS1_v1_5.new(key).sign(SHA256.new(data))
+    signature_bytes = PKCS1_v1_5.new(key).sign(SHA256.new(data_bytes))
     signature_hex = signature_bytes.hex()
 
     # Prepare the exponent e and the modulus n
@@ -115,17 +123,18 @@ def verifyRSATest(contract, key):
     key_e_hex = key_e_bytes.hex()
     key_n_hex = key_n_bytes.hex()
 
-    print("Data: " + data_hex)
+    print("Data: " + data_bytes.hex())
     print("Signature: " + signature_hex)
     print("Exponent: " + key_e_hex)
     print("Modulus: " + key_n_hex)
 
-    code = contract.caller.verifyRSATest(data, signature_hex, key_e_hex, key_n_hex)
+    code = contract.caller.verifyRSATest(data_bytes, signature_hex, key_e_hex, key_n_hex)
     print("Code: " + str(code))
     print("--------------------------------------------------------------------------------------------------------------------------------------")
 
 
 def addressToBytesTest(contract):
+    # This function demonstrates the difference between the toBytes function and the encode
 
     response = contract.caller.toBytes(pseudonym_address)
     print(response)
@@ -133,8 +142,6 @@ def addressToBytesTest(contract):
     print(Web3.toHex(response))
     print(pseudonym_address.encode().hex())
     print("--------------------------------------------------------------------------------------------------------------------------------------")
-
-    print(Web3.toBytes(pseudonym_address, 32))
 
 
 ca_address = "0x7B5FB9A5535f2976cdc99c57d19111B2Ed3cB925"
@@ -144,8 +151,8 @@ pseudonym_address = "0xb8d3CAF65Fe089fFd186283a6653A44292AA7AC3"
 
 w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545/"))
 
-with open("./build/contracts/SecTor.json") as f:
-	info_json = json.load(f)
+with open("./SecTor.json") as f:
+    info_json = json.load(f)
 abi = info_json["abi"]
 
 # generate an RSA key for the patron
@@ -157,12 +164,11 @@ print("CA Balance: " + str(w3.eth.get_balance(check_address)))
 
 contract = w3.eth.contract(address=contract_address, abi=abi)
 
-# two ways of calling functions that don't require transactions
 getDocumentUploadCostAndInitalTokenGrant(contract)
 
-# verifyRSATest(contract, key)
+verifyRSATest(contract, key)
 
-# addressToBytesTest(contract)
+addressToBytesTest(contract)
 
 # unlock CA Account using passphrase test to allow transactions
 unlockAccount(ca_address, "test")
