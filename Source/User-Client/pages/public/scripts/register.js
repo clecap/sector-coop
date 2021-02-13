@@ -1,30 +1,28 @@
 var identityServer = "http://localhost:8000/register";
 
-
 $(function () {
     $("#register-button").on('click', function(e) {
         e.preventDefault();
-        
-        var _username = $('#username').val();
-        var _password = $('#password').val();
+        var username = $('#username').val();
+        var password = $('#password').val();
         var payload = JSON.stringify(
             {
-                "username" : _username.toString(), 
-                "password" : _password.toString()
+                "username" : username.toString(), 
+                "password" : password.toString()
             });
         
-        /*$.post(identityServer, payload, function (res) {
-            console.log(res)
-          },
-        'json');
-        */
         $.ajax({
             type: "POST",
             url: identityServer,
             data: payload,
             success: function(data) {alert('data: ' + data);},
             contentType: "application/json",
-            dataType: "json"
+            dataType: "json",
+            statusCode: {
+                201: function() {
+                    alert("Registration process was succesful!");
+                }
+            }
         })
     })
 });
