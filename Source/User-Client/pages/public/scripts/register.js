@@ -1,4 +1,4 @@
-var identityServer = "http://127.0.0.1:6000/register";
+var identityServer = "http://localhost:8000/register";
 
 
 $(function () {
