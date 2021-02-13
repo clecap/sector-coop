@@ -4,12 +4,15 @@ var bcrypt = require('bcrypt');
 
 app.use(express.json());
 
-var hostname = '127.0.0.1';
-var port = 6000;
+var hostname = 'localhost';
+var port = 8000;
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-})
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    res.header("Access-Control-Allow-Headers", "content-type");
+    next();
+});
 
 //this needs to be replaced by a database connection in the future!!
 var user = [];
@@ -46,4 +49,6 @@ app.post('/register', async(req,res) => {
     }
 })
 
-app.listen(port);
+app.listen(port, () => {
+    console.log(`Express.js Identity Server running on port: ${port}`);
+});
