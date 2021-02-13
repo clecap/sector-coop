@@ -10,6 +10,8 @@ const io = require("socket.io")(server); // Socket connections
 
 
 var roomCodes = {"__inv__":{}}; // keys are patron auth tokens, values are patron's chosen room code
+
+// serving the static html pages
 app.use('/', express.static(path.join(__dirname, '/pages')));
 
 app.use('/script', express.static(path.join(__dirname, '/scripts')));

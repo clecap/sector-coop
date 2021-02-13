@@ -1,16 +1,23 @@
-var loginServer = "http://127.0.0.1:6000/login";
+var identityServer = "http://127.0.0.1:8000/login";
 
 $(function () {
     $("#login-button").on('click', function(e) {
         e.preventDefault();
         var username = $('#username').val();
         var password = $('#password').val();
-        var payload = {username, password};
+        var payload = JSON.stringify(
+            {
+                "username" : username.toString(), 
+                "password" : password.toString()
+            });
         
-        $.post(loginServer, payload, function (data, status) {
-            console.log('${data} and status is ${status}')
-          });
+        $.ajax({
+            type: "POST",
+            url: identityServer,
+            data: payload,
+            success: function(data) {alert('data: ' + data);},
+            contentType: "application/json",
+            dataType: "json"
+        })
     })
 });
-
-
