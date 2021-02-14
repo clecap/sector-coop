@@ -139,7 +139,7 @@ contract SecTor {
     address ca = 0x7B5FB9A5535f2976cdc99c57d19111B2Ed3cB925; // Hardcoded address of the central authority
     mapping(address => Pseudonym) pseudonyms;
     address[] pseudoList;
-    mapping(address => Pseudonym) patrons;
+    mapping(address => Patron) patrons;
     address[] patList;
     mapping(bytes => Document) docs;
     bytes[] docHashes;
@@ -157,16 +157,25 @@ contract SecTor {
     struct Pseudonym {
         address owner;
         address patron;
-        bytes patronRSAPubKeyExponent;
-        bytes patronRSAPubKeyModulus;
+
         bytes patronBlindSignature;
         uint tokens;
 
-        bool isPatron;
         bool gotInitialTokens;
 
         bytes publicIdentity;
         bytes publicIdentitySignature;
+        
+        bool isValue; // Used for exists check in mapping
+    }
+    
+    struct Patron {
+        address owner;
+        address ca;
+        bytes patronRSAPubKeyExponent;
+        bytes patronRSAPubKeyModulus;
+        
+        bool isValue; // Used for exists check in mapping
     }
 
     struct Document {
@@ -174,6 +183,8 @@ contract SecTor {
         address author;
         // space for meta data
         // bool accepted;
+        
+        bool isValue; // Used for exists check in mapping
     }
 
     modifier caOnly() {
@@ -196,20 +207,15 @@ contract SecTor {
     }
 
 
-    function createPatron(address _patron, bytes memory _RSAPublicKeyExponent, bytes memory _RSAPublicKeyModulus) public caOnly returns (Pseudonym memory){
+    function createPatron(address _patron, bytes memory _RSAPublicKeyExponent, bytes memory _RSAPublicKeyModulus) public caOnly returns (Patron memory){
 
         // Create new patron
-        Pseudonym memory patron = Pseudonym({
+        Patron memory patron = Patron({
             owner: _patron,
             patronRSAPubKeyExponent: _RSAPublicKeyExponent,
             patronRSAPubKeyModulus: _RSAPublicKeyModulus,
-            patron: ca,
-            patronBlindSignature: "",
-            tokens: 0,
-            isPatron: true,
-            gotInitialTokens: true, // to disable patrons from getting tokens to publish documents
-            publicIdentity: "",
-            publicIdentitySignature: ""
+            ca: msg.sender,
+            isValue: true
             });
         patrons[_patron] = patron;
         patList.push(_patron);
@@ -219,20 +225,18 @@ contract SecTor {
 
     function addPseudonym(address _patron, bytes memory _patronBlindSignature) public returns (Pseudonym memory){
         // Validate blind Signature of Patron
-        Pseudonym storage patron = patrons[_patron];
-        require(patron.isPatron == true, "Given address must be a patron.");
+        Patron storage patron = patrons[_patron];
+        require(patron.isValue == true, "Given address must be a patron.");
         // Use RSA library here, signature should have been unblinded already
         require( SolRsaVerify.pkcs1Sha256VerifyRaw(abi.encodePacked(msg.sender), _patronBlindSignature, patron.patronRSAPubKeyExponent , patron.patronRSAPubKeyModulus) == 0, "Signature does not match sender address.");
 
         // Create new Pseudonym
         Pseudonym memory pseudo = Pseudonym({
             owner: msg.sender,
-            patronRSAPubKeyExponent: "",
-            patronRSAPubKeyModulus: "",
             patron: _patron,
             patronBlindSignature: _patronBlindSignature,
             tokens: 0,
-            isPatron: false,
+            isValue: true,
             gotInitialTokens: false,
             publicIdentity: "",
             publicIdentitySignature: ""
@@ -245,6 +249,9 @@ contract SecTor {
 
     function grantInitialTokens() public returns (Pseudonym memory){
         Pseudonym memory pseudo = pseudonyms[msg.sender];
+
+        // Check if sender is a pseudonym
+        require(pseudo.isValue == true, "Sender is not a pseudonym.");
 
         // Check if tokens were already granted
         require(pseudo.gotInitialTokens == true, "This pseudonym already received initial tokens.");
@@ -260,6 +267,9 @@ contract SecTor {
     function addDocumentHash(bytes memory _hash) public returns (Document memory){
         Pseudonym memory pseudo = pseudonyms[msg.sender];
 
+        // Check if sender is a pseudonym
+        require(pseudo.isValue == true, "Sender is not a pseudonym.");
+
         // Check if enough tokens are available
         require(pseudo.tokens < documentUploadCost, "This pseudonym does not have enough tokens to pay the upload cost.");
 
@@ -269,7 +279,8 @@ contract SecTor {
         // add the document hash
         Document memory doc = Document({
             hash: _hash,
-            author: msg.sender
+            author: msg.sender,
+            isValue: true
             });
         docs[_hash] = doc;
         pseudonyms[msg.sender] = pseudo;
@@ -280,6 +291,10 @@ contract SecTor {
 
     function proveAuthorship(bytes memory _publicIdentity, bytes memory _publicIdentitySignature, bytes memory _exponent, bytes memory _modulus) public returns (Pseudonym memory){
         Pseudonym memory pseudo = pseudonyms[msg.sender];
+        
+        // Check if sender is a pseudonym
+        require(pseudo.isValue == true, "Sender is not a pseudonym.");
+        
         // Validate _publicIdentitySignature signature of the ethereum address aka msg.sender
         require(SolRsaVerify.pkcs1Sha256VerifyRaw(abi.encodePacked(msg.sender), _publicIdentitySignature, _exponent, _modulus) == 0, "Signature does not match sender address.");
 
@@ -309,7 +324,7 @@ contract SecTor {
         return patList;
     }
 
-    function getPatron(address _owner) public view returns (Pseudonym memory){
+    function getPatron(address _owner) public view returns (Patron memory){
         return patrons[_owner];
     }
 
