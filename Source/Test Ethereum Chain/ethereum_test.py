@@ -52,10 +52,9 @@ def createPatron(contract, key):
     patron_pseudo = contract.caller.getPatron(patron_address)
 
     print("owner: " + patron_pseudo[0])
-    print("patron: " + patron_pseudo[1])
+    print("CA: " + patron_pseudo[1])
     print("patronRSApubkeyExponent: " + Web3.toHex(patron_pseudo[2]))
     print("patronRSApubkeyModulus: " + Web3.toHex(patron_pseudo[3]))
-    print("isPatron: " + str(patron_pseudo[5]))
     print("--------------------------------------------------------------------------------------------------------------------------------------")
     return key
 
@@ -101,10 +100,9 @@ def addPseudonym(contract, key):
 
     print("owner: " + pseudo[0])
     print("patron: " + pseudo[1])
-    print("patronBlindSignature: " + Web3.toHex(pseudo[3]))
-    print("tokens: " + str(pseudo[4]))
-    print("isPatron: " + str(pseudo[5]))
-    print("gotInitialTokens: " + str(pseudo[6]))
+    print("patronBlindSignature: " + Web3.toHex(pseudo[2]))
+    print("tokens: " + str(pseudo[3]))
+    print("gotInitialTokens: " + str(pseudo[4]))
     print("--------------------------------------------------------------------------------------------------------------------------------------")
 
 
@@ -145,7 +143,7 @@ def addressToBytesTest(contract):
 
 
 ca_address = "0x7B5FB9A5535f2976cdc99c57d19111B2Ed3cB925"
-contract_address = "0x01f146b25aC95fbcBe73967764ce638Ea6ae9C6d"
+contract_address = "0xccAfDc191aC3Ca5902103E0f3Dd172147FC8811D"
 patron_address = "0xD75d8c141b8643D25391ddbd7EF8ca3D93f70919"
 pseudonym_address = "0xb8d3CAF65Fe089fFd186283a6653A44292AA7AC3"
 
