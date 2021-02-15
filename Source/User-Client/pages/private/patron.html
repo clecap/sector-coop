@@ -27,8 +27,35 @@
 	     throw new Error("Cannot proceed without user's go.");
 	 }
 	 console.log("Generating 2048 Bit RSA key");
+	 var patron1_RSAPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\n"+
+				     "MIIEpAIBAAKCAQEAiWiTeJ9UYocPVMAWg84+VEVWX41n32n/+I54AJpAQKPaRPAu\n"+
+				     "DPLSY6H/3rFl8CS3hEfPUYht8ROi96nBWFZg+N9m0ODAcqZUU7psV4PjAJzsN0tF\n"+
+				     "i2e/ndI3YmfJyBPkkv15MjD6zEb5dC1iG3wiPlBvq6J+izROCRCr8Zp6NT3rqN0S\n"+
+				     "OY6r7HOmuy5AEOnfVsUpYXadobzmZ0/CP5wGIZOGRfWflfITrjJ7i8MTGIxL8t0Q\n"+
+				     "zomaA7n/fCZh1TCXHSchcUmPZKsY4eDGDUNwJ6mu5sXfAxAHq+UD+a2X8w2SdJ/3\n"+
+				     "YgYNOmjpI7tz7Q1dyAQJJ8RIqYW6XxaVo3REZwIDAQABAoIBAH6nFJ7vBUHXyYrN\n"+
+				     "jzMoTA0y5/0lAqRMOPLqprOveh/ap5o5Y8jtnHzXWlfyXcpunXThF7fIL8Yw2lq7\n"+
+				     "boo0/CcJC+Tl9Jz4sOuH/srftsHe4l/JEq3/EACxPfmHPtcbdukBl89qlBDsLowm\n"+
+				     "NLKuxYV4cKXcHhXDPVZftoz4XUJqmOrZhe1tbG9wAaQt0ljgYp2l8iCVlUmuGG+c\n"+
+				     "LjOVlb/X5cl8oWVfqbVP2PH7eoRsxXmYq/hRPI6kbz3CZNCx4df29Rv+roPLQeQN\n"+
+				     "r6iTU5Bi5mOkF4ftRqjQIsBt9Yq4U/+krzm7OoNNz5lKFpIJYybFvWeLYXLlLMar\n"+
+				     "0TwdTCECgYEAykR6jYRY0fCXRdgODPrHvRg487qEG5sAf5DI6pg6dDT8pzbm9Gij\n"+
+				     "NqfrI/zbeM4v2y8wEXuAHgp9iYiR3anXjjlKGMbKpWj1+sB0x2QKMG2GkXLal2KY\n"+
+				     "uFWNIpTbWZ4x2bdW8NUibkXDNw9uMAuYtITxh01u0E0h9zQxS00xVTcCgYEArelC\n"+
+				     "OfSVLPRUBNJlkV1PcYo2nxs1Fg9ZmkQyfdyeaH4R9Gy+Q1s+HEv5IDqJ5EbHYWz/\n"+
+				     "OkCvnHqbb+/i33vAOczyEhDfP4t4rYYCuvWLXL25hzqez18dKaLpH8/PC0HnEm02\n"+
+				     "C2R8tMzEXajWhgNMxv6b8krJuHZmP0eo/3YxIlECgYEArmUgrYfg9RJVu5ivdK19\n"+
+				     "LiMGZ873PL4GTfbN5MdgDvXoqVwDAdR+dQ+PBDZuHNjaFke3UDuFmWE+ICkqa06X\n"+
+				     "Vj87DeXIr5myDIOHrKsqxdqJXjsDEeem+bh5uclS3xAwtyEGyxtZVm68BGs/fBlj\n"+
+				     "jrHZdeljlCINGRFdNynVUT0CgYByu4R5f6Y6tiYH2FYxhIG4whou9WAcYZwXbg5x\n"+
+				     "gm7vONzXiDYtcbCUMnr0jCoUc61t1N68q5gvf6O0QWpHTfkPKOo6iO7/mR/QOqzq\n"+
+				     "cruyP2h6km3bGUDACz4JQquxHZU4Ttxsv6qWDNEviQed+edZEPgI7NYP3+ysqrYP\n"+
+				     "cwYPQQKBgQCaBMS21TXuuaJ8pQQraoX19aT2W8kyZuxPk5zy/r5bZ/m+6HFyS7Ap\n"+
+				     "Te+wY+1stKMPw4sL1KulJTw0m1rugqtWqfxC5liUmlB0gHpFGEmYmYYsZ0kTU4YX\n"+
+				     "FS9k3DesGV2gcMAsOAda2iM9bFn014TFc8M8uNLmNbJZaMxDtIDDrQ==\n"+
+				     "-----END RSA PRIVATE KEY-----";
 	 const Bob = {
-	     key: BlindSignature.keyGeneration({ b:2048}),
+	     key: new window.myexports.NodeRSA(patron1_RSAPrivateKey, "pkcs1-private"),
 	     blinded: null,
 	     unblinded: null,
 	     message: null,
