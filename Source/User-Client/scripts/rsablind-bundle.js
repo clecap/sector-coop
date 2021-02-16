@@ -1,1391 +1,4 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-const secureRandom = require('secure-random');
-const BigInteger = require('jsbn').BigInteger;
-const sha256 = require('js-sha256');
-const NodeRSA = require('node-rsa');
-
-function keyGeneration(params) {
-  const key = new NodeRSA(params || { b: 2048 });
-  return key;
-}
-
-function keyProperties(key) {
-  return {
-    E: new BigInteger(key.keyPair.e.toString()),
-    N: key.keyPair.n,
-    D: key.keyPair.d,
-  };
-}
-
-function messageToHash(message) {
-  const messageHash = sha256(message);
-  return messageHash;
-}
-
-function messageToHashInt(message) {
-  const messageHash = messageToHash(message);
-  const messageBig = new BigInteger(messageHash, 16);
-  return messageBig;
-}
-
-function blind({ message, key, N, E }) {
-  const messageHash = messageToHashInt(message);
-  N = key ? key.keyPair.n : new BigInteger(N.toString());
-  E = key
-    ? new BigInteger(key.keyPair.e.toString())
-    : new BigInteger(E.toString());
-
-  const bigOne = new BigInteger('1');
-  let gcd;
-  let r;
-  do {
-    r = new BigInteger(secureRandom(64)).mod(N);
-    gcd = r.gcd(N);
-  } while (
-    !gcd.equals(bigOne) ||
-    r.compareTo(N) >= 0 ||
-    r.compareTo(bigOne) <= 0
-  );
-  const blinded = messageHash.multiply(r.modPow(E, N)).mod(N);
-  return {
-    blinded,
-    r,
-  };
-}
-function blindHEX({ message, key, N, E }) {
-    const messageHash = messageToHashInt(message);
-    // N = key ? key.keyPair.n : new BigInteger(N.toString());
-    // E = key
-    //   ? new BigInteger(key.keyPair.e.toString())
-    //   : new BigInteger(E.toString());
-    N = new BigInteger(N, 16);
-    console.log(N);
-    E = new BigInteger(E, 16);
-    console.log(E);
-    const bigOne = new BigInteger('1');
-    let gcd;
-    let r;
-    do {
-	r = new BigInteger(secureRandom(64)).mod(N);
-	gcd = r.gcd(N);
-    } while (
-	!gcd.equals(bigOne) ||
-	    r.compareTo(N) >= 0 ||
-	    r.compareTo(bigOne) <= 0
-    );
-    const blinded = messageHash.multiply(r.modPow(E, N)).mod(N);
-    return {
-	blinded,
-	r,
-    };
-}
-
-
-function sign({ blinded, key }) {
-  const { N, D } = keyProperties(key);
-  blinded = new BigInteger(blinded.toString());
-  const signed = blinded.modPow(D, N);
-  return signed;
-}
-
-function signHEX({ blinded, key }) {
-    const { N, D } = keyProperties(key);
-    blinded = new BigInteger(blinded, 16);
-    const signed = blinded.modPow(D, N);
-    return signed;
-}
-
-
-function unblind({ signed, key, r, N }) {
-  r = new BigInteger(r.toString());
-  N = key ? key.keyPair.n : new BigInteger(N.toString());
-  signed = new BigInteger(signed.toString());
-  const unblinded = signed.multiply(r.modInverse(N)).mod(N);
-  return unblinded;
-}
-
-function unblindHEX({ signed, key, r, N }) {
-    N = new BigInteger(N, 16);
-    signed = new BigInteger(signed, 16);
-    const unblinded = signed.multiply(r.modInverse(N)).mod(N);
-    return unblinded;
-}
-
-function verify({ unblinded, key, message, E, N }) {
-  unblinded = new BigInteger(unblinded.toString());
-  const messageHash = messageToHashInt(message);
-  N = key ? key.keyPair.n : new BigInteger(N.toString());
-  E = key
-    ? new BigInteger(key.keyPair.e.toString())
-    : new BigInteger(E.toString());
-
-  const originalMsg = unblinded.modPow(E, N);
-  const result = messageHash.equals(originalMsg);
-  return result;
-}
-
-function verifyHEX({ unblinded, key, message, E, N }) {
-  const messageHash = messageToHashInt(message);
-    N = new BigInteger(N, 16);
-    E = new BigInteger(E, 16);
-    const originalMsg = unblinded.modPow(E, N);
-    const result = messageHash.equals(originalMsg);
-    return result;
-}
-
-function verify2({ unblinded, key, message }) {
-  unblinded = new BigInteger(unblinded.toString());
-  const messageHash = messageToHashInt(message);
-  const { D, N } = keyProperties(key);
-  const msgSig = messageHash.modPow(D, N);
-  const result = unblinded.equals(msgSig);
-  return result;
-}
-
-function verifyBlinding({ blinded, r, unblinded, key, E, N }) {
-  const messageHash = messageToHashInt(unblinded);
-  r = new BigInteger(r.toString());
-  N = key ? key.keyPair.n : new BigInteger(N.toString());
-  E = key
-    ? new BigInteger(key.keyPair.e.toString())
-    : new BigInteger(E.toString());
-
-  const blindedHere = messageHash.multiply(r.modPow(E, N)).mod(N);
-  const result = blindedHere.equals(blinded);
-  return result;
-}
-
-module.exports = {
-    keyGeneration,
-    messageToHash,
-    blind,
-    blindHEX,
-    sign,
-    signHEX,
-    unblind,
-    unblindHEX,
-    verify,
-    verifyHEX,
-    verify2,
-    verifyBlinding,
-};
-
-},{"js-sha256":9,"jsbn":10,"node-rsa":11,"secure-random":28}],2:[function(require,module,exports){
-window.myexports = {
-    BlindSignature:require('./blind-signatures/rsablind'),
-    NodeRSA : require('node-rsa')
-};
-
-},{"./blind-signatures/rsablind":1,"node-rsa":11}],3:[function(require,module,exports){
-// Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
-
-
-module.exports = {
-
-  newInvalidAsn1Error: function (msg) {
-    var e = new Error();
-    e.name = 'InvalidAsn1Error';
-    e.message = msg || '';
-    return e;
-  }
-
-};
-
-},{}],4:[function(require,module,exports){
-// Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
-
-var errors = require('./errors');
-var types = require('./types');
-
-var Reader = require('./reader');
-var Writer = require('./writer');
-
-
-// --- Exports
-
-module.exports = {
-
-  Reader: Reader,
-
-  Writer: Writer
-
-};
-
-for (var t in types) {
-  if (types.hasOwnProperty(t))
-    module.exports[t] = types[t];
-}
-for (var e in errors) {
-  if (errors.hasOwnProperty(e))
-    module.exports[e] = errors[e];
-}
-
-},{"./errors":3,"./reader":5,"./types":6,"./writer":7}],5:[function(require,module,exports){
-// Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
-
-var assert = require('assert');
-var Buffer = require('safer-buffer').Buffer;
-
-var ASN1 = require('./types');
-var errors = require('./errors');
-
-
-// --- Globals
-
-var newInvalidAsn1Error = errors.newInvalidAsn1Error;
-
-
-
-// --- API
-
-function Reader(data) {
-  if (!data || !Buffer.isBuffer(data))
-    throw new TypeError('data must be a node Buffer');
-
-  this._buf = data;
-  this._size = data.length;
-
-  // These hold the "current" state
-  this._len = 0;
-  this._offset = 0;
-}
-
-Object.defineProperty(Reader.prototype, 'length', {
-  enumerable: true,
-  get: function () { return (this._len); }
-});
-
-Object.defineProperty(Reader.prototype, 'offset', {
-  enumerable: true,
-  get: function () { return (this._offset); }
-});
-
-Object.defineProperty(Reader.prototype, 'remain', {
-  get: function () { return (this._size - this._offset); }
-});
-
-Object.defineProperty(Reader.prototype, 'buffer', {
-  get: function () { return (this._buf.slice(this._offset)); }
-});
-
-
-/**
- * Reads a single byte and advances offset; you can pass in `true` to make this
- * a "peek" operation (i.e., get the byte, but don't advance the offset).
- *
- * @param {Boolean} peek true means don't move offset.
- * @return {Number} the next byte, null if not enough data.
- */
-Reader.prototype.readByte = function (peek) {
-  if (this._size - this._offset < 1)
-    return null;
-
-  var b = this._buf[this._offset] & 0xff;
-
-  if (!peek)
-    this._offset += 1;
-
-  return b;
-};
-
-
-Reader.prototype.peek = function () {
-  return this.readByte(true);
-};
-
-
-/**
- * Reads a (potentially) variable length off the BER buffer.  This call is
- * not really meant to be called directly, as callers have to manipulate
- * the internal buffer afterwards.
- *
- * As a result of this call, you can call `Reader.length`, until the
- * next thing called that does a readLength.
- *
- * @return {Number} the amount of offset to advance the buffer.
- * @throws {InvalidAsn1Error} on bad ASN.1
- */
-Reader.prototype.readLength = function (offset) {
-  if (offset === undefined)
-    offset = this._offset;
-
-  if (offset >= this._size)
-    return null;
-
-  var lenB = this._buf[offset++] & 0xff;
-  if (lenB === null)
-    return null;
-
-  if ((lenB & 0x80) === 0x80) {
-    lenB &= 0x7f;
-
-    if (lenB === 0)
-      throw newInvalidAsn1Error('Indefinite length not supported');
-
-    if (lenB > 4)
-      throw newInvalidAsn1Error('encoding too long');
-
-    if (this._size - offset < lenB)
-      return null;
-
-    this._len = 0;
-    for (var i = 0; i < lenB; i++)
-      this._len = (this._len << 8) + (this._buf[offset++] & 0xff);
-
-  } else {
-    // Wasn't a variable length
-    this._len = lenB;
-  }
-
-  return offset;
-};
-
-
-/**
- * Parses the next sequence in this BER buffer.
- *
- * To get the length of the sequence, call `Reader.length`.
- *
- * @return {Number} the sequence's tag.
- */
-Reader.prototype.readSequence = function (tag) {
-  var seq = this.peek();
-  if (seq === null)
-    return null;
-  if (tag !== undefined && tag !== seq)
-    throw newInvalidAsn1Error('Expected 0x' + tag.toString(16) +
-                              ': got 0x' + seq.toString(16));
-
-  var o = this.readLength(this._offset + 1); // stored in `length`
-  if (o === null)
-    return null;
-
-  this._offset = o;
-  return seq;
-};
-
-
-Reader.prototype.readInt = function () {
-  return this._readTag(ASN1.Integer);
-};
-
-
-Reader.prototype.readBoolean = function () {
-  return (this._readTag(ASN1.Boolean) === 0 ? false : true);
-};
-
-
-Reader.prototype.readEnumeration = function () {
-  return this._readTag(ASN1.Enumeration);
-};
-
-
-Reader.prototype.readString = function (tag, retbuf) {
-  if (!tag)
-    tag = ASN1.OctetString;
-
-  var b = this.peek();
-  if (b === null)
-    return null;
-
-  if (b !== tag)
-    throw newInvalidAsn1Error('Expected 0x' + tag.toString(16) +
-                              ': got 0x' + b.toString(16));
-
-  var o = this.readLength(this._offset + 1); // stored in `length`
-
-  if (o === null)
-    return null;
-
-  if (this.length > this._size - o)
-    return null;
-
-  this._offset = o;
-
-  if (this.length === 0)
-    return retbuf ? Buffer.alloc(0) : '';
-
-  var str = this._buf.slice(this._offset, this._offset + this.length);
-  this._offset += this.length;
-
-  return retbuf ? str : str.toString('utf8');
-};
-
-Reader.prototype.readOID = function (tag) {
-  if (!tag)
-    tag = ASN1.OID;
-
-  var b = this.readString(tag, true);
-  if (b === null)
-    return null;
-
-  var values = [];
-  var value = 0;
-
-  for (var i = 0; i < b.length; i++) {
-    var byte = b[i] & 0xff;
-
-    value <<= 7;
-    value += byte & 0x7f;
-    if ((byte & 0x80) === 0) {
-      values.push(value);
-      value = 0;
-    }
-  }
-
-  value = values.shift();
-  values.unshift(value % 40);
-  values.unshift((value / 40) >> 0);
-
-  return values.join('.');
-};
-
-
-Reader.prototype._readTag = function (tag) {
-  assert.ok(tag !== undefined);
-
-  var b = this.peek();
-
-  if (b === null)
-    return null;
-
-  if (b !== tag)
-    throw newInvalidAsn1Error('Expected 0x' + tag.toString(16) +
-                              ': got 0x' + b.toString(16));
-
-  var o = this.readLength(this._offset + 1); // stored in `length`
-  if (o === null)
-    return null;
-
-  if (this.length > 4)
-    throw newInvalidAsn1Error('Integer too long: ' + this.length);
-
-  if (this.length > this._size - o)
-    return null;
-  this._offset = o;
-
-  var fb = this._buf[this._offset];
-  var value = 0;
-
-  for (var i = 0; i < this.length; i++) {
-    value <<= 8;
-    value |= (this._buf[this._offset++] & 0xff);
-  }
-
-  if ((fb & 0x80) === 0x80 && i !== 4)
-    value -= (1 << (i * 8));
-
-  return value >> 0;
-};
-
-
-
-// --- Exported API
-
-module.exports = Reader;
-
-},{"./errors":3,"./types":6,"assert":44,"safer-buffer":27}],6:[function(require,module,exports){
-// Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
-
-
-module.exports = {
-  EOC: 0,
-  Boolean: 1,
-  Integer: 2,
-  BitString: 3,
-  OctetString: 4,
-  Null: 5,
-  OID: 6,
-  ObjectDescriptor: 7,
-  External: 8,
-  Real: 9, // float
-  Enumeration: 10,
-  PDV: 11,
-  Utf8String: 12,
-  RelativeOID: 13,
-  Sequence: 16,
-  Set: 17,
-  NumericString: 18,
-  PrintableString: 19,
-  T61String: 20,
-  VideotexString: 21,
-  IA5String: 22,
-  UTCTime: 23,
-  GeneralizedTime: 24,
-  GraphicString: 25,
-  VisibleString: 26,
-  GeneralString: 28,
-  UniversalString: 29,
-  CharacterString: 30,
-  BMPString: 31,
-  Constructor: 32,
-  Context: 128
-};
-
-},{}],7:[function(require,module,exports){
-// Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
-
-var assert = require('assert');
-var Buffer = require('safer-buffer').Buffer;
-var ASN1 = require('./types');
-var errors = require('./errors');
-
-
-// --- Globals
-
-var newInvalidAsn1Error = errors.newInvalidAsn1Error;
-
-var DEFAULT_OPTS = {
-  size: 1024,
-  growthFactor: 8
-};
-
-
-// --- Helpers
-
-function merge(from, to) {
-  assert.ok(from);
-  assert.equal(typeof (from), 'object');
-  assert.ok(to);
-  assert.equal(typeof (to), 'object');
-
-  var keys = Object.getOwnPropertyNames(from);
-  keys.forEach(function (key) {
-    if (to[key])
-      return;
-
-    var value = Object.getOwnPropertyDescriptor(from, key);
-    Object.defineProperty(to, key, value);
-  });
-
-  return to;
-}
-
-
-
-// --- API
-
-function Writer(options) {
-  options = merge(DEFAULT_OPTS, options || {});
-
-  this._buf = Buffer.alloc(options.size || 1024);
-  this._size = this._buf.length;
-  this._offset = 0;
-  this._options = options;
-
-  // A list of offsets in the buffer where we need to insert
-  // sequence tag/len pairs.
-  this._seq = [];
-}
-
-Object.defineProperty(Writer.prototype, 'buffer', {
-  get: function () {
-    if (this._seq.length)
-      throw newInvalidAsn1Error(this._seq.length + ' unended sequence(s)');
-
-    return (this._buf.slice(0, this._offset));
-  }
-});
-
-Writer.prototype.writeByte = function (b) {
-  if (typeof (b) !== 'number')
-    throw new TypeError('argument must be a Number');
-
-  this._ensure(1);
-  this._buf[this._offset++] = b;
-};
-
-
-Writer.prototype.writeInt = function (i, tag) {
-  if (typeof (i) !== 'number')
-    throw new TypeError('argument must be a Number');
-  if (typeof (tag) !== 'number')
-    tag = ASN1.Integer;
-
-  var sz = 4;
-
-  while ((((i & 0xff800000) === 0) || ((i & 0xff800000) === 0xff800000 >> 0)) &&
-        (sz > 1)) {
-    sz--;
-    i <<= 8;
-  }
-
-  if (sz > 4)
-    throw newInvalidAsn1Error('BER ints cannot be > 0xffffffff');
-
-  this._ensure(2 + sz);
-  this._buf[this._offset++] = tag;
-  this._buf[this._offset++] = sz;
-
-  while (sz-- > 0) {
-    this._buf[this._offset++] = ((i & 0xff000000) >>> 24);
-    i <<= 8;
-  }
-
-};
-
-
-Writer.prototype.writeNull = function () {
-  this.writeByte(ASN1.Null);
-  this.writeByte(0x00);
-};
-
-
-Writer.prototype.writeEnumeration = function (i, tag) {
-  if (typeof (i) !== 'number')
-    throw new TypeError('argument must be a Number');
-  if (typeof (tag) !== 'number')
-    tag = ASN1.Enumeration;
-
-  return this.writeInt(i, tag);
-};
-
-
-Writer.prototype.writeBoolean = function (b, tag) {
-  if (typeof (b) !== 'boolean')
-    throw new TypeError('argument must be a Boolean');
-  if (typeof (tag) !== 'number')
-    tag = ASN1.Boolean;
-
-  this._ensure(3);
-  this._buf[this._offset++] = tag;
-  this._buf[this._offset++] = 0x01;
-  this._buf[this._offset++] = b ? 0xff : 0x00;
-};
-
-
-Writer.prototype.writeString = function (s, tag) {
-  if (typeof (s) !== 'string')
-    throw new TypeError('argument must be a string (was: ' + typeof (s) + ')');
-  if (typeof (tag) !== 'number')
-    tag = ASN1.OctetString;
-
-  var len = Buffer.byteLength(s);
-  this.writeByte(tag);
-  this.writeLength(len);
-  if (len) {
-    this._ensure(len);
-    this._buf.write(s, this._offset);
-    this._offset += len;
-  }
-};
-
-
-Writer.prototype.writeBuffer = function (buf, tag) {
-  if (typeof (tag) !== 'number')
-    throw new TypeError('tag must be a number');
-  if (!Buffer.isBuffer(buf))
-    throw new TypeError('argument must be a buffer');
-
-  this.writeByte(tag);
-  this.writeLength(buf.length);
-  this._ensure(buf.length);
-  buf.copy(this._buf, this._offset, 0, buf.length);
-  this._offset += buf.length;
-};
-
-
-Writer.prototype.writeStringArray = function (strings) {
-  if ((!strings instanceof Array))
-    throw new TypeError('argument must be an Array[String]');
-
-  var self = this;
-  strings.forEach(function (s) {
-    self.writeString(s);
-  });
-};
-
-// This is really to solve DER cases, but whatever for now
-Writer.prototype.writeOID = function (s, tag) {
-  if (typeof (s) !== 'string')
-    throw new TypeError('argument must be a string');
-  if (typeof (tag) !== 'number')
-    tag = ASN1.OID;
-
-  if (!/^([0-9]+\.){3,}[0-9]+$/.test(s))
-    throw new Error('argument is not a valid OID string');
-
-  function encodeOctet(bytes, octet) {
-    if (octet < 128) {
-        bytes.push(octet);
-    } else if (octet < 16384) {
-        bytes.push((octet >>> 7) | 0x80);
-        bytes.push(octet & 0x7F);
-    } else if (octet < 2097152) {
-      bytes.push((octet >>> 14) | 0x80);
-      bytes.push(((octet >>> 7) | 0x80) & 0xFF);
-      bytes.push(octet & 0x7F);
-    } else if (octet < 268435456) {
-      bytes.push((octet >>> 21) | 0x80);
-      bytes.push(((octet >>> 14) | 0x80) & 0xFF);
-      bytes.push(((octet >>> 7) | 0x80) & 0xFF);
-      bytes.push(octet & 0x7F);
-    } else {
-      bytes.push(((octet >>> 28) | 0x80) & 0xFF);
-      bytes.push(((octet >>> 21) | 0x80) & 0xFF);
-      bytes.push(((octet >>> 14) | 0x80) & 0xFF);
-      bytes.push(((octet >>> 7) | 0x80) & 0xFF);
-      bytes.push(octet & 0x7F);
-    }
-  }
-
-  var tmp = s.split('.');
-  var bytes = [];
-  bytes.push(parseInt(tmp[0], 10) * 40 + parseInt(tmp[1], 10));
-  tmp.slice(2).forEach(function (b) {
-    encodeOctet(bytes, parseInt(b, 10));
-  });
-
-  var self = this;
-  this._ensure(2 + bytes.length);
-  this.writeByte(tag);
-  this.writeLength(bytes.length);
-  bytes.forEach(function (b) {
-    self.writeByte(b);
-  });
-};
-
-
-Writer.prototype.writeLength = function (len) {
-  if (typeof (len) !== 'number')
-    throw new TypeError('argument must be a Number');
-
-  this._ensure(4);
-
-  if (len <= 0x7f) {
-    this._buf[this._offset++] = len;
-  } else if (len <= 0xff) {
-    this._buf[this._offset++] = 0x81;
-    this._buf[this._offset++] = len;
-  } else if (len <= 0xffff) {
-    this._buf[this._offset++] = 0x82;
-    this._buf[this._offset++] = len >> 8;
-    this._buf[this._offset++] = len;
-  } else if (len <= 0xffffff) {
-    this._buf[this._offset++] = 0x83;
-    this._buf[this._offset++] = len >> 16;
-    this._buf[this._offset++] = len >> 8;
-    this._buf[this._offset++] = len;
-  } else {
-    throw newInvalidAsn1Error('Length too long (> 4 bytes)');
-  }
-};
-
-Writer.prototype.startSequence = function (tag) {
-  if (typeof (tag) !== 'number')
-    tag = ASN1.Sequence | ASN1.Constructor;
-
-  this.writeByte(tag);
-  this._seq.push(this._offset);
-  this._ensure(3);
-  this._offset += 3;
-};
-
-
-Writer.prototype.endSequence = function () {
-  var seq = this._seq.pop();
-  var start = seq + 3;
-  var len = this._offset - start;
-
-  if (len <= 0x7f) {
-    this._shift(start, len, -2);
-    this._buf[seq] = len;
-  } else if (len <= 0xff) {
-    this._shift(start, len, -1);
-    this._buf[seq] = 0x81;
-    this._buf[seq + 1] = len;
-  } else if (len <= 0xffff) {
-    this._buf[seq] = 0x82;
-    this._buf[seq + 1] = len >> 8;
-    this._buf[seq + 2] = len;
-  } else if (len <= 0xffffff) {
-    this._shift(start, len, 1);
-    this._buf[seq] = 0x83;
-    this._buf[seq + 1] = len >> 16;
-    this._buf[seq + 2] = len >> 8;
-    this._buf[seq + 3] = len;
-  } else {
-    throw newInvalidAsn1Error('Sequence too long');
-  }
-};
-
-
-Writer.prototype._shift = function (start, len, shift) {
-  assert.ok(start !== undefined);
-  assert.ok(len !== undefined);
-  assert.ok(shift);
-
-  this._buf.copy(this._buf, start + shift, start, start + len);
-  this._offset += shift;
-};
-
-Writer.prototype._ensure = function (len) {
-  assert.ok(len);
-
-  if (this._size - this._offset < len) {
-    var sz = this._size * this._options.growthFactor;
-    if (sz - this._offset < len)
-      sz += len;
-
-    var buf = Buffer.alloc(sz);
-
-    this._buf.copy(buf, 0, 0, this._offset);
-    this._buf = buf;
-    this._size = sz;
-  }
-};
-
-
-
-// --- Exported API
-
-module.exports = Writer;
-
-},{"./errors":3,"./types":6,"assert":44,"safer-buffer":27}],8:[function(require,module,exports){
-// Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
-
-// If you have no idea what ASN.1 or BER is, see this:
-// ftp://ftp.rsa.com/pub/pkcs/ascii/layman.asc
-
-var Ber = require('./ber/index');
-
-
-
-// --- Exported API
-
-module.exports = {
-
-  Ber: Ber,
-
-  BerReader: Ber.Reader,
-
-  BerWriter: Ber.Writer
-
-};
-
-},{"./ber/index":4}],9:[function(require,module,exports){
-(function (process,global){(function (){
-/**
- * [js-sha256]{@link https://github.com/emn178/js-sha256}
- *
- * @version 0.9.0
- * @author Chen, Yi-Cyuan [emn178@gmail.com]
- * @copyright Chen, Yi-Cyuan 2014-2017
- * @license MIT
- */
-/*jslint bitwise: true */
-(function () {
-  'use strict';
-
-  var ERROR = 'input is invalid type';
-  var WINDOW = typeof window === 'object';
-  var root = WINDOW ? window : {};
-  if (root.JS_SHA256_NO_WINDOW) {
-    WINDOW = false;
-  }
-  var WEB_WORKER = !WINDOW && typeof self === 'object';
-  var NODE_JS = !root.JS_SHA256_NO_NODE_JS && typeof process === 'object' && process.versions && process.versions.node;
-  if (NODE_JS) {
-    root = global;
-  } else if (WEB_WORKER) {
-    root = self;
-  }
-  var COMMON_JS = !root.JS_SHA256_NO_COMMON_JS && typeof module === 'object' && module.exports;
-  var AMD = typeof define === 'function' && define.amd;
-  var ARRAY_BUFFER = !root.JS_SHA256_NO_ARRAY_BUFFER && typeof ArrayBuffer !== 'undefined';
-  var HEX_CHARS = '0123456789abcdef'.split('');
-  var EXTRA = [-2147483648, 8388608, 32768, 128];
-  var SHIFT = [24, 16, 8, 0];
-  var K = [
-    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
-    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
-    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
-    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
-    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
-    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
-    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
-    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
-  ];
-  var OUTPUT_TYPES = ['hex', 'array', 'digest', 'arrayBuffer'];
-
-  var blocks = [];
-
-  if (root.JS_SHA256_NO_NODE_JS || !Array.isArray) {
-    Array.isArray = function (obj) {
-      return Object.prototype.toString.call(obj) === '[object Array]';
-    };
-  }
-
-  if (ARRAY_BUFFER && (root.JS_SHA256_NO_ARRAY_BUFFER_IS_VIEW || !ArrayBuffer.isView)) {
-    ArrayBuffer.isView = function (obj) {
-      return typeof obj === 'object' && obj.buffer && obj.buffer.constructor === ArrayBuffer;
-    };
-  }
-
-  var createOutputMethod = function (outputType, is224) {
-    return function (message) {
-      return new Sha256(is224, true).update(message)[outputType]();
-    };
-  };
-
-  var createMethod = function (is224) {
-    var method = createOutputMethod('hex', is224);
-    if (NODE_JS) {
-      method = nodeWrap(method, is224);
-    }
-    method.create = function () {
-      return new Sha256(is224);
-    };
-    method.update = function (message) {
-      return method.create().update(message);
-    };
-    for (var i = 0; i < OUTPUT_TYPES.length; ++i) {
-      var type = OUTPUT_TYPES[i];
-      method[type] = createOutputMethod(type, is224);
-    }
-    return method;
-  };
-
-  var nodeWrap = function (method, is224) {
-    var crypto = eval("require('crypto')");
-    var Buffer = eval("require('buffer').Buffer");
-    var algorithm = is224 ? 'sha224' : 'sha256';
-    var nodeMethod = function (message) {
-      if (typeof message === 'string') {
-        return crypto.createHash(algorithm).update(message, 'utf8').digest('hex');
-      } else {
-        if (message === null || message === undefined) {
-          throw new Error(ERROR);
-        } else if (message.constructor === ArrayBuffer) {
-          message = new Uint8Array(message);
-        }
-      }
-      if (Array.isArray(message) || ArrayBuffer.isView(message) ||
-        message.constructor === Buffer) {
-        return crypto.createHash(algorithm).update(new Buffer(message)).digest('hex');
-      } else {
-        return method(message);
-      }
-    };
-    return nodeMethod;
-  };
-
-  var createHmacOutputMethod = function (outputType, is224) {
-    return function (key, message) {
-      return new HmacSha256(key, is224, true).update(message)[outputType]();
-    };
-  };
-
-  var createHmacMethod = function (is224) {
-    var method = createHmacOutputMethod('hex', is224);
-    method.create = function (key) {
-      return new HmacSha256(key, is224);
-    };
-    method.update = function (key, message) {
-      return method.create(key).update(message);
-    };
-    for (var i = 0; i < OUTPUT_TYPES.length; ++i) {
-      var type = OUTPUT_TYPES[i];
-      method[type] = createHmacOutputMethod(type, is224);
-    }
-    return method;
-  };
-
-  function Sha256(is224, sharedMemory) {
-    if (sharedMemory) {
-      blocks[0] = blocks[16] = blocks[1] = blocks[2] = blocks[3] =
-        blocks[4] = blocks[5] = blocks[6] = blocks[7] =
-        blocks[8] = blocks[9] = blocks[10] = blocks[11] =
-        blocks[12] = blocks[13] = blocks[14] = blocks[15] = 0;
-      this.blocks = blocks;
-    } else {
-      this.blocks = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    }
-
-    if (is224) {
-      this.h0 = 0xc1059ed8;
-      this.h1 = 0x367cd507;
-      this.h2 = 0x3070dd17;
-      this.h3 = 0xf70e5939;
-      this.h4 = 0xffc00b31;
-      this.h5 = 0x68581511;
-      this.h6 = 0x64f98fa7;
-      this.h7 = 0xbefa4fa4;
-    } else { // 256
-      this.h0 = 0x6a09e667;
-      this.h1 = 0xbb67ae85;
-      this.h2 = 0x3c6ef372;
-      this.h3 = 0xa54ff53a;
-      this.h4 = 0x510e527f;
-      this.h5 = 0x9b05688c;
-      this.h6 = 0x1f83d9ab;
-      this.h7 = 0x5be0cd19;
-    }
-
-    this.block = this.start = this.bytes = this.hBytes = 0;
-    this.finalized = this.hashed = false;
-    this.first = true;
-    this.is224 = is224;
-  }
-
-  Sha256.prototype.update = function (message) {
-    if (this.finalized) {
-      return;
-    }
-    var notString, type = typeof message;
-    if (type !== 'string') {
-      if (type === 'object') {
-        if (message === null) {
-          throw new Error(ERROR);
-        } else if (ARRAY_BUFFER && message.constructor === ArrayBuffer) {
-          message = new Uint8Array(message);
-        } else if (!Array.isArray(message)) {
-          if (!ARRAY_BUFFER || !ArrayBuffer.isView(message)) {
-            throw new Error(ERROR);
-          }
-        }
-      } else {
-        throw new Error(ERROR);
-      }
-      notString = true;
-    }
-    var code, index = 0, i, length = message.length, blocks = this.blocks;
-
-    while (index < length) {
-      if (this.hashed) {
-        this.hashed = false;
-        blocks[0] = this.block;
-        blocks[16] = blocks[1] = blocks[2] = blocks[3] =
-          blocks[4] = blocks[5] = blocks[6] = blocks[7] =
-          blocks[8] = blocks[9] = blocks[10] = blocks[11] =
-          blocks[12] = blocks[13] = blocks[14] = blocks[15] = 0;
-      }
-
-      if (notString) {
-        for (i = this.start; index < length && i < 64; ++index) {
-          blocks[i >> 2] |= message[index] << SHIFT[i++ & 3];
-        }
-      } else {
-        for (i = this.start; index < length && i < 64; ++index) {
-          code = message.charCodeAt(index);
-          if (code < 0x80) {
-            blocks[i >> 2] |= code << SHIFT[i++ & 3];
-          } else if (code < 0x800) {
-            blocks[i >> 2] |= (0xc0 | (code >> 6)) << SHIFT[i++ & 3];
-            blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
-          } else if (code < 0xd800 || code >= 0xe000) {
-            blocks[i >> 2] |= (0xe0 | (code >> 12)) << SHIFT[i++ & 3];
-            blocks[i >> 2] |= (0x80 | ((code >> 6) & 0x3f)) << SHIFT[i++ & 3];
-            blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
-          } else {
-            code = 0x10000 + (((code & 0x3ff) << 10) | (message.charCodeAt(++index) & 0x3ff));
-            blocks[i >> 2] |= (0xf0 | (code >> 18)) << SHIFT[i++ & 3];
-            blocks[i >> 2] |= (0x80 | ((code >> 12) & 0x3f)) << SHIFT[i++ & 3];
-            blocks[i >> 2] |= (0x80 | ((code >> 6) & 0x3f)) << SHIFT[i++ & 3];
-            blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
-          }
-        }
-      }
-
-      this.lastByteIndex = i;
-      this.bytes += i - this.start;
-      if (i >= 64) {
-        this.block = blocks[16];
-        this.start = i - 64;
-        this.hash();
-        this.hashed = true;
-      } else {
-        this.start = i;
-      }
-    }
-    if (this.bytes > 4294967295) {
-      this.hBytes += this.bytes / 4294967296 << 0;
-      this.bytes = this.bytes % 4294967296;
-    }
-    return this;
-  };
-
-  Sha256.prototype.finalize = function () {
-    if (this.finalized) {
-      return;
-    }
-    this.finalized = true;
-    var blocks = this.blocks, i = this.lastByteIndex;
-    blocks[16] = this.block;
-    blocks[i >> 2] |= EXTRA[i & 3];
-    this.block = blocks[16];
-    if (i >= 56) {
-      if (!this.hashed) {
-        this.hash();
-      }
-      blocks[0] = this.block;
-      blocks[16] = blocks[1] = blocks[2] = blocks[3] =
-        blocks[4] = blocks[5] = blocks[6] = blocks[7] =
-        blocks[8] = blocks[9] = blocks[10] = blocks[11] =
-        blocks[12] = blocks[13] = blocks[14] = blocks[15] = 0;
-    }
-    blocks[14] = this.hBytes << 3 | this.bytes >>> 29;
-    blocks[15] = this.bytes << 3;
-    this.hash();
-  };
-
-  Sha256.prototype.hash = function () {
-    var a = this.h0, b = this.h1, c = this.h2, d = this.h3, e = this.h4, f = this.h5, g = this.h6,
-      h = this.h7, blocks = this.blocks, j, s0, s1, maj, t1, t2, ch, ab, da, cd, bc;
-
-    for (j = 16; j < 64; ++j) {
-      // rightrotate
-      t1 = blocks[j - 15];
-      s0 = ((t1 >>> 7) | (t1 << 25)) ^ ((t1 >>> 18) | (t1 << 14)) ^ (t1 >>> 3);
-      t1 = blocks[j - 2];
-      s1 = ((t1 >>> 17) | (t1 << 15)) ^ ((t1 >>> 19) | (t1 << 13)) ^ (t1 >>> 10);
-      blocks[j] = blocks[j - 16] + s0 + blocks[j - 7] + s1 << 0;
-    }
-
-    bc = b & c;
-    for (j = 0; j < 64; j += 4) {
-      if (this.first) {
-        if (this.is224) {
-          ab = 300032;
-          t1 = blocks[0] - 1413257819;
-          h = t1 - 150054599 << 0;
-          d = t1 + 24177077 << 0;
-        } else {
-          ab = 704751109;
-          t1 = blocks[0] - 210244248;
-          h = t1 - 1521486534 << 0;
-          d = t1 + 143694565 << 0;
-        }
-        this.first = false;
-      } else {
-        s0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
-        s1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
-        ab = a & b;
-        maj = ab ^ (a & c) ^ bc;
-        ch = (e & f) ^ (~e & g);
-        t1 = h + s1 + ch + K[j] + blocks[j];
-        t2 = s0 + maj;
-        h = d + t1 << 0;
-        d = t1 + t2 << 0;
-      }
-      s0 = ((d >>> 2) | (d << 30)) ^ ((d >>> 13) | (d << 19)) ^ ((d >>> 22) | (d << 10));
-      s1 = ((h >>> 6) | (h << 26)) ^ ((h >>> 11) | (h << 21)) ^ ((h >>> 25) | (h << 7));
-      da = d & a;
-      maj = da ^ (d & b) ^ ab;
-      ch = (h & e) ^ (~h & f);
-      t1 = g + s1 + ch + K[j + 1] + blocks[j + 1];
-      t2 = s0 + maj;
-      g = c + t1 << 0;
-      c = t1 + t2 << 0;
-      s0 = ((c >>> 2) | (c << 30)) ^ ((c >>> 13) | (c << 19)) ^ ((c >>> 22) | (c << 10));
-      s1 = ((g >>> 6) | (g << 26)) ^ ((g >>> 11) | (g << 21)) ^ ((g >>> 25) | (g << 7));
-      cd = c & d;
-      maj = cd ^ (c & a) ^ da;
-      ch = (g & h) ^ (~g & e);
-      t1 = f + s1 + ch + K[j + 2] + blocks[j + 2];
-      t2 = s0 + maj;
-      f = b + t1 << 0;
-      b = t1 + t2 << 0;
-      s0 = ((b >>> 2) | (b << 30)) ^ ((b >>> 13) | (b << 19)) ^ ((b >>> 22) | (b << 10));
-      s1 = ((f >>> 6) | (f << 26)) ^ ((f >>> 11) | (f << 21)) ^ ((f >>> 25) | (f << 7));
-      bc = b & c;
-      maj = bc ^ (b & d) ^ cd;
-      ch = (f & g) ^ (~f & h);
-      t1 = e + s1 + ch + K[j + 3] + blocks[j + 3];
-      t2 = s0 + maj;
-      e = a + t1 << 0;
-      a = t1 + t2 << 0;
-    }
-
-    this.h0 = this.h0 + a << 0;
-    this.h1 = this.h1 + b << 0;
-    this.h2 = this.h2 + c << 0;
-    this.h3 = this.h3 + d << 0;
-    this.h4 = this.h4 + e << 0;
-    this.h5 = this.h5 + f << 0;
-    this.h6 = this.h6 + g << 0;
-    this.h7 = this.h7 + h << 0;
-  };
-
-  Sha256.prototype.hex = function () {
-    this.finalize();
-
-    var h0 = this.h0, h1 = this.h1, h2 = this.h2, h3 = this.h3, h4 = this.h4, h5 = this.h5,
-      h6 = this.h6, h7 = this.h7;
-
-    var hex = HEX_CHARS[(h0 >> 28) & 0x0F] + HEX_CHARS[(h0 >> 24) & 0x0F] +
-      HEX_CHARS[(h0 >> 20) & 0x0F] + HEX_CHARS[(h0 >> 16) & 0x0F] +
-      HEX_CHARS[(h0 >> 12) & 0x0F] + HEX_CHARS[(h0 >> 8) & 0x0F] +
-      HEX_CHARS[(h0 >> 4) & 0x0F] + HEX_CHARS[h0 & 0x0F] +
-      HEX_CHARS[(h1 >> 28) & 0x0F] + HEX_CHARS[(h1 >> 24) & 0x0F] +
-      HEX_CHARS[(h1 >> 20) & 0x0F] + HEX_CHARS[(h1 >> 16) & 0x0F] +
-      HEX_CHARS[(h1 >> 12) & 0x0F] + HEX_CHARS[(h1 >> 8) & 0x0F] +
-      HEX_CHARS[(h1 >> 4) & 0x0F] + HEX_CHARS[h1 & 0x0F] +
-      HEX_CHARS[(h2 >> 28) & 0x0F] + HEX_CHARS[(h2 >> 24) & 0x0F] +
-      HEX_CHARS[(h2 >> 20) & 0x0F] + HEX_CHARS[(h2 >> 16) & 0x0F] +
-      HEX_CHARS[(h2 >> 12) & 0x0F] + HEX_CHARS[(h2 >> 8) & 0x0F] +
-      HEX_CHARS[(h2 >> 4) & 0x0F] + HEX_CHARS[h2 & 0x0F] +
-      HEX_CHARS[(h3 >> 28) & 0x0F] + HEX_CHARS[(h3 >> 24) & 0x0F] +
-      HEX_CHARS[(h3 >> 20) & 0x0F] + HEX_CHARS[(h3 >> 16) & 0x0F] +
-      HEX_CHARS[(h3 >> 12) & 0x0F] + HEX_CHARS[(h3 >> 8) & 0x0F] +
-      HEX_CHARS[(h3 >> 4) & 0x0F] + HEX_CHARS[h3 & 0x0F] +
-      HEX_CHARS[(h4 >> 28) & 0x0F] + HEX_CHARS[(h4 >> 24) & 0x0F] +
-      HEX_CHARS[(h4 >> 20) & 0x0F] + HEX_CHARS[(h4 >> 16) & 0x0F] +
-      HEX_CHARS[(h4 >> 12) & 0x0F] + HEX_CHARS[(h4 >> 8) & 0x0F] +
-      HEX_CHARS[(h4 >> 4) & 0x0F] + HEX_CHARS[h4 & 0x0F] +
-      HEX_CHARS[(h5 >> 28) & 0x0F] + HEX_CHARS[(h5 >> 24) & 0x0F] +
-      HEX_CHARS[(h5 >> 20) & 0x0F] + HEX_CHARS[(h5 >> 16) & 0x0F] +
-      HEX_CHARS[(h5 >> 12) & 0x0F] + HEX_CHARS[(h5 >> 8) & 0x0F] +
-      HEX_CHARS[(h5 >> 4) & 0x0F] + HEX_CHARS[h5 & 0x0F] +
-      HEX_CHARS[(h6 >> 28) & 0x0F] + HEX_CHARS[(h6 >> 24) & 0x0F] +
-      HEX_CHARS[(h6 >> 20) & 0x0F] + HEX_CHARS[(h6 >> 16) & 0x0F] +
-      HEX_CHARS[(h6 >> 12) & 0x0F] + HEX_CHARS[(h6 >> 8) & 0x0F] +
-      HEX_CHARS[(h6 >> 4) & 0x0F] + HEX_CHARS[h6 & 0x0F];
-    if (!this.is224) {
-      hex += HEX_CHARS[(h7 >> 28) & 0x0F] + HEX_CHARS[(h7 >> 24) & 0x0F] +
-        HEX_CHARS[(h7 >> 20) & 0x0F] + HEX_CHARS[(h7 >> 16) & 0x0F] +
-        HEX_CHARS[(h7 >> 12) & 0x0F] + HEX_CHARS[(h7 >> 8) & 0x0F] +
-        HEX_CHARS[(h7 >> 4) & 0x0F] + HEX_CHARS[h7 & 0x0F];
-    }
-    return hex;
-  };
-
-  Sha256.prototype.toString = Sha256.prototype.hex;
-
-  Sha256.prototype.digest = function () {
-    this.finalize();
-
-    var h0 = this.h0, h1 = this.h1, h2 = this.h2, h3 = this.h3, h4 = this.h4, h5 = this.h5,
-      h6 = this.h6, h7 = this.h7;
-
-    var arr = [
-      (h0 >> 24) & 0xFF, (h0 >> 16) & 0xFF, (h0 >> 8) & 0xFF, h0 & 0xFF,
-      (h1 >> 24) & 0xFF, (h1 >> 16) & 0xFF, (h1 >> 8) & 0xFF, h1 & 0xFF,
-      (h2 >> 24) & 0xFF, (h2 >> 16) & 0xFF, (h2 >> 8) & 0xFF, h2 & 0xFF,
-      (h3 >> 24) & 0xFF, (h3 >> 16) & 0xFF, (h3 >> 8) & 0xFF, h3 & 0xFF,
-      (h4 >> 24) & 0xFF, (h4 >> 16) & 0xFF, (h4 >> 8) & 0xFF, h4 & 0xFF,
-      (h5 >> 24) & 0xFF, (h5 >> 16) & 0xFF, (h5 >> 8) & 0xFF, h5 & 0xFF,
-      (h6 >> 24) & 0xFF, (h6 >> 16) & 0xFF, (h6 >> 8) & 0xFF, h6 & 0xFF
-    ];
-    if (!this.is224) {
-      arr.push((h7 >> 24) & 0xFF, (h7 >> 16) & 0xFF, (h7 >> 8) & 0xFF, h7 & 0xFF);
-    }
-    return arr;
-  };
-
-  Sha256.prototype.array = Sha256.prototype.digest;
-
-  Sha256.prototype.arrayBuffer = function () {
-    this.finalize();
-
-    var buffer = new ArrayBuffer(this.is224 ? 28 : 32);
-    var dataView = new DataView(buffer);
-    dataView.setUint32(0, this.h0);
-    dataView.setUint32(4, this.h1);
-    dataView.setUint32(8, this.h2);
-    dataView.setUint32(12, this.h3);
-    dataView.setUint32(16, this.h4);
-    dataView.setUint32(20, this.h5);
-    dataView.setUint32(24, this.h6);
-    if (!this.is224) {
-      dataView.setUint32(28, this.h7);
-    }
-    return buffer;
-  };
-
-  function HmacSha256(key, is224, sharedMemory) {
-    var i, type = typeof key;
-    if (type === 'string') {
-      var bytes = [], length = key.length, index = 0, code;
-      for (i = 0; i < length; ++i) {
-        code = key.charCodeAt(i);
-        if (code < 0x80) {
-          bytes[index++] = code;
-        } else if (code < 0x800) {
-          bytes[index++] = (0xc0 | (code >> 6));
-          bytes[index++] = (0x80 | (code & 0x3f));
-        } else if (code < 0xd800 || code >= 0xe000) {
-          bytes[index++] = (0xe0 | (code >> 12));
-          bytes[index++] = (0x80 | ((code >> 6) & 0x3f));
-          bytes[index++] = (0x80 | (code & 0x3f));
-        } else {
-          code = 0x10000 + (((code & 0x3ff) << 10) | (key.charCodeAt(++i) & 0x3ff));
-          bytes[index++] = (0xf0 | (code >> 18));
-          bytes[index++] = (0x80 | ((code >> 12) & 0x3f));
-          bytes[index++] = (0x80 | ((code >> 6) & 0x3f));
-          bytes[index++] = (0x80 | (code & 0x3f));
-        }
-      }
-      key = bytes;
-    } else {
-      if (type === 'object') {
-        if (key === null) {
-          throw new Error(ERROR);
-        } else if (ARRAY_BUFFER && key.constructor === ArrayBuffer) {
-          key = new Uint8Array(key);
-        } else if (!Array.isArray(key)) {
-          if (!ARRAY_BUFFER || !ArrayBuffer.isView(key)) {
-            throw new Error(ERROR);
-          }
-        }
-      } else {
-        throw new Error(ERROR);
-      }
-    }
-
-    if (key.length > 64) {
-      key = (new Sha256(is224, true)).update(key).array();
-    }
-
-    var oKeyPad = [], iKeyPad = [];
-    for (i = 0; i < 64; ++i) {
-      var b = key[i] || 0;
-      oKeyPad[i] = 0x5c ^ b;
-      iKeyPad[i] = 0x36 ^ b;
-    }
-
-    Sha256.call(this, is224, sharedMemory);
-
-    this.update(iKeyPad);
-    this.oKeyPad = oKeyPad;
-    this.inner = true;
-    this.sharedMemory = sharedMemory;
-  }
-  HmacSha256.prototype = new Sha256();
-
-  HmacSha256.prototype.finalize = function () {
-    Sha256.prototype.finalize.call(this);
-    if (this.inner) {
-      this.inner = false;
-      var innerHash = this.array();
-      Sha256.call(this, this.is224, this.sharedMemory);
-      this.update(this.oKeyPad);
-      this.update(innerHash);
-      Sha256.prototype.finalize.call(this);
-    }
-  };
-
-  var exports = createMethod();
-  exports.sha256 = exports;
-  exports.sha224 = createMethod(true);
-  exports.sha256.hmac = createHmacMethod();
-  exports.sha224.hmac = createHmacMethod(true);
-
-  if (COMMON_JS) {
-    module.exports = exports;
-  } else {
-    root.sha256 = exports.sha256;
-    root.sha224 = exports.sha224;
-    if (AMD) {
-      define(function () {
-        return exports;
-      });
-    }
-  }
-})();
-
-}).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":184}],10:[function(require,module,exports){
 (function(){
 
     // Copyright (c) 2005  Tom Wu
@@ -2038,7 +651,7 @@ module.exports = {
         if(a < 2) this.fromInt(1);
         else {
           this.fromNumber(a,c);
-          if(!this.testBit(a-1))    // force MSB set
+          if(!this.testBit(a-1))	// force MSB set
             this.bitwiseTo(BigInteger.ONE.shiftLeft(a-1),op_or,this);
           if(this.isEven()) this.dAddOffset(1,0); // force odd
           while(!this.isProbablePrime(b)) {
@@ -2399,7 +1012,7 @@ module.exports = {
         n = k;
         while((w&1) == 0) { w >>= 1; --n; }
         if((i -= n) < 0) { i += this.DB; --j; }
-        if(is1) {    // ret == 1, don't bother squaring or multiplying it
+        if(is1) {	// ret == 1, don't bother squaring or multiplying it
           g[w].copyTo(r);
           is1 = false;
         }
@@ -2609,146 +1222,1547 @@ module.exports = {
     // long longValue()
     // static BigInteger valueOf(long val)
 
-    // Random number generator - requires a PRNG backend, e.g. prng4.js
+	// Random number generator - requires a PRNG backend, e.g. prng4.js
 
-    // For best results, put code like
-    // <body onClick='rng_seed_time();' onKeyPress='rng_seed_time();'>
-    // in your main HTML document.
+	// For best results, put code like
+	// <body onClick='rng_seed_time();' onKeyPress='rng_seed_time();'>
+	// in your main HTML document.
 
-    var rng_state;
-    var rng_pool;
-    var rng_pptr;
+	var rng_state;
+	var rng_pool;
+	var rng_pptr;
 
-    // Mix in a 32-bit integer into the pool
-    function rng_seed_int(x) {
-      rng_pool[rng_pptr++] ^= x & 255;
-      rng_pool[rng_pptr++] ^= (x >> 8) & 255;
-      rng_pool[rng_pptr++] ^= (x >> 16) & 255;
-      rng_pool[rng_pptr++] ^= (x >> 24) & 255;
-      if(rng_pptr >= rng_psize) rng_pptr -= rng_psize;
-    }
+	// Mix in a 32-bit integer into the pool
+	function rng_seed_int(x) {
+	  rng_pool[rng_pptr++] ^= x & 255;
+	  rng_pool[rng_pptr++] ^= (x >> 8) & 255;
+	  rng_pool[rng_pptr++] ^= (x >> 16) & 255;
+	  rng_pool[rng_pptr++] ^= (x >> 24) & 255;
+	  if(rng_pptr >= rng_psize) rng_pptr -= rng_psize;
+	}
 
-    // Mix in the current time (w/milliseconds) into the pool
-    function rng_seed_time() {
-      rng_seed_int(new Date().getTime());
-    }
+	// Mix in the current time (w/milliseconds) into the pool
+	function rng_seed_time() {
+	  rng_seed_int(new Date().getTime());
+	}
 
-    // Initialize the pool with junk if needed.
-    if(rng_pool == null) {
-      rng_pool = new Array();
-      rng_pptr = 0;
-      var t;
-      if(typeof window !== "undefined" && window.crypto) {
-        if (window.crypto.getRandomValues) {
-          // Use webcrypto if available
-          var ua = new Uint8Array(32);
-          window.crypto.getRandomValues(ua);
-          for(t = 0; t < 32; ++t)
-            rng_pool[rng_pptr++] = ua[t];
-        }
-        else if(navigator.appName == "Netscape" && navigator.appVersion < "5") {
-          // Extract entropy (256 bits) from NS4 RNG if available
-          var z = window.crypto.random(32);
-          for(t = 0; t < z.length; ++t)
-            rng_pool[rng_pptr++] = z.charCodeAt(t) & 255;
-        }
-      }
-      while(rng_pptr < rng_psize) {  // extract some randomness from Math.random()
-        t = Math.floor(65536 * Math.random());
-        rng_pool[rng_pptr++] = t >>> 8;
-        rng_pool[rng_pptr++] = t & 255;
-      }
-      rng_pptr = 0;
-      rng_seed_time();
-      //rng_seed_int(window.screenX);
-      //rng_seed_int(window.screenY);
-    }
+	// Initialize the pool with junk if needed.
+	if(rng_pool == null) {
+	  rng_pool = new Array();
+	  rng_pptr = 0;
+	  var t;
+	  if(typeof window !== "undefined" && window.crypto) {
+		if (window.crypto.getRandomValues) {
+		  // Use webcrypto if available
+		  var ua = new Uint8Array(32);
+		  window.crypto.getRandomValues(ua);
+		  for(t = 0; t < 32; ++t)
+			rng_pool[rng_pptr++] = ua[t];
+		}
+		else if(navigator.appName == "Netscape" && navigator.appVersion < "5") {
+		  // Extract entropy (256 bits) from NS4 RNG if available
+		  var z = window.crypto.random(32);
+		  for(t = 0; t < z.length; ++t)
+			rng_pool[rng_pptr++] = z.charCodeAt(t) & 255;
+		}
+	  }
+	  while(rng_pptr < rng_psize) {  // extract some randomness from Math.random()
+		t = Math.floor(65536 * Math.random());
+		rng_pool[rng_pptr++] = t >>> 8;
+		rng_pool[rng_pptr++] = t & 255;
+	  }
+	  rng_pptr = 0;
+	  rng_seed_time();
+	  //rng_seed_int(window.screenX);
+	  //rng_seed_int(window.screenY);
+	}
 
-    function rng_get_byte() {
-      if(rng_state == null) {
-        rng_seed_time();
-        rng_state = prng_newstate();
-        rng_state.init(rng_pool);
-        for(rng_pptr = 0; rng_pptr < rng_pool.length; ++rng_pptr)
-          rng_pool[rng_pptr] = 0;
-        rng_pptr = 0;
-        //rng_pool = null;
-      }
-      // TODO: allow reseeding after first request
-      return rng_state.next();
-    }
+	function rng_get_byte() {
+	  if(rng_state == null) {
+		rng_seed_time();
+		rng_state = prng_newstate();
+		rng_state.init(rng_pool);
+		for(rng_pptr = 0; rng_pptr < rng_pool.length; ++rng_pptr)
+		  rng_pool[rng_pptr] = 0;
+		rng_pptr = 0;
+		//rng_pool = null;
+	  }
+	  // TODO: allow reseeding after first request
+	  return rng_state.next();
+	}
 
-    function rng_get_bytes(ba) {
-      var i;
-      for(i = 0; i < ba.length; ++i) ba[i] = rng_get_byte();
-    }
+	function rng_get_bytes(ba) {
+	  var i;
+	  for(i = 0; i < ba.length; ++i) ba[i] = rng_get_byte();
+	}
 
-    function SecureRandom() {}
+	function SecureRandom() {}
 
-    SecureRandom.prototype.nextBytes = rng_get_bytes;
+	SecureRandom.prototype.nextBytes = rng_get_bytes;
 
-    // prng4.js - uses Arcfour as a PRNG
+	// prng4.js - uses Arcfour as a PRNG
 
-    function Arcfour() {
-      this.i = 0;
-      this.j = 0;
-      this.S = new Array();
-    }
+	function Arcfour() {
+	  this.i = 0;
+	  this.j = 0;
+	  this.S = new Array();
+	}
 
-    // Initialize arcfour context from key, an array of ints, each from [0..255]
-    function ARC4init(key) {
-      var i, j, t;
-      for(i = 0; i < 256; ++i)
-        this.S[i] = i;
-      j = 0;
-      for(i = 0; i < 256; ++i) {
-        j = (j + this.S[i] + key[i % key.length]) & 255;
-        t = this.S[i];
-        this.S[i] = this.S[j];
-        this.S[j] = t;
-      }
-      this.i = 0;
-      this.j = 0;
-    }
+	// Initialize arcfour context from key, an array of ints, each from [0..255]
+	function ARC4init(key) {
+	  var i, j, t;
+	  for(i = 0; i < 256; ++i)
+		this.S[i] = i;
+	  j = 0;
+	  for(i = 0; i < 256; ++i) {
+		j = (j + this.S[i] + key[i % key.length]) & 255;
+		t = this.S[i];
+		this.S[i] = this.S[j];
+		this.S[j] = t;
+	  }
+	  this.i = 0;
+	  this.j = 0;
+	}
 
-    function ARC4next() {
-      var t;
-      this.i = (this.i + 1) & 255;
-      this.j = (this.j + this.S[this.i]) & 255;
-      t = this.S[this.i];
-      this.S[this.i] = this.S[this.j];
-      this.S[this.j] = t;
-      return this.S[(t + this.S[this.i]) & 255];
-    }
+	function ARC4next() {
+	  var t;
+	  this.i = (this.i + 1) & 255;
+	  this.j = (this.j + this.S[this.i]) & 255;
+	  t = this.S[this.i];
+	  this.S[this.i] = this.S[this.j];
+	  this.S[this.j] = t;
+	  return this.S[(t + this.S[this.i]) & 255];
+	}
 
-    Arcfour.prototype.init = ARC4init;
-    Arcfour.prototype.next = ARC4next;
+	Arcfour.prototype.init = ARC4init;
+	Arcfour.prototype.next = ARC4next;
 
-    // Plug in your RNG constructor here
-    function prng_newstate() {
-      return new Arcfour();
-    }
+	// Plug in your RNG constructor here
+	function prng_newstate() {
+	  return new Arcfour();
+	}
 
-    // Pool size must be a multiple of 4 and greater than 32.
-    // An array of bytes the size of the pool will be passed to init()
-    var rng_psize = 256;
+	// Pool size must be a multiple of 4 and greater than 32.
+	// An array of bytes the size of the pool will be passed to init()
+	var rng_psize = 256;
 
-    if (typeof exports !== 'undefined') {
-        exports = module.exports = {
-            default: BigInteger,
-            BigInteger: BigInteger,
-            SecureRandom: SecureRandom,
-        };
-    } else {
-        this.jsbn = {
-          BigInteger: BigInteger,
-          SecureRandom: SecureRandom
-        };
-    }
+  BigInteger.SecureRandom = SecureRandom;
+  BigInteger.BigInteger = BigInteger;
+  if (typeof exports !== 'undefined') {
+    exports = module.exports = BigInteger;
+  } else {
+    this.BigInteger = BigInteger;
+    this.SecureRandom = SecureRandom;
+  }
 
 }).call(this);
 
-},{}],11:[function(require,module,exports){
+},{}],2:[function(require,module,exports){
+const secureRandom = require('secure-random');
+const BigInteger = require('jsbn').BigInteger;
+const sha256 = require('js-sha256');
+const NodeRSA = require('node-rsa');
+
+function keyGeneration(params) {
+  const key = new NodeRSA(params || { b: 2048 });
+  return key;
+}
+
+function keyProperties(key) {
+  return {
+    E: new BigInteger(key.keyPair.e.toString()),
+    N: key.keyPair.n,
+    D: key.keyPair.d,
+  };
+}
+
+function messageToHash(message) {
+  const messageHash = sha256(message);
+  return messageHash;
+}
+
+function messageToHashInt(message) {
+  const messageHash = messageToHash(message);
+  const messageBig = new BigInteger(messageHash, 16);
+  return messageBig;
+}
+
+function messageToEMSA_PKCS1_v1_5(message){
+    // https://tools.ietf.org/html/rfc3447#section-9.2
+    SHA256_DIGEST_INFO = "30" + "31" + "30" + "0d" + "06" + "09" + "60" + "86" + "48" + "01" + "65" + "03" + "04" + "02" + "01" + "05" + "00" + "04" + "20" ;
+    T = SHA256_DIGEST_INFO + messageToHash(message);
+    t_len = 51;
+
+    ps_len = 256 - t_len - 3;
+    PS = "ff".repeat(ps_len);
+
+    EM = "00" + "01" + PS + "00" + T;
+    console.log(`EMSA-PKCS1-v1_5 encoded Message: ${EM}`);
+    return EM;
+}
+
+function messageToEMSA_PKCS1_v1_5Int(message){
+    return new BigInteger(messageToEMSA_PKCS1_v1_5(message), 16);
+}
+
+function blind({ message, key, N, E }) {
+  const messageHash = messageToHashInt(message);
+  N = key ? key.keyPair.n : new BigInteger(N.toString());
+  E = key
+    ? new BigInteger(key.keyPair.e.toString())
+    : new BigInteger(E.toString());
+
+  const bigOne = new BigInteger('1');
+  let gcd;
+  let r;
+  do {
+    r = new BigInteger(secureRandom(64)).mod(N);
+    gcd = r.gcd(N);
+  } while (
+    !gcd.equals(bigOne) ||
+    r.compareTo(N) >= 0 ||
+    r.compareTo(bigOne) <= 0
+  );
+  const blinded = messageHash.multiply(r.modPow(E, N)).mod(N);
+  return {
+    blinded,
+    r,
+  };
+}
+
+function sign({ blinded, key }) {
+  const { N, D } = keyProperties(key);
+  blinded = new BigInteger(blinded.toString());
+  const signed = blinded.modPow(D, N);
+  return signed;
+}
+
+function unblind({ signed, key, r, N }) {
+  r = new BigInteger(r.toString());
+  N = key ? key.keyPair.n : new BigInteger(N.toString());
+  signed = new BigInteger(signed.toString());
+  const unblinded = signed.multiply(r.modInverse(N)).mod(N);
+  return unblinded;
+}
+
+function verify({ unblinded, key, message, E, N }) {
+  unblinded = new BigInteger(unblinded.toString());
+  const messageHash = messageToHashInt(message);
+  N = key ? key.keyPair.n : new BigInteger(N.toString());
+  E = key
+    ? new BigInteger(key.keyPair.e.toString())
+    : new BigInteger(E.toString());
+
+  const originalMsg = unblinded.modPow(E, N);
+  const result = messageHash.equals(originalMsg);
+  return result;
+}
+
+function verify2({ unblinded, key, message }) {
+  unblinded = new BigInteger(unblinded.toString());
+  const messageHash = messageToHashInt(message);
+  const { D, N } = keyProperties(key);
+  const msgSig = messageHash.modPow(D, N);
+  const result = unblinded.equals(msgSig);
+  return result;
+}
+
+function verifyBlinding({ blinded, r, unblinded, key, E, N }) {
+  const messageHash = messageToHashInt(unblinded);
+  r = new BigInteger(r.toString());
+  N = key ? key.keyPair.n : new BigInteger(N.toString());
+  E = key
+    ? new BigInteger(key.keyPair.e.toString())
+    : new BigInteger(E.toString());
+
+  const blindedHere = messageHash.multiply(r.modPow(E, N)).mod(N);
+  const result = blindedHere.equals(blinded);
+  return result;
+}
+
+function blindHEX({ message, key, N, E }) {
+    const messageHash = messageToEMSA_PKCS1_v1_5Int(message);
+    // N = key ? key.keyPair.n : new BigInteger(N.toString());
+    // E = key
+    //   ? new BigInteger(key.keyPair.e.toString())
+    //   : new BigInteger(E.toString());
+    N = new BigInteger(N, 16);
+    // console.log(N);
+    E = new BigInteger(E, 16);
+    // console.log(E);
+    const bigOne = new BigInteger('1');
+    let gcd;
+    let r;
+    do {
+	r = new BigInteger(secureRandom(64)).mod(N);
+	gcd = r.gcd(N);
+    } while (
+	!gcd.equals(bigOne) ||
+	    r.compareTo(N) >= 0 ||
+	    r.compareTo(bigOne) <= 0
+    );
+    const blinded = messageHash.multiply(r.modPow(E, N)).mod(N);
+    return {
+	blinded,
+	r,
+    };
+}
+
+function signHEX({ blinded, key }) {
+    const { N, D } = keyProperties(key);
+    blinded = new BigInteger(blinded, 16);
+    const signed = blinded.modPow(D, N);
+    return signed;
+}
+
+function unblindHEX({ signed, key, r, N }) {
+    N = new BigInteger(N, 16);
+    signed = new BigInteger(signed, 16);
+    const unblinded = signed.multiply(r.modInverse(N)).mod(N);
+    return unblinded;
+}
+
+function verifyHEX({ unblinded, key, message, E, N }) {
+  const messageHash = messageToHashInt(message);
+    N = new BigInteger(N, 16);
+    E = new BigInteger(E, 16);
+    const originalMsg = unblinded.modPow(E, N);
+    const result = messageHash.equals(originalMsg);
+    return result;
+}
+
+
+module.exports = {
+    keyGeneration,
+    messageToHash,
+    blind,
+    sign,
+    unblind,
+    verify,
+    verify2,
+    verifyBlinding,
+    blindHEX,
+    signHEX,
+    unblindHEX,
+    verifyHEX
+};
+
+},{"js-sha256":10,"jsbn":1,"node-rsa":11,"secure-random":28}],3:[function(require,module,exports){
+window.myexports = {
+    BlindSignature:require('./blind-signatures-master/rsablind'),
+    NodeRSA : require('node-rsa')
+};
+
+},{"./blind-signatures-master/rsablind":2,"node-rsa":11}],4:[function(require,module,exports){
+// Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
+
+
+module.exports = {
+
+  newInvalidAsn1Error: function (msg) {
+    var e = new Error();
+    e.name = 'InvalidAsn1Error';
+    e.message = msg || '';
+    return e;
+  }
+
+};
+
+},{}],5:[function(require,module,exports){
+// Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
+
+var errors = require('./errors');
+var types = require('./types');
+
+var Reader = require('./reader');
+var Writer = require('./writer');
+
+
+// --- Exports
+
+module.exports = {
+
+  Reader: Reader,
+
+  Writer: Writer
+
+};
+
+for (var t in types) {
+  if (types.hasOwnProperty(t))
+    module.exports[t] = types[t];
+}
+for (var e in errors) {
+  if (errors.hasOwnProperty(e))
+    module.exports[e] = errors[e];
+}
+
+},{"./errors":4,"./reader":6,"./types":7,"./writer":8}],6:[function(require,module,exports){
+// Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
+
+var assert = require('assert');
+var Buffer = require('safer-buffer').Buffer;
+
+var ASN1 = require('./types');
+var errors = require('./errors');
+
+
+// --- Globals
+
+var newInvalidAsn1Error = errors.newInvalidAsn1Error;
+
+
+
+// --- API
+
+function Reader(data) {
+  if (!data || !Buffer.isBuffer(data))
+    throw new TypeError('data must be a node Buffer');
+
+  this._buf = data;
+  this._size = data.length;
+
+  // These hold the "current" state
+  this._len = 0;
+  this._offset = 0;
+}
+
+Object.defineProperty(Reader.prototype, 'length', {
+  enumerable: true,
+  get: function () { return (this._len); }
+});
+
+Object.defineProperty(Reader.prototype, 'offset', {
+  enumerable: true,
+  get: function () { return (this._offset); }
+});
+
+Object.defineProperty(Reader.prototype, 'remain', {
+  get: function () { return (this._size - this._offset); }
+});
+
+Object.defineProperty(Reader.prototype, 'buffer', {
+  get: function () { return (this._buf.slice(this._offset)); }
+});
+
+
+/**
+ * Reads a single byte and advances offset; you can pass in `true` to make this
+ * a "peek" operation (i.e., get the byte, but don't advance the offset).
+ *
+ * @param {Boolean} peek true means don't move offset.
+ * @return {Number} the next byte, null if not enough data.
+ */
+Reader.prototype.readByte = function (peek) {
+  if (this._size - this._offset < 1)
+    return null;
+
+  var b = this._buf[this._offset] & 0xff;
+
+  if (!peek)
+    this._offset += 1;
+
+  return b;
+};
+
+
+Reader.prototype.peek = function () {
+  return this.readByte(true);
+};
+
+
+/**
+ * Reads a (potentially) variable length off the BER buffer.  This call is
+ * not really meant to be called directly, as callers have to manipulate
+ * the internal buffer afterwards.
+ *
+ * As a result of this call, you can call `Reader.length`, until the
+ * next thing called that does a readLength.
+ *
+ * @return {Number} the amount of offset to advance the buffer.
+ * @throws {InvalidAsn1Error} on bad ASN.1
+ */
+Reader.prototype.readLength = function (offset) {
+  if (offset === undefined)
+    offset = this._offset;
+
+  if (offset >= this._size)
+    return null;
+
+  var lenB = this._buf[offset++] & 0xff;
+  if (lenB === null)
+    return null;
+
+  if ((lenB & 0x80) === 0x80) {
+    lenB &= 0x7f;
+
+    if (lenB === 0)
+      throw newInvalidAsn1Error('Indefinite length not supported');
+
+    if (lenB > 4)
+      throw newInvalidAsn1Error('encoding too long');
+
+    if (this._size - offset < lenB)
+      return null;
+
+    this._len = 0;
+    for (var i = 0; i < lenB; i++)
+      this._len = (this._len << 8) + (this._buf[offset++] & 0xff);
+
+  } else {
+    // Wasn't a variable length
+    this._len = lenB;
+  }
+
+  return offset;
+};
+
+
+/**
+ * Parses the next sequence in this BER buffer.
+ *
+ * To get the length of the sequence, call `Reader.length`.
+ *
+ * @return {Number} the sequence's tag.
+ */
+Reader.prototype.readSequence = function (tag) {
+  var seq = this.peek();
+  if (seq === null)
+    return null;
+  if (tag !== undefined && tag !== seq)
+    throw newInvalidAsn1Error('Expected 0x' + tag.toString(16) +
+                              ': got 0x' + seq.toString(16));
+
+  var o = this.readLength(this._offset + 1); // stored in `length`
+  if (o === null)
+    return null;
+
+  this._offset = o;
+  return seq;
+};
+
+
+Reader.prototype.readInt = function () {
+  return this._readTag(ASN1.Integer);
+};
+
+
+Reader.prototype.readBoolean = function () {
+  return (this._readTag(ASN1.Boolean) === 0 ? false : true);
+};
+
+
+Reader.prototype.readEnumeration = function () {
+  return this._readTag(ASN1.Enumeration);
+};
+
+
+Reader.prototype.readString = function (tag, retbuf) {
+  if (!tag)
+    tag = ASN1.OctetString;
+
+  var b = this.peek();
+  if (b === null)
+    return null;
+
+  if (b !== tag)
+    throw newInvalidAsn1Error('Expected 0x' + tag.toString(16) +
+                              ': got 0x' + b.toString(16));
+
+  var o = this.readLength(this._offset + 1); // stored in `length`
+
+  if (o === null)
+    return null;
+
+  if (this.length > this._size - o)
+    return null;
+
+  this._offset = o;
+
+  if (this.length === 0)
+    return retbuf ? Buffer.alloc(0) : '';
+
+  var str = this._buf.slice(this._offset, this._offset + this.length);
+  this._offset += this.length;
+
+  return retbuf ? str : str.toString('utf8');
+};
+
+Reader.prototype.readOID = function (tag) {
+  if (!tag)
+    tag = ASN1.OID;
+
+  var b = this.readString(tag, true);
+  if (b === null)
+    return null;
+
+  var values = [];
+  var value = 0;
+
+  for (var i = 0; i < b.length; i++) {
+    var byte = b[i] & 0xff;
+
+    value <<= 7;
+    value += byte & 0x7f;
+    if ((byte & 0x80) === 0) {
+      values.push(value);
+      value = 0;
+    }
+  }
+
+  value = values.shift();
+  values.unshift(value % 40);
+  values.unshift((value / 40) >> 0);
+
+  return values.join('.');
+};
+
+
+Reader.prototype._readTag = function (tag) {
+  assert.ok(tag !== undefined);
+
+  var b = this.peek();
+
+  if (b === null)
+    return null;
+
+  if (b !== tag)
+    throw newInvalidAsn1Error('Expected 0x' + tag.toString(16) +
+                              ': got 0x' + b.toString(16));
+
+  var o = this.readLength(this._offset + 1); // stored in `length`
+  if (o === null)
+    return null;
+
+  if (this.length > 4)
+    throw newInvalidAsn1Error('Integer too long: ' + this.length);
+
+  if (this.length > this._size - o)
+    return null;
+  this._offset = o;
+
+  var fb = this._buf[this._offset];
+  var value = 0;
+
+  for (var i = 0; i < this.length; i++) {
+    value <<= 8;
+    value |= (this._buf[this._offset++] & 0xff);
+  }
+
+  if ((fb & 0x80) === 0x80 && i !== 4)
+    value -= (1 << (i * 8));
+
+  return value >> 0;
+};
+
+
+
+// --- Exported API
+
+module.exports = Reader;
+
+},{"./errors":4,"./types":7,"assert":44,"safer-buffer":27}],7:[function(require,module,exports){
+// Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
+
+
+module.exports = {
+  EOC: 0,
+  Boolean: 1,
+  Integer: 2,
+  BitString: 3,
+  OctetString: 4,
+  Null: 5,
+  OID: 6,
+  ObjectDescriptor: 7,
+  External: 8,
+  Real: 9, // float
+  Enumeration: 10,
+  PDV: 11,
+  Utf8String: 12,
+  RelativeOID: 13,
+  Sequence: 16,
+  Set: 17,
+  NumericString: 18,
+  PrintableString: 19,
+  T61String: 20,
+  VideotexString: 21,
+  IA5String: 22,
+  UTCTime: 23,
+  GeneralizedTime: 24,
+  GraphicString: 25,
+  VisibleString: 26,
+  GeneralString: 28,
+  UniversalString: 29,
+  CharacterString: 30,
+  BMPString: 31,
+  Constructor: 32,
+  Context: 128
+};
+
+},{}],8:[function(require,module,exports){
+// Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
+
+var assert = require('assert');
+var Buffer = require('safer-buffer').Buffer;
+var ASN1 = require('./types');
+var errors = require('./errors');
+
+
+// --- Globals
+
+var newInvalidAsn1Error = errors.newInvalidAsn1Error;
+
+var DEFAULT_OPTS = {
+  size: 1024,
+  growthFactor: 8
+};
+
+
+// --- Helpers
+
+function merge(from, to) {
+  assert.ok(from);
+  assert.equal(typeof (from), 'object');
+  assert.ok(to);
+  assert.equal(typeof (to), 'object');
+
+  var keys = Object.getOwnPropertyNames(from);
+  keys.forEach(function (key) {
+    if (to[key])
+      return;
+
+    var value = Object.getOwnPropertyDescriptor(from, key);
+    Object.defineProperty(to, key, value);
+  });
+
+  return to;
+}
+
+
+
+// --- API
+
+function Writer(options) {
+  options = merge(DEFAULT_OPTS, options || {});
+
+  this._buf = Buffer.alloc(options.size || 1024);
+  this._size = this._buf.length;
+  this._offset = 0;
+  this._options = options;
+
+  // A list of offsets in the buffer where we need to insert
+  // sequence tag/len pairs.
+  this._seq = [];
+}
+
+Object.defineProperty(Writer.prototype, 'buffer', {
+  get: function () {
+    if (this._seq.length)
+      throw newInvalidAsn1Error(this._seq.length + ' unended sequence(s)');
+
+    return (this._buf.slice(0, this._offset));
+  }
+});
+
+Writer.prototype.writeByte = function (b) {
+  if (typeof (b) !== 'number')
+    throw new TypeError('argument must be a Number');
+
+  this._ensure(1);
+  this._buf[this._offset++] = b;
+};
+
+
+Writer.prototype.writeInt = function (i, tag) {
+  if (typeof (i) !== 'number')
+    throw new TypeError('argument must be a Number');
+  if (typeof (tag) !== 'number')
+    tag = ASN1.Integer;
+
+  var sz = 4;
+
+  while ((((i & 0xff800000) === 0) || ((i & 0xff800000) === 0xff800000 >> 0)) &&
+        (sz > 1)) {
+    sz--;
+    i <<= 8;
+  }
+
+  if (sz > 4)
+    throw newInvalidAsn1Error('BER ints cannot be > 0xffffffff');
+
+  this._ensure(2 + sz);
+  this._buf[this._offset++] = tag;
+  this._buf[this._offset++] = sz;
+
+  while (sz-- > 0) {
+    this._buf[this._offset++] = ((i & 0xff000000) >>> 24);
+    i <<= 8;
+  }
+
+};
+
+
+Writer.prototype.writeNull = function () {
+  this.writeByte(ASN1.Null);
+  this.writeByte(0x00);
+};
+
+
+Writer.prototype.writeEnumeration = function (i, tag) {
+  if (typeof (i) !== 'number')
+    throw new TypeError('argument must be a Number');
+  if (typeof (tag) !== 'number')
+    tag = ASN1.Enumeration;
+
+  return this.writeInt(i, tag);
+};
+
+
+Writer.prototype.writeBoolean = function (b, tag) {
+  if (typeof (b) !== 'boolean')
+    throw new TypeError('argument must be a Boolean');
+  if (typeof (tag) !== 'number')
+    tag = ASN1.Boolean;
+
+  this._ensure(3);
+  this._buf[this._offset++] = tag;
+  this._buf[this._offset++] = 0x01;
+  this._buf[this._offset++] = b ? 0xff : 0x00;
+};
+
+
+Writer.prototype.writeString = function (s, tag) {
+  if (typeof (s) !== 'string')
+    throw new TypeError('argument must be a string (was: ' + typeof (s) + ')');
+  if (typeof (tag) !== 'number')
+    tag = ASN1.OctetString;
+
+  var len = Buffer.byteLength(s);
+  this.writeByte(tag);
+  this.writeLength(len);
+  if (len) {
+    this._ensure(len);
+    this._buf.write(s, this._offset);
+    this._offset += len;
+  }
+};
+
+
+Writer.prototype.writeBuffer = function (buf, tag) {
+  if (typeof (tag) !== 'number')
+    throw new TypeError('tag must be a number');
+  if (!Buffer.isBuffer(buf))
+    throw new TypeError('argument must be a buffer');
+
+  this.writeByte(tag);
+  this.writeLength(buf.length);
+  this._ensure(buf.length);
+  buf.copy(this._buf, this._offset, 0, buf.length);
+  this._offset += buf.length;
+};
+
+
+Writer.prototype.writeStringArray = function (strings) {
+  if ((!strings instanceof Array))
+    throw new TypeError('argument must be an Array[String]');
+
+  var self = this;
+  strings.forEach(function (s) {
+    self.writeString(s);
+  });
+};
+
+// This is really to solve DER cases, but whatever for now
+Writer.prototype.writeOID = function (s, tag) {
+  if (typeof (s) !== 'string')
+    throw new TypeError('argument must be a string');
+  if (typeof (tag) !== 'number')
+    tag = ASN1.OID;
+
+  if (!/^([0-9]+\.){3,}[0-9]+$/.test(s))
+    throw new Error('argument is not a valid OID string');
+
+  function encodeOctet(bytes, octet) {
+    if (octet < 128) {
+        bytes.push(octet);
+    } else if (octet < 16384) {
+        bytes.push((octet >>> 7) | 0x80);
+        bytes.push(octet & 0x7F);
+    } else if (octet < 2097152) {
+      bytes.push((octet >>> 14) | 0x80);
+      bytes.push(((octet >>> 7) | 0x80) & 0xFF);
+      bytes.push(octet & 0x7F);
+    } else if (octet < 268435456) {
+      bytes.push((octet >>> 21) | 0x80);
+      bytes.push(((octet >>> 14) | 0x80) & 0xFF);
+      bytes.push(((octet >>> 7) | 0x80) & 0xFF);
+      bytes.push(octet & 0x7F);
+    } else {
+      bytes.push(((octet >>> 28) | 0x80) & 0xFF);
+      bytes.push(((octet >>> 21) | 0x80) & 0xFF);
+      bytes.push(((octet >>> 14) | 0x80) & 0xFF);
+      bytes.push(((octet >>> 7) | 0x80) & 0xFF);
+      bytes.push(octet & 0x7F);
+    }
+  }
+
+  var tmp = s.split('.');
+  var bytes = [];
+  bytes.push(parseInt(tmp[0], 10) * 40 + parseInt(tmp[1], 10));
+  tmp.slice(2).forEach(function (b) {
+    encodeOctet(bytes, parseInt(b, 10));
+  });
+
+  var self = this;
+  this._ensure(2 + bytes.length);
+  this.writeByte(tag);
+  this.writeLength(bytes.length);
+  bytes.forEach(function (b) {
+    self.writeByte(b);
+  });
+};
+
+
+Writer.prototype.writeLength = function (len) {
+  if (typeof (len) !== 'number')
+    throw new TypeError('argument must be a Number');
+
+  this._ensure(4);
+
+  if (len <= 0x7f) {
+    this._buf[this._offset++] = len;
+  } else if (len <= 0xff) {
+    this._buf[this._offset++] = 0x81;
+    this._buf[this._offset++] = len;
+  } else if (len <= 0xffff) {
+    this._buf[this._offset++] = 0x82;
+    this._buf[this._offset++] = len >> 8;
+    this._buf[this._offset++] = len;
+  } else if (len <= 0xffffff) {
+    this._buf[this._offset++] = 0x83;
+    this._buf[this._offset++] = len >> 16;
+    this._buf[this._offset++] = len >> 8;
+    this._buf[this._offset++] = len;
+  } else {
+    throw newInvalidAsn1Error('Length too long (> 4 bytes)');
+  }
+};
+
+Writer.prototype.startSequence = function (tag) {
+  if (typeof (tag) !== 'number')
+    tag = ASN1.Sequence | ASN1.Constructor;
+
+  this.writeByte(tag);
+  this._seq.push(this._offset);
+  this._ensure(3);
+  this._offset += 3;
+};
+
+
+Writer.prototype.endSequence = function () {
+  var seq = this._seq.pop();
+  var start = seq + 3;
+  var len = this._offset - start;
+
+  if (len <= 0x7f) {
+    this._shift(start, len, -2);
+    this._buf[seq] = len;
+  } else if (len <= 0xff) {
+    this._shift(start, len, -1);
+    this._buf[seq] = 0x81;
+    this._buf[seq + 1] = len;
+  } else if (len <= 0xffff) {
+    this._buf[seq] = 0x82;
+    this._buf[seq + 1] = len >> 8;
+    this._buf[seq + 2] = len;
+  } else if (len <= 0xffffff) {
+    this._shift(start, len, 1);
+    this._buf[seq] = 0x83;
+    this._buf[seq + 1] = len >> 16;
+    this._buf[seq + 2] = len >> 8;
+    this._buf[seq + 3] = len;
+  } else {
+    throw newInvalidAsn1Error('Sequence too long');
+  }
+};
+
+
+Writer.prototype._shift = function (start, len, shift) {
+  assert.ok(start !== undefined);
+  assert.ok(len !== undefined);
+  assert.ok(shift);
+
+  this._buf.copy(this._buf, start + shift, start, start + len);
+  this._offset += shift;
+};
+
+Writer.prototype._ensure = function (len) {
+  assert.ok(len);
+
+  if (this._size - this._offset < len) {
+    var sz = this._size * this._options.growthFactor;
+    if (sz - this._offset < len)
+      sz += len;
+
+    var buf = Buffer.alloc(sz);
+
+    this._buf.copy(buf, 0, 0, this._offset);
+    this._buf = buf;
+    this._size = sz;
+  }
+};
+
+
+
+// --- Exported API
+
+module.exports = Writer;
+
+},{"./errors":4,"./types":7,"assert":44,"safer-buffer":27}],9:[function(require,module,exports){
+// Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
+
+// If you have no idea what ASN.1 or BER is, see this:
+// ftp://ftp.rsa.com/pub/pkcs/ascii/layman.asc
+
+var Ber = require('./ber/index');
+
+
+
+// --- Exported API
+
+module.exports = {
+
+  Ber: Ber,
+
+  BerReader: Ber.Reader,
+
+  BerWriter: Ber.Writer
+
+};
+
+},{"./ber/index":5}],10:[function(require,module,exports){
+(function (process,global){(function (){
+/**
+ * [js-sha256]{@link https://github.com/emn178/js-sha256}
+ *
+ * @version 0.9.0
+ * @author Chen, Yi-Cyuan [emn178@gmail.com]
+ * @copyright Chen, Yi-Cyuan 2014-2017
+ * @license MIT
+ */
+/*jslint bitwise: true */
+(function () {
+  'use strict';
+
+  var ERROR = 'input is invalid type';
+  var WINDOW = typeof window === 'object';
+  var root = WINDOW ? window : {};
+  if (root.JS_SHA256_NO_WINDOW) {
+    WINDOW = false;
+  }
+  var WEB_WORKER = !WINDOW && typeof self === 'object';
+  var NODE_JS = !root.JS_SHA256_NO_NODE_JS && typeof process === 'object' && process.versions && process.versions.node;
+  if (NODE_JS) {
+    root = global;
+  } else if (WEB_WORKER) {
+    root = self;
+  }
+  var COMMON_JS = !root.JS_SHA256_NO_COMMON_JS && typeof module === 'object' && module.exports;
+  var AMD = typeof define === 'function' && define.amd;
+  var ARRAY_BUFFER = !root.JS_SHA256_NO_ARRAY_BUFFER && typeof ArrayBuffer !== 'undefined';
+  var HEX_CHARS = '0123456789abcdef'.split('');
+  var EXTRA = [-2147483648, 8388608, 32768, 128];
+  var SHIFT = [24, 16, 8, 0];
+  var K = [
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+  ];
+  var OUTPUT_TYPES = ['hex', 'array', 'digest', 'arrayBuffer'];
+
+  var blocks = [];
+
+  if (root.JS_SHA256_NO_NODE_JS || !Array.isArray) {
+    Array.isArray = function (obj) {
+      return Object.prototype.toString.call(obj) === '[object Array]';
+    };
+  }
+
+  if (ARRAY_BUFFER && (root.JS_SHA256_NO_ARRAY_BUFFER_IS_VIEW || !ArrayBuffer.isView)) {
+    ArrayBuffer.isView = function (obj) {
+      return typeof obj === 'object' && obj.buffer && obj.buffer.constructor === ArrayBuffer;
+    };
+  }
+
+  var createOutputMethod = function (outputType, is224) {
+    return function (message) {
+      return new Sha256(is224, true).update(message)[outputType]();
+    };
+  };
+
+  var createMethod = function (is224) {
+    var method = createOutputMethod('hex', is224);
+    if (NODE_JS) {
+      method = nodeWrap(method, is224);
+    }
+    method.create = function () {
+      return new Sha256(is224);
+    };
+    method.update = function (message) {
+      return method.create().update(message);
+    };
+    for (var i = 0; i < OUTPUT_TYPES.length; ++i) {
+      var type = OUTPUT_TYPES[i];
+      method[type] = createOutputMethod(type, is224);
+    }
+    return method;
+  };
+
+  var nodeWrap = function (method, is224) {
+    var crypto = eval("require('crypto')");
+    var Buffer = eval("require('buffer').Buffer");
+    var algorithm = is224 ? 'sha224' : 'sha256';
+    var nodeMethod = function (message) {
+      if (typeof message === 'string') {
+        return crypto.createHash(algorithm).update(message, 'utf8').digest('hex');
+      } else {
+        if (message === null || message === undefined) {
+          throw new Error(ERROR);
+        } else if (message.constructor === ArrayBuffer) {
+          message = new Uint8Array(message);
+        }
+      }
+      if (Array.isArray(message) || ArrayBuffer.isView(message) ||
+        message.constructor === Buffer) {
+        return crypto.createHash(algorithm).update(new Buffer(message)).digest('hex');
+      } else {
+        return method(message);
+      }
+    };
+    return nodeMethod;
+  };
+
+  var createHmacOutputMethod = function (outputType, is224) {
+    return function (key, message) {
+      return new HmacSha256(key, is224, true).update(message)[outputType]();
+    };
+  };
+
+  var createHmacMethod = function (is224) {
+    var method = createHmacOutputMethod('hex', is224);
+    method.create = function (key) {
+      return new HmacSha256(key, is224);
+    };
+    method.update = function (key, message) {
+      return method.create(key).update(message);
+    };
+    for (var i = 0; i < OUTPUT_TYPES.length; ++i) {
+      var type = OUTPUT_TYPES[i];
+      method[type] = createHmacOutputMethod(type, is224);
+    }
+    return method;
+  };
+
+  function Sha256(is224, sharedMemory) {
+    if (sharedMemory) {
+      blocks[0] = blocks[16] = blocks[1] = blocks[2] = blocks[3] =
+        blocks[4] = blocks[5] = blocks[6] = blocks[7] =
+        blocks[8] = blocks[9] = blocks[10] = blocks[11] =
+        blocks[12] = blocks[13] = blocks[14] = blocks[15] = 0;
+      this.blocks = blocks;
+    } else {
+      this.blocks = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    }
+
+    if (is224) {
+      this.h0 = 0xc1059ed8;
+      this.h1 = 0x367cd507;
+      this.h2 = 0x3070dd17;
+      this.h3 = 0xf70e5939;
+      this.h4 = 0xffc00b31;
+      this.h5 = 0x68581511;
+      this.h6 = 0x64f98fa7;
+      this.h7 = 0xbefa4fa4;
+    } else { // 256
+      this.h0 = 0x6a09e667;
+      this.h1 = 0xbb67ae85;
+      this.h2 = 0x3c6ef372;
+      this.h3 = 0xa54ff53a;
+      this.h4 = 0x510e527f;
+      this.h5 = 0x9b05688c;
+      this.h6 = 0x1f83d9ab;
+      this.h7 = 0x5be0cd19;
+    }
+
+    this.block = this.start = this.bytes = this.hBytes = 0;
+    this.finalized = this.hashed = false;
+    this.first = true;
+    this.is224 = is224;
+  }
+
+  Sha256.prototype.update = function (message) {
+    if (this.finalized) {
+      return;
+    }
+    var notString, type = typeof message;
+    if (type !== 'string') {
+      if (type === 'object') {
+        if (message === null) {
+          throw new Error(ERROR);
+        } else if (ARRAY_BUFFER && message.constructor === ArrayBuffer) {
+          message = new Uint8Array(message);
+        } else if (!Array.isArray(message)) {
+          if (!ARRAY_BUFFER || !ArrayBuffer.isView(message)) {
+            throw new Error(ERROR);
+          }
+        }
+      } else {
+        throw new Error(ERROR);
+      }
+      notString = true;
+    }
+    var code, index = 0, i, length = message.length, blocks = this.blocks;
+
+    while (index < length) {
+      if (this.hashed) {
+        this.hashed = false;
+        blocks[0] = this.block;
+        blocks[16] = blocks[1] = blocks[2] = blocks[3] =
+          blocks[4] = blocks[5] = blocks[6] = blocks[7] =
+          blocks[8] = blocks[9] = blocks[10] = blocks[11] =
+          blocks[12] = blocks[13] = blocks[14] = blocks[15] = 0;
+      }
+
+      if (notString) {
+        for (i = this.start; index < length && i < 64; ++index) {
+          blocks[i >> 2] |= message[index] << SHIFT[i++ & 3];
+        }
+      } else {
+        for (i = this.start; index < length && i < 64; ++index) {
+          code = message.charCodeAt(index);
+          if (code < 0x80) {
+            blocks[i >> 2] |= code << SHIFT[i++ & 3];
+          } else if (code < 0x800) {
+            blocks[i >> 2] |= (0xc0 | (code >> 6)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
+          } else if (code < 0xd800 || code >= 0xe000) {
+            blocks[i >> 2] |= (0xe0 | (code >> 12)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | ((code >> 6) & 0x3f)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
+          } else {
+            code = 0x10000 + (((code & 0x3ff) << 10) | (message.charCodeAt(++index) & 0x3ff));
+            blocks[i >> 2] |= (0xf0 | (code >> 18)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | ((code >> 12) & 0x3f)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | ((code >> 6) & 0x3f)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
+          }
+        }
+      }
+
+      this.lastByteIndex = i;
+      this.bytes += i - this.start;
+      if (i >= 64) {
+        this.block = blocks[16];
+        this.start = i - 64;
+        this.hash();
+        this.hashed = true;
+      } else {
+        this.start = i;
+      }
+    }
+    if (this.bytes > 4294967295) {
+      this.hBytes += this.bytes / 4294967296 << 0;
+      this.bytes = this.bytes % 4294967296;
+    }
+    return this;
+  };
+
+  Sha256.prototype.finalize = function () {
+    if (this.finalized) {
+      return;
+    }
+    this.finalized = true;
+    var blocks = this.blocks, i = this.lastByteIndex;
+    blocks[16] = this.block;
+    blocks[i >> 2] |= EXTRA[i & 3];
+    this.block = blocks[16];
+    if (i >= 56) {
+      if (!this.hashed) {
+        this.hash();
+      }
+      blocks[0] = this.block;
+      blocks[16] = blocks[1] = blocks[2] = blocks[3] =
+        blocks[4] = blocks[5] = blocks[6] = blocks[7] =
+        blocks[8] = blocks[9] = blocks[10] = blocks[11] =
+        blocks[12] = blocks[13] = blocks[14] = blocks[15] = 0;
+    }
+    blocks[14] = this.hBytes << 3 | this.bytes >>> 29;
+    blocks[15] = this.bytes << 3;
+    this.hash();
+  };
+
+  Sha256.prototype.hash = function () {
+    var a = this.h0, b = this.h1, c = this.h2, d = this.h3, e = this.h4, f = this.h5, g = this.h6,
+      h = this.h7, blocks = this.blocks, j, s0, s1, maj, t1, t2, ch, ab, da, cd, bc;
+
+    for (j = 16; j < 64; ++j) {
+      // rightrotate
+      t1 = blocks[j - 15];
+      s0 = ((t1 >>> 7) | (t1 << 25)) ^ ((t1 >>> 18) | (t1 << 14)) ^ (t1 >>> 3);
+      t1 = blocks[j - 2];
+      s1 = ((t1 >>> 17) | (t1 << 15)) ^ ((t1 >>> 19) | (t1 << 13)) ^ (t1 >>> 10);
+      blocks[j] = blocks[j - 16] + s0 + blocks[j - 7] + s1 << 0;
+    }
+
+    bc = b & c;
+    for (j = 0; j < 64; j += 4) {
+      if (this.first) {
+        if (this.is224) {
+          ab = 300032;
+          t1 = blocks[0] - 1413257819;
+          h = t1 - 150054599 << 0;
+          d = t1 + 24177077 << 0;
+        } else {
+          ab = 704751109;
+          t1 = blocks[0] - 210244248;
+          h = t1 - 1521486534 << 0;
+          d = t1 + 143694565 << 0;
+        }
+        this.first = false;
+      } else {
+        s0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
+        s1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
+        ab = a & b;
+        maj = ab ^ (a & c) ^ bc;
+        ch = (e & f) ^ (~e & g);
+        t1 = h + s1 + ch + K[j] + blocks[j];
+        t2 = s0 + maj;
+        h = d + t1 << 0;
+        d = t1 + t2 << 0;
+      }
+      s0 = ((d >>> 2) | (d << 30)) ^ ((d >>> 13) | (d << 19)) ^ ((d >>> 22) | (d << 10));
+      s1 = ((h >>> 6) | (h << 26)) ^ ((h >>> 11) | (h << 21)) ^ ((h >>> 25) | (h << 7));
+      da = d & a;
+      maj = da ^ (d & b) ^ ab;
+      ch = (h & e) ^ (~h & f);
+      t1 = g + s1 + ch + K[j + 1] + blocks[j + 1];
+      t2 = s0 + maj;
+      g = c + t1 << 0;
+      c = t1 + t2 << 0;
+      s0 = ((c >>> 2) | (c << 30)) ^ ((c >>> 13) | (c << 19)) ^ ((c >>> 22) | (c << 10));
+      s1 = ((g >>> 6) | (g << 26)) ^ ((g >>> 11) | (g << 21)) ^ ((g >>> 25) | (g << 7));
+      cd = c & d;
+      maj = cd ^ (c & a) ^ da;
+      ch = (g & h) ^ (~g & e);
+      t1 = f + s1 + ch + K[j + 2] + blocks[j + 2];
+      t2 = s0 + maj;
+      f = b + t1 << 0;
+      b = t1 + t2 << 0;
+      s0 = ((b >>> 2) | (b << 30)) ^ ((b >>> 13) | (b << 19)) ^ ((b >>> 22) | (b << 10));
+      s1 = ((f >>> 6) | (f << 26)) ^ ((f >>> 11) | (f << 21)) ^ ((f >>> 25) | (f << 7));
+      bc = b & c;
+      maj = bc ^ (b & d) ^ cd;
+      ch = (f & g) ^ (~f & h);
+      t1 = e + s1 + ch + K[j + 3] + blocks[j + 3];
+      t2 = s0 + maj;
+      e = a + t1 << 0;
+      a = t1 + t2 << 0;
+    }
+
+    this.h0 = this.h0 + a << 0;
+    this.h1 = this.h1 + b << 0;
+    this.h2 = this.h2 + c << 0;
+    this.h3 = this.h3 + d << 0;
+    this.h4 = this.h4 + e << 0;
+    this.h5 = this.h5 + f << 0;
+    this.h6 = this.h6 + g << 0;
+    this.h7 = this.h7 + h << 0;
+  };
+
+  Sha256.prototype.hex = function () {
+    this.finalize();
+
+    var h0 = this.h0, h1 = this.h1, h2 = this.h2, h3 = this.h3, h4 = this.h4, h5 = this.h5,
+      h6 = this.h6, h7 = this.h7;
+
+    var hex = HEX_CHARS[(h0 >> 28) & 0x0F] + HEX_CHARS[(h0 >> 24) & 0x0F] +
+      HEX_CHARS[(h0 >> 20) & 0x0F] + HEX_CHARS[(h0 >> 16) & 0x0F] +
+      HEX_CHARS[(h0 >> 12) & 0x0F] + HEX_CHARS[(h0 >> 8) & 0x0F] +
+      HEX_CHARS[(h0 >> 4) & 0x0F] + HEX_CHARS[h0 & 0x0F] +
+      HEX_CHARS[(h1 >> 28) & 0x0F] + HEX_CHARS[(h1 >> 24) & 0x0F] +
+      HEX_CHARS[(h1 >> 20) & 0x0F] + HEX_CHARS[(h1 >> 16) & 0x0F] +
+      HEX_CHARS[(h1 >> 12) & 0x0F] + HEX_CHARS[(h1 >> 8) & 0x0F] +
+      HEX_CHARS[(h1 >> 4) & 0x0F] + HEX_CHARS[h1 & 0x0F] +
+      HEX_CHARS[(h2 >> 28) & 0x0F] + HEX_CHARS[(h2 >> 24) & 0x0F] +
+      HEX_CHARS[(h2 >> 20) & 0x0F] + HEX_CHARS[(h2 >> 16) & 0x0F] +
+      HEX_CHARS[(h2 >> 12) & 0x0F] + HEX_CHARS[(h2 >> 8) & 0x0F] +
+      HEX_CHARS[(h2 >> 4) & 0x0F] + HEX_CHARS[h2 & 0x0F] +
+      HEX_CHARS[(h3 >> 28) & 0x0F] + HEX_CHARS[(h3 >> 24) & 0x0F] +
+      HEX_CHARS[(h3 >> 20) & 0x0F] + HEX_CHARS[(h3 >> 16) & 0x0F] +
+      HEX_CHARS[(h3 >> 12) & 0x0F] + HEX_CHARS[(h3 >> 8) & 0x0F] +
+      HEX_CHARS[(h3 >> 4) & 0x0F] + HEX_CHARS[h3 & 0x0F] +
+      HEX_CHARS[(h4 >> 28) & 0x0F] + HEX_CHARS[(h4 >> 24) & 0x0F] +
+      HEX_CHARS[(h4 >> 20) & 0x0F] + HEX_CHARS[(h4 >> 16) & 0x0F] +
+      HEX_CHARS[(h4 >> 12) & 0x0F] + HEX_CHARS[(h4 >> 8) & 0x0F] +
+      HEX_CHARS[(h4 >> 4) & 0x0F] + HEX_CHARS[h4 & 0x0F] +
+      HEX_CHARS[(h5 >> 28) & 0x0F] + HEX_CHARS[(h5 >> 24) & 0x0F] +
+      HEX_CHARS[(h5 >> 20) & 0x0F] + HEX_CHARS[(h5 >> 16) & 0x0F] +
+      HEX_CHARS[(h5 >> 12) & 0x0F] + HEX_CHARS[(h5 >> 8) & 0x0F] +
+      HEX_CHARS[(h5 >> 4) & 0x0F] + HEX_CHARS[h5 & 0x0F] +
+      HEX_CHARS[(h6 >> 28) & 0x0F] + HEX_CHARS[(h6 >> 24) & 0x0F] +
+      HEX_CHARS[(h6 >> 20) & 0x0F] + HEX_CHARS[(h6 >> 16) & 0x0F] +
+      HEX_CHARS[(h6 >> 12) & 0x0F] + HEX_CHARS[(h6 >> 8) & 0x0F] +
+      HEX_CHARS[(h6 >> 4) & 0x0F] + HEX_CHARS[h6 & 0x0F];
+    if (!this.is224) {
+      hex += HEX_CHARS[(h7 >> 28) & 0x0F] + HEX_CHARS[(h7 >> 24) & 0x0F] +
+        HEX_CHARS[(h7 >> 20) & 0x0F] + HEX_CHARS[(h7 >> 16) & 0x0F] +
+        HEX_CHARS[(h7 >> 12) & 0x0F] + HEX_CHARS[(h7 >> 8) & 0x0F] +
+        HEX_CHARS[(h7 >> 4) & 0x0F] + HEX_CHARS[h7 & 0x0F];
+    }
+    return hex;
+  };
+
+  Sha256.prototype.toString = Sha256.prototype.hex;
+
+  Sha256.prototype.digest = function () {
+    this.finalize();
+
+    var h0 = this.h0, h1 = this.h1, h2 = this.h2, h3 = this.h3, h4 = this.h4, h5 = this.h5,
+      h6 = this.h6, h7 = this.h7;
+
+    var arr = [
+      (h0 >> 24) & 0xFF, (h0 >> 16) & 0xFF, (h0 >> 8) & 0xFF, h0 & 0xFF,
+      (h1 >> 24) & 0xFF, (h1 >> 16) & 0xFF, (h1 >> 8) & 0xFF, h1 & 0xFF,
+      (h2 >> 24) & 0xFF, (h2 >> 16) & 0xFF, (h2 >> 8) & 0xFF, h2 & 0xFF,
+      (h3 >> 24) & 0xFF, (h3 >> 16) & 0xFF, (h3 >> 8) & 0xFF, h3 & 0xFF,
+      (h4 >> 24) & 0xFF, (h4 >> 16) & 0xFF, (h4 >> 8) & 0xFF, h4 & 0xFF,
+      (h5 >> 24) & 0xFF, (h5 >> 16) & 0xFF, (h5 >> 8) & 0xFF, h5 & 0xFF,
+      (h6 >> 24) & 0xFF, (h6 >> 16) & 0xFF, (h6 >> 8) & 0xFF, h6 & 0xFF
+    ];
+    if (!this.is224) {
+      arr.push((h7 >> 24) & 0xFF, (h7 >> 16) & 0xFF, (h7 >> 8) & 0xFF, h7 & 0xFF);
+    }
+    return arr;
+  };
+
+  Sha256.prototype.array = Sha256.prototype.digest;
+
+  Sha256.prototype.arrayBuffer = function () {
+    this.finalize();
+
+    var buffer = new ArrayBuffer(this.is224 ? 28 : 32);
+    var dataView = new DataView(buffer);
+    dataView.setUint32(0, this.h0);
+    dataView.setUint32(4, this.h1);
+    dataView.setUint32(8, this.h2);
+    dataView.setUint32(12, this.h3);
+    dataView.setUint32(16, this.h4);
+    dataView.setUint32(20, this.h5);
+    dataView.setUint32(24, this.h6);
+    if (!this.is224) {
+      dataView.setUint32(28, this.h7);
+    }
+    return buffer;
+  };
+
+  function HmacSha256(key, is224, sharedMemory) {
+    var i, type = typeof key;
+    if (type === 'string') {
+      var bytes = [], length = key.length, index = 0, code;
+      for (i = 0; i < length; ++i) {
+        code = key.charCodeAt(i);
+        if (code < 0x80) {
+          bytes[index++] = code;
+        } else if (code < 0x800) {
+          bytes[index++] = (0xc0 | (code >> 6));
+          bytes[index++] = (0x80 | (code & 0x3f));
+        } else if (code < 0xd800 || code >= 0xe000) {
+          bytes[index++] = (0xe0 | (code >> 12));
+          bytes[index++] = (0x80 | ((code >> 6) & 0x3f));
+          bytes[index++] = (0x80 | (code & 0x3f));
+        } else {
+          code = 0x10000 + (((code & 0x3ff) << 10) | (key.charCodeAt(++i) & 0x3ff));
+          bytes[index++] = (0xf0 | (code >> 18));
+          bytes[index++] = (0x80 | ((code >> 12) & 0x3f));
+          bytes[index++] = (0x80 | ((code >> 6) & 0x3f));
+          bytes[index++] = (0x80 | (code & 0x3f));
+        }
+      }
+      key = bytes;
+    } else {
+      if (type === 'object') {
+        if (key === null) {
+          throw new Error(ERROR);
+        } else if (ARRAY_BUFFER && key.constructor === ArrayBuffer) {
+          key = new Uint8Array(key);
+        } else if (!Array.isArray(key)) {
+          if (!ARRAY_BUFFER || !ArrayBuffer.isView(key)) {
+            throw new Error(ERROR);
+          }
+        }
+      } else {
+        throw new Error(ERROR);
+      }
+    }
+
+    if (key.length > 64) {
+      key = (new Sha256(is224, true)).update(key).array();
+    }
+
+    var oKeyPad = [], iKeyPad = [];
+    for (i = 0; i < 64; ++i) {
+      var b = key[i] || 0;
+      oKeyPad[i] = 0x5c ^ b;
+      iKeyPad[i] = 0x36 ^ b;
+    }
+
+    Sha256.call(this, is224, sharedMemory);
+
+    this.update(iKeyPad);
+    this.oKeyPad = oKeyPad;
+    this.inner = true;
+    this.sharedMemory = sharedMemory;
+  }
+  HmacSha256.prototype = new Sha256();
+
+  HmacSha256.prototype.finalize = function () {
+    Sha256.prototype.finalize.call(this);
+    if (this.inner) {
+      this.inner = false;
+      var innerHash = this.array();
+      Sha256.call(this, this.is224, this.sharedMemory);
+      this.update(this.oKeyPad);
+      this.update(innerHash);
+      Sha256.prototype.finalize.call(this);
+    }
+  };
+
+  var exports = createMethod();
+  exports.sha256 = exports;
+  exports.sha224 = createMethod(true);
+  exports.sha256.hmac = createHmacMethod();
+  exports.sha224.hmac = createHmacMethod(true);
+
+  if (COMMON_JS) {
+    module.exports = exports;
+  } else {
+    root.sha256 = exports.sha256;
+    root.sha224 = exports.sha224;
+    if (AMD) {
+      define(function () {
+        return exports;
+      });
+    }
+  }
+})();
+
+}).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"_process":184}],11:[function(require,module,exports){
 (function (Buffer){(function (){
 /*!
  * RSA library for Node.js
@@ -3150,7 +3164,7 @@ module.exports = (function () {
 })();
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"./formats/formats.js":17,"./libs/rsa.js":21,"./schemes/schemes.js":25,"./utils":26,"asn1":8,"buffer":96,"constants":98,"crypto":105}],12:[function(require,module,exports){
+},{"./formats/formats.js":17,"./libs/rsa.js":21,"./schemes/schemes.js":25,"./utils":26,"asn1":9,"buffer":96,"constants":98,"crypto":105}],12:[function(require,module,exports){
 var crypt = require('crypto');
 
 module.exports = {
@@ -3654,7 +3668,7 @@ module.exports = {
     }
 };
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"../utils":26,"asn1":8,"buffer":96}],19:[function(require,module,exports){
+},{"../utils":26,"asn1":9,"buffer":96}],19:[function(require,module,exports){
 (function (Buffer){(function (){
 var ber = require('asn1').Ber;
 var _ = require('../utils')._;
@@ -3845,7 +3859,7 @@ module.exports = {
 };
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"../utils":26,"asn1":8,"buffer":96}],20:[function(require,module,exports){
+},{"../utils":26,"asn1":9,"buffer":96}],20:[function(require,module,exports){
 (function (Buffer){(function (){
 /*
  * Basic JavaScript BN library - subset useful for RSA encryption.
@@ -34574,4 +34588,4 @@ function config (name) {
 }
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[2]);
+},{}]},{},[3]);
