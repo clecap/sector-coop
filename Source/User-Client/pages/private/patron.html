@@ -54,7 +54,7 @@
 				     "Te+wY+1stKMPw4sL1KulJTw0m1rugqtWqfxC5liUmlB0gHpFGEmYmYYsZ0kTU4YX\n"+
 				     "FS9k3DesGV2gcMAsOAda2iM9bFn014TFc8M8uNLmNbJZaMxDtIDDrQ==\n"+
 				     "-----END RSA PRIVATE KEY-----";
-	 const Bob = {
+	 const Patron = {
 	     key: new window.myexports.NodeRSA(patron1_RSAPrivateKey, "pkcs1-private"),
 	     blinded: null,
 	     unblinded: null,
@@ -66,15 +66,15 @@
 	 const socket = io({auth: {role:"patron",
 				   token:"uniquePatronToken",
 				   roomCode:"patronRoom",
-				   publicKey:{n : Bob.key.keyPair.n.toString(16),
-					      e : Bob.key.keyPair.e.toString(16)}}});
+				   publicKey:{n : Patron.key.keyPair.n.toString(16),
+					      e : Patron.key.keyPair.e.toString(16)}}});
 
 	 socket.on('psuedonymSigningRequest', (blindedHash) => {
 	     console.log("Recieved Signing Request from Psuedonym");
-	     Bob.blinded = blindedHash;
+	     Patron.blinded = blindedHash;
 	     const signed = BlindSignature.signHEX({
-		 blinded: Bob.blinded,
-		 key: Bob.key
+		 blinded: Patron.blinded,
+		 key: Patron.key
 	     });
 	     console.log('Sending blindSignature');
 	    
