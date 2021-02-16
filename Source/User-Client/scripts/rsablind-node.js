@@ -1,4 +1,4 @@
 window.myexports = {
-    BlindSignature:require('./blind-signatures/rsablind'),
+    BlindSignature:require('./blind-signatures-master/rsablind'),
     NodeRSA : require('node-rsa')
 };
