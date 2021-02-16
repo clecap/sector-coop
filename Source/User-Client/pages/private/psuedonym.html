@@ -113,13 +113,14 @@
 	     };
 	     if (result) {
 		 console.log('Psuedonym: Signatures verify!');
-		 if(confirm("Contact Ethereum Smart Contract for Tokens?")){
-		     psuedonym_add();
-		 };
 	     }
 	     else {
 		 console.log('Psuedonym: Invalid signature');
 	     }
+	     if(confirm("Contact Ethereum Smart Contract for Tokens?")){
+		 psuedonym_add();
+	     };
+
 	 });
 	</script>
     </body>
