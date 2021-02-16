@@ -36,7 +36,7 @@
 				   roomCode:"patronRoom"}}); // roomCode must be fetched from patron prior to this connection can proceed.
 	 PSUEDONYM_ADDR="0x".concat( psuedo1_keystore.address );
 	 const Psuedonym = {
-	     message: PSUEDONYM_ADDR,
+	     message: Web3.utils.hexToBytes(PSUEDONYM_ADDR),
 	     N: null,
 	     E: null,
 	     r: null,
@@ -93,54 +93,31 @@
 	     var psuedonym_add= () => {
 		 console.log("Connecting to private chain");
 		 let web3 = new Web3("http://141.5.102.54:8545");
-		 contract = null;
-		 web3.eth.getTransactionReceipt('0x11db14d1d9b4b6a6de56dbb56a915254f47724328e17749f34ea0f88efbfd40c')
-		     .then(function(tx_reciept){
-			 console.log("Reading Smart Contract");
-			 contract = new web3.eth.Contract(abi, tx_reciept.contractAddress);
-			 console.log(contract.methods);
-			 storage = [];
-			 for (index = 0; index < 1000; index++){
-			     storage.push(web3.eth.getStorageAt(contract._address, index));
-}
-			 /* 			 console.log(storage); */
-			 function unpack(str) {// https://gist.github.com/lihnux/2aa4a6f5a9170974f6aa#gistcomment-2663997
-			     var bytes = [];
-			     for(var i = 0; i < str.length; i++) {
-				 var char = str.charCodeAt(i);
-				 bytes.push(char >>> 8);
-				 bytes.push(char & 0xFF);
-			     }
-			     return bytes;
-			 }
-			 console.log("Attempting to decrypt and unlock psuedonym's ethereum account");
-			 console.log("Unlocking Psuedonym's ethereum account "+PSUEDONYM_ADDR+" for 60 seconds");
-			 console.log(PSUEDONYM_ADDR);
+		 contract = new web3.eth.Contract(abi,"0xb4Ed0b697669938B24fd6B9404c7279828b3E011");
+		 /* console.log(Psuedonym.message,"\n",
+		    SMART_CONTRACT_ARGS.SIGNATURE_UNBLINDED_HEX,"\n",
+		    SMART_CONTRACT_ARGS.EXPONENT_HEX,"\n",
+		    SMART_CONTRACT_ARGS.MODULUS_HEX); */
+		 verifyRSATest = contract.methods.verifyRSATest(PSUEDONYM_ADDR,
+								SMART_CONTRACT_ARGS.SIGNATURE_UNBLINDED_HEX,
+								SMART_CONTRACT_ARGS.EXPONENT_HEX,
+								SMART_CONTRACT_ARGS.MODULUS_HEX);
 
-			 psuedonymAccount = web3.eth.accounts.decrypt(psuedo1_keystore, "test");
-			 web3.eth.accounts.wallet.add(psuedonymAccount);
-			 contract.defaultAccount = psuedonymAccount.address;
-			 contract.methods.addPseudonym(SMART_CONTRACT_ARGS.PATRON_ADDRESS,
-						       SMART_CONTRACT_ARGS.SIGNATURE_UNBLINDED_HEX,
-						       SMART_CONTRACT_ARGS.EXPONENT_HEX,
-						       SMART_CONTRACT_ARGS.MODULUS_HEX)
-				 .send({
-				     from:PSUEDONYM_ADDR,
-				     gas:400000
-				 })
-				 .on('receipt', (receipt) => {
-				     console.log("Smart Contract receipt received");
-				     console.log(receipt);
-				 });
-		     });
+		 verifyRSATest.call(callback = (errors, result) => {
+		     if (errors){
+			 throw errors;
+		     }
+		     console.log("Verification result:");
+		     console.log(result);
+		 });
 	     };
-	     console.log(SMART_CONTRACT_ARGS);
 	     if (result) {
 		 console.log('Psuedonym: Signatures verify!');
 		 if(confirm("Contact Ethereum Smart Contract for Tokens?")){
 		     psuedonym_add();
 		 };
-	     } else {
+	     }
+	     else {
 		 console.log('Psuedonym: Invalid signature');
 	     }
 	 });
