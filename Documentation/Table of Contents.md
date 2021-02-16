@@ -15,7 +15,7 @@
 | Test setup instructions | Step by step guide for setting up a test environment with a private Ethereum blockchain | Jonathan | 09.02.2021 | [Link](https://github.com/clecap/sector-coop/blob/Documentation/Documents/Test%20Chain%20Setup%20Guide.md)
 | Entity Relationship Diagram | ER Diagram for storage node | Jonas | 01.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphics/UML/new%20entity%20relationship%20diagram.png) |
 | Block Diagram | System snapshot for rough system parts with functionality | Jonas | 09.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphichs/UML/block%20Diagram.png) 
-| Flow Diagram | Flow for various system use cases | Jonas | 06.01.2021 | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphics/UML/flowdiagramn-new.svg) 
+| Flow Diagram | Flow for various system use cases | Jonas | 06.01.2021 | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphics/UML/flowdiagram-new.svg) 
 
 ### Informal thoughts
 
