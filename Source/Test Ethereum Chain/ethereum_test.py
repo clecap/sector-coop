@@ -1,6 +1,7 @@
 """
-This file demonstrates how to call the createPatron and addPseudonym functions on the SecTor.sol smart contract.
-Those two are the most complicated functions on the contract.
+This file demonstrates how to call each function on the SecTor.sol smart contract.
+Make sure to replace either the contract address or the pseudonym and patron address as well as make up a new document
+after each run, as each patron address, pseudonym address and document hash may only be once on the contract.
 
 :author: Jonathan Decker
 """
@@ -106,6 +107,78 @@ def addPseudonym(contract, key):
     print("--------------------------------------------------------------------------------------------------------------------------------------")
 
 
+def grantInitialTokens(contract):
+    response = contract.functions.grantInitialTokens().transact({"from": pseudonym_address})
+
+    print("grantInitialTokens transaction: " + str(Web3.toJSON(response)))
+
+    # wait for the miner to add the transaction
+    sleep(10)
+
+    pseudo = contract.caller.getPseudonym(pseudonym_address)
+
+    print("owner: " + pseudo[0])
+    print("patron: " + pseudo[1])
+    print("patronBlindSignature: " + Web3.toHex(pseudo[2]))
+    print("tokens: " + str(pseudo[3]))
+    print("gotInitialTokens: " + str(pseudo[4]))
+    print("--------------------------------------------------------------------------------------------------------------------------------------")
+
+
+def proveAuthorship(contract):
+    identity_key = RSA.generate(2048)
+
+    # The toBytes function does the same as abi.encodePacked
+    pseudonym_address_bytes = contract.caller.toBytes(pseudonym_address)
+    # Sign the hashed encoded pseudonym_address with PKCS1_v1_5
+    signature_bytes = PKCS1_v1_5.new(identity_key).sign(SHA256.new(pseudonym_address_bytes))
+    signature_hex = signature_bytes.hex()
+
+    # Prepare the exponent e and the modulus n
+    key_e_bytes = identity_key.e.to_bytes(4, "big")
+    key_n_bytes = identity_key.n.to_bytes(256, "big")
+    key_e_hex = key_e_bytes.hex()
+    key_n_hex = key_n_bytes.hex()
+
+    response = contract.functions.proveAuthorship(identity_key.publickey().export_key().hex(), signature_hex, key_e_hex, key_n_hex).transact({"from": pseudonym_address})
+
+    print("proveAuthorship transaction: " + str(Web3.toJSON(response)))
+
+    # wait for the miner to add the transaction
+    sleep(10)
+
+    pseudo = contract.caller.getPseudonym(pseudonym_address)
+
+    print("owner: " + pseudo[0])
+    print("patron: " + pseudo[1])
+    print("patronBlindSignature: " + Web3.toHex(pseudo[2]))
+    print("tokens: " + str(pseudo[3]))
+    print("gotInitialTokens: " + str(pseudo[4]))
+    print("publicIdentity: " + str(Web3.toHex(pseudo[5])))
+    print("publicIdentitySignature " + str(Web3.toHex(pseudo[6])))
+    print("--------------------------------------------------------------------------------------------------------------------------------------")
+
+
+def addDocumentHash(contract, document):
+
+    document_enc = document.encode()
+    document_hash = SHA256.new(document_enc).digest()
+
+    response = contract.functions.addDocumentHash(document_hash).transact({"from": pseudonym_address})
+
+    print("addDocumentHash transaction: " + str(Web3.toJSON(response)))
+
+    # wait for the miner to add the transaction
+    sleep(10)
+
+    print("List of Doc Hashes: " + str([Web3.toHex(h) for h in contract.caller.getDocHashes()]))
+
+    doc = contract.caller.getDocument(document_hash)
+
+    print("hash: " + str(Web3.toHex(doc[0])))
+    print("author: " + doc[1])
+
+
 def verifyRSATest(contract, key):
     # This function demonstrates how the RSA signature validation works by calling verifyRSATest which directly forwards
     # the inputs to the library that does the validation.
@@ -143,9 +216,10 @@ def addressToBytesTest(contract):
 
 
 ca_address = "0x7B5FB9A5535f2976cdc99c57d19111B2Ed3cB925"
-contract_address = "0xccAfDc191aC3Ca5902103E0f3Dd172147FC8811D"
+contract_address = "0xeABB62E71a36a9A3eD54c49e0aBAA3b786e55F99"
 patron_address = "0xD75d8c141b8643D25391ddbd7EF8ca3D93f70919"
 pseudonym_address = "0xb8d3CAF65Fe089fFd186283a6653A44292AA7AC3"
+document = "I am a document."
 
 w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545/"))
 
@@ -177,3 +251,9 @@ createPatron(contract, key)
 unlockAccount(pseudonym_address, "test")
 
 addPseudonym(contract, key)
+
+grantInitialTokens(contract)
+
+addDocumentHash(contract, document)
+
+proveAuthorship(contract)
