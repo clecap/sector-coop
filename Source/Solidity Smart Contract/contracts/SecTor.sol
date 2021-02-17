@@ -208,6 +208,9 @@ contract SecTor {
 
 
     function createPatron(address _patron, bytes memory _RSAPublicKeyExponent, bytes memory _RSAPublicKeyModulus) public caOnly returns (Patron memory){
+        Patron memory patronTest = patrons[_patron];
+        // Check if this is already a patron
+        require(patronTest.isValue != true, "Given address is already a patron.");
 
         // Create new patron
         Patron memory patron = Patron({
@@ -225,8 +228,13 @@ contract SecTor {
 
     function addPseudonym(address _patron, bytes memory _patronBlindSignature) public returns (Pseudonym memory){
         // Validate blind Signature of Patron
-        Patron storage patron = patrons[_patron];
+        Patron memory patron = patrons[_patron];
         require(patron.isValue == true, "Given address must be a patron.");
+        
+        Pseudonym memory pseudoTest = pseudonyms[msg.sender];
+        // Check if sender is already a pseudonym
+        require(pseudoTest.isValue != true, "Given address is already a pseudonym.");
+        
         // Use RSA library here, signature should have been unblinded already
         require( SolRsaVerify.pkcs1Sha256VerifyRaw(abi.encodePacked(msg.sender), _patronBlindSignature, patron.patronRSAPubKeyExponent , patron.patronRSAPubKeyModulus) == 0, "Signature does not match sender address.");
 
@@ -269,9 +277,13 @@ contract SecTor {
 
         // Check if sender is a pseudonym
         require(pseudo.isValue == true, "Sender is not a pseudonym.");
+        
+        // Check if document hash already exists
+        Document memory docTest = docs[_hash];
+        require(docTest.isValue != true, "Document hash already exists.");
 
         // Check if enough tokens are available
-        require(pseudo.tokens < documentUploadCost, "This pseudonym does not have enough tokens to pay the upload cost.");
+        require(pseudo.tokens >= documentUploadCost, "This pseudonym does not have enough tokens to pay the upload cost.");
 
         // pay the tokens
         pseudo.tokens = pseudo.tokens - documentUploadCost;
