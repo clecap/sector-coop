@@ -21,6 +21,12 @@ $(function () {
             statusCode: {
                 201: function() {
                     alert("Registration process was succesful!");
+                },
+                555: function() {
+                    alert("This username already exists. Please try a different one.");
+                },
+                500: function() {
+                    alert("Something went wrong!");
                 }
             }
         })
