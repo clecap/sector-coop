@@ -93,7 +93,7 @@
 	     
 	     console.log("Connecting to private chain");
 	     let web3 = new Web3("http://141.5.102.54:8545");
-	     contract = new web3.eth.Contract(abi,"0xb4Ed0b697669938B24fd6B9404c7279828b3E011");
+	     contract = new web3.eth.Contract(abi,"0x760661c2376aa98cB4CA42Bc85e2e2136A5E7B9A");
 
 	     pseudonym_account = web3.eth.accounts.decrypt(psuedo1_keystore, "test");
 	     web3.eth.accounts.wallet.add(pseudonym_account);
