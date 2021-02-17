@@ -1,4 +1,4 @@
-var identityServer = "http://127.0.0.1:8000/login";
+var identityServer = "http://localhost:8000/login";
 
 $(function () {
     $("#login-button").on('click', function(e) {

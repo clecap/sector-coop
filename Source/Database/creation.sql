@@ -1,11 +1,17 @@
 CREATE TABLE identity.users(
-	id 					BIGINT,
-	username 			VARCHAR(64) NOT NULL,
-	hashed_password 	VARCHAR(256) NOT NULL,
-	aes256_key 			VARCHAR(256),
-	datablob 			VARCHAR(1000),				
-	created 			TIMESTAMP with time zone,
+	id 					BIGSERIAL,
+	username 			CHARACTER VARYING(64) NOT NULL,
+	hashed_password 	BYTEA NOT NULL,
+	aes256_key 			BYTEA,
+	datablob 			BYTEA,				
+	created 			time with time zone,
 	PRIMARY KEY(id)
+);
+
+CREATE TABLE identity.usermetadata(
+	id						BIGSERIAL,
+	uuid					UUID,
+	
 );
 
 CREATE TABLE identity.keys(
