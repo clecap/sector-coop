@@ -76,12 +76,12 @@
 	     Psuedonym.unblinded = unblinded;
 	     // Psuedonym verifies
 	     // N, E
-	     const result = BlindSignature.verifyHEX({
-		 unblinded: Psuedonym.unblinded,
-		 N: Psuedonym.N,
-		 E: Psuedonym.E,
-		 message: Psuedonym.message,
-	     });
+	     /* const result = BlindSignature.verifyHEX({
+		unblinded: Psuedonym.unblinded,
+		N: Psuedonym.N,
+		E: Psuedonym.E,
+		message: Psuedonym.message,
+		}); */
 
 // Hex generation and outputs:
 
@@ -90,37 +90,64 @@
 				  EXPONENT_HEX : "0x".concat(Psuedonym.E.toString(16)),
 				  SIGNATURE_UNBLINDED_HEX : "0x".concat(Psuedonym.unblinded.toString(16)),
 				  MESSAGE_PLAIN : Psuedonym.message };
-	     var psuedonym_add= () => {
-		 console.log("Connecting to private chain");
-		 let web3 = new Web3("http://141.5.102.54:8545");
-		 contract = new web3.eth.Contract(abi,"0xb4Ed0b697669938B24fd6B9404c7279828b3E011");
+	     
+	     console.log("Connecting to private chain");
+	     let web3 = new Web3("http://141.5.102.54:8545");
+	     contract = new web3.eth.Contract(abi,"0xb4Ed0b697669938B24fd6B9404c7279828b3E011");
+
+	     pseudonym_account = web3.eth.accounts.decrypt(psuedo1_keystore, "test");
+	     web3.eth.accounts.wallet.add(pseudonym_account);
+	     
+	     var pseudonym_add = (test=true) => {
 		 /* console.log(Psuedonym.message,"\n",
 		    SMART_CONTRACT_ARGS.SIGNATURE_UNBLINDED_HEX,"\n",
 		    SMART_CONTRACT_ARGS.EXPONENT_HEX,"\n",
 		    SMART_CONTRACT_ARGS.MODULUS_HEX); */
-		 verifyRSATest = contract.methods.verifyRSATest(PSUEDONYM_ADDR,
-								SMART_CONTRACT_ARGS.SIGNATURE_UNBLINDED_HEX,
-								SMART_CONTRACT_ARGS.EXPONENT_HEX,
-								SMART_CONTRACT_ARGS.MODULUS_HEX);
+		 /* verifyRSATest = contract.methods.verifyRSATest(PSUEDONYM_ADDR,
+		    SMART_CONTRACT_ARGS.SIGNATURE_UNBLINDED_HEX,
+		    SMART_CONTRACT_ARGS.EXPONENT_HEX,
+		    SMART_CONTRACT_ARGS.MODULUS_HEX);
 
-		 verifyRSATest.call(callback = (errors, result) => {
-		     if (errors){
-			 throw errors;
-		     }
-		     console.log("Verification result:");
-		     console.log(result);
+		    verifyRSATest.call(callback = (errors, result) => {
+		    if (errors){
+		    throw errors;
+		    }
+		    console.log("Verification result:");
+		    console.log(result);
+		    }); */
+		 addPseudonym = contract.methods.addPseudonym(SMART_CONTRACT_ARGS.PATRON_ADDRESS,
+							      SMART_CONTRACT_ARGS.SIGNATURE_UNBLINDED_HEX); 
+		 exec = addPseudonym.send;
+		 if(test){
+		     exec = addPseudonym.call;
+		 }
+		 exec(options={from:PSUEDONYM_ADDR,
+			       gas:1000000},
+		      callback=(errors, result) => {
+			  if (errors){
+			      throw errors;
+			  }
+			  console.log(result);
+			  
 		 });
 	     };
-	     if (result) {
-		 console.log('Psuedonym: Signatures verify!');
-	     }
-	     else {
-		 console.log('Psuedonym: Invalid signature');
-	     }
-	     if(confirm("Contact Ethereum Smart Contract for Tokens?")){
-		 psuedonym_add();
+	     var pseudonym_granttokens = (test=true) => {
+		 grantInitialTokens = contract.methods.grantInitialTokens();
+		 exec = grantInitialTokens.send;
+		 if (test) {
+		     exec = grantInitialTokens.call;
+		 }
+		 exec(options={from:PSUEDONYM_ADDR,
+			       gas:1000000},
+		      callback=(errors, result) => {
+			  if (errors) {
+			      throw errors;
+			  }
+			  console.log(result);
+		 });
 	     };
-
+	     window.funcs = { pseudonym_add : pseudonym_add,
+			      pseudonum_granttokens : pseudonym_granttokens };
 	 });
 	</script>
     </body>
