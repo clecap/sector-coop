@@ -254,7 +254,7 @@ contract SecTor {
         require(pseudo.isValue == true, "Sender is not a pseudonym.");
 
         // Check if tokens were already granted
-        require(pseudo.gotInitialTokens == true, "This pseudonym already received initial tokens.");
+        require(pseudo.gotInitialTokens == false, "This pseudonym already received initial tokens.");
 
         // Update pseudonym
         pseudo.tokens = initialTokenGrant;
