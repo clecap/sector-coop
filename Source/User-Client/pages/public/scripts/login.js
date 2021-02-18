@@ -17,7 +17,15 @@ $(function () {
             data: payload,
             success: function(data) {alert('data: ' + data);},
             contentType: "application/json",
-            dataType: "json"
+            dataType: "json",
+            statusCode: {
+                200: function() {
+                    alert("Login was successful.");
+                },
+                401: function() {
+                    alert("Login was unsuccessful. Please try again.");
+                }
+            }
         })
     })
 });

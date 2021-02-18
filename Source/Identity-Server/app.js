@@ -1,8 +1,9 @@
 const express = require('express');
 app = express();
 const bcrypt = require('bcrypt');
-const {Pool, Client} = require('pg');
+const {Pool, Client} = require('pg');   // the pool internally delegates queries to clients. Setting those up for every transaction is costly though. Hence, pools.
 const { restart } = require('nodemon');
+let pooldata = require('./secret.json');
 
 app.use(express.json());
 
@@ -10,22 +11,16 @@ const hostname = 'localhost';
 const port = 8000;
 
 app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "http://localhost:3000"); //allow connections from the user client server
+    //allow connections from the user-client-served pages that we expect to deal with.
+    res.header("Access-Control-Allow-Origin", "http://localhost:3000"); 
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
     res.header("Access-Control-Allow-Headers", "content-type");
     next();
 });
 
-// replace this later with the appropriate parameters set during the database setup.
-// alternatively, set the parameters before starting the app via the command line.
+// this creates the database connection with the parameters set in secret.json -- alter them accordingly if necessary.
 // see https://node-postgres.com/features/connecting for instructions.
-const db = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'identities',
-    password: '4xmtaNNE.X?z/15m<ep)#jU>Qnb81:',
-    port: 5432,
-})
+const db = new Pool(pooldata)
 
 // make sure the server uses the appropriate schema name.
 const schemaName = "identities";
@@ -45,9 +40,46 @@ var users = [];
 app.post('/login', async(req, res) => {
     console.log('Login requested.');
 
-    var user = users.find(user => user.username === req.body.username);
+    var req_username = req.body.username;
+    var req_password = req.body.password;
+    let hashed_password;
 
-    if(user == null) {
+    var queryText = "SELECT hashed_password FROM \""+ schemaName +"\".users WHERE username = $1;";
+    var values = [req_username];
+
+    
+    var result = await db.query(queryText, values);
+
+    //if a username is provided that does not exist, the resulting query will have 0 rows.
+    //so code execution is aborted at this point
+    if(result.rowCount == 0) {
+        console.log("User could not be found.");
+        return res.status(401).send();
+    }
+
+    //if and only if a matching username was found in the database, the code proceeds to compare the passwords.
+    hashed_password = result.rows[0].hashed_password;
+    console.log("Hashed Password retrieved for user: " + hashed_password);
+    
+    try {
+        if(await bcrypt.compare(req_password, hashed_password)) {
+            console.log("Login successful.");
+
+            // establish and send a session cookie here!
+
+            res.status(200).send();
+        } else {
+            console.log("Failed compairing " + req_password + " and " + hashed_password);
+            res.status(401).send();
+        }
+
+    } catch (error) {
+        console.error("Bcrypt Error: " + error);
+    }
+
+    
+
+    /* if(user == null) {
         return res.status(400).send('Cannot find user')
     }
     try {
@@ -59,7 +91,7 @@ app.post('/login', async(req, res) => {
        }
     } catch {
         res.status(500)
-    }
+    } */
 })
 
 app.post('/register', async(req,res) => {
@@ -73,7 +105,8 @@ app.post('/register', async(req,res) => {
         var user = {username: req.body.username, password: hashedPassword};
 
         try {
-            var queryText = "INSERT INTO \"identities\".users(username, hashed_password) VALUES($1, $2)"
+            // adding "schemaName" here, probably should be redundant, but better be safe than sorry.
+            var queryText = "INSERT INTO \""+ schemaName +"\".users(username, hashed_password) VALUES($1, $2);"
             var values = [user.username, user.password];
     
             db.query(queryText, values, (err, qres) => {
@@ -86,9 +119,12 @@ app.post('/register', async(req,res) => {
                 else {
                     console.log("The registration was succesful."); 
                     res.status(201).send('Registration process complete');
+                    //maybe one wants to write qres to some log file or whatever. this can be done here.
                 }
             });
-            
+
+
+    // if the code gets to this part, SOMETHING went wrong.        
         } catch (err) {
             console.error(err);
             res.status(500).send();

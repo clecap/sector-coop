@@ -1,2 +1,4 @@
 node_modules/
 package-lock.json
+Source/Document-Server/secret.json
+Source/Identity-Server/secret.json
