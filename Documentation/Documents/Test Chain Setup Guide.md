@@ -38,14 +38,11 @@ Finally download the SecTor repository
 git clone https://github.com/clecap/sector-coop.git
 cd sector-coop/
 ```
-As the time of this writing the testchain configurations still live on the `cloud-SC` branch of the repository, to check them out use
-```
-git checkout cloud-SC
-```
 
 Move into the testchain folder
 ```
-cd testchain
+cd Source
+cd 'Test Ethereum Chain'
 ```
 
 The next step is to move the custom Geth binary into the correct folder to replace the normal one.
@@ -126,12 +123,13 @@ For clarity, the terminal running the blockchain and the miner will be called te
 On terminal T navigate to the solidity folder in the repository.
 ```
 cd sector-coop
-cd solidity
+cd Source
+cd 'Solidty Smart Contract'
 ```
 
 The contract uses a hard coded address as the central authority which is allowed to make other addresses to patrons.
 The hard coded line in the contract needs to replaced with one of the addresses that were initialized.
-Open `sector-coop/solidity/contracts/SeCTor.sol` with a text editor and scroll to line 138. Or in case this was changed, it is the very first line after `contract SeCTor {` and says `address ca = <some address>`.
+Open `./contracts/SeCTor.sol` with a text editor and scroll to line 138. Or in case this was changed, it is the very first line after `contract SeCTor {` and says `address ca = <some address>`.
 Replace the address with one of the initialized addresses.
 
 To compile the contract run
@@ -185,19 +183,19 @@ When the Ethereum chain is running, it exposes itself on port 8545, so opening
 Via this port the Ethereum chain can be accessed programmatically using web3 libraries.
 Follow the instructions for the web3 library in the programming language of your choice. 
 
-In order to call upon the contract, the address of the contract as well as the ABI of the contract are required. The address was noted down, when deploying the contract, the ABI can be found under `/sector-coop/solidty/build/contracts/SeCTor.json`.
+In order to call upon the contract, the address of the contract as well as the ABI of the contract are required. The address was noted down, when deploying the contract, the ABI can be found under `/sector-coop/Source/Solidity Smart Contract/build/contracts/SeCTor.json`.
 
 Have a look at the contract itself to see which functions are available. Getter functions for all storage fields are provided.
 
 ## Sample code
-The file `/sector-coop/testchain/ethereum_test.py` provides some sample code on how to interact with the contract. 
+The file `/sector-coop/Test Ethereum Chain/ethereum_test.py` provides sample code on how to interact with each function of the contract. 
 
-web3 needs to be installed via pip for this to work.
+web3 and pycryptodome need to be installed via pip for ethereum_test.py to work.
 
 Open the file with a text editor and change the ca_address, patron_address and pseudonym_address to three different valid ethereum addresses on the test chain. If necessary create additional accounts.
 Further, change contract address to the address of the latest contract deployment and in the calls to unlockAccount, give the respective passphrase to each of the accounts.
 
-Executing the python file creates a new RSA key in memory, uses it to create a new Patron and to add a pseudonym based on that patron.
+Executing the python file, creates a new patron, a new pseudonym which gets verified by that patron, adds a new document for that pseudonym and finally adds a public RSA key as the identity of that pseudonym.
 
 ## Additional notes
 While the miner is configured to accept 0 gas transactions and calls to the contract, truffle and any caller programmed also need to be told that they can just send 0 gas and don't need to match the estimated gas price.
