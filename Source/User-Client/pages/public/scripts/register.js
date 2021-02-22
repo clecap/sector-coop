@@ -1,30 +1,41 @@
-var identityServer = "http://127.0.0.1:6000/register";
-
+var identityServer = "http://localhost:3000/register";
 
 $(function () {
     $("#register-button").on('click', function(e) {
         e.preventDefault();
-        
-        var _username = $('#username').val();
-        var _password = $('#password').val();
-        var payload = JSON.stringify(
-            {
-                "username" : _username.toString(), 
-                "password" : _password.toString()
-            });
-        
-        /*$.post(identityServer, payload, function (res) {
-            console.log(res)
-          },
-        'json');
-        */
-        $.ajax({
-            type: "POST",
-            url: identityServer,
-            data: payload,
-            success: function(data) {alert('data: ' + data);},
-            contentType: "application/json",
-            dataType: "json"
-        })
+        var username = $('#username').val();
+        var password = $('#password').val();
+        var repeated_password = $('#repeat-password').val();
+
+        if(password === repeated_password) {
+            var payload = JSON.stringify(
+                {
+                    "username" : username.toString(), 
+                    "password" : password.toString()
+                });
+            
+            $.ajax({
+                type: "POST",
+                url: identityServer,
+                data: payload,
+                success: function(data) {alert('data: ' + data);}, 
+                contentType: "application/json",
+                dataType: "json",
+                statusCode: {
+                    201: function() {
+                        alert("Registration process was succesful!");
+                    },
+                    555: function() {
+                        alert("This username already exists. Please try a different one.");
+                    },
+                    500: function() {
+                        alert("Something went wrong!");
+                    }
+                }
+            })
+        } 
+        else {
+            alert("The passwords that you entered do not match. Please try again.");
+        }
     })
 });
