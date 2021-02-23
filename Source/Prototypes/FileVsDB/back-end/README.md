@@ -34,19 +34,23 @@ grant all privileges on database postgres to postgres ;
 
 ### Run  on windows
 ```
+ At the application root (i.e back-end/)
+
  npm install knex -g
  npm install knex --save
  npm install pg --save
 ``` 
-NB: if this command was properly executed , then is you run `Knex` on this terminal at this point, you should get a response showing list of knex commands, if not try installing again.
+NB: if this command was properly executed , then if you run `Knex` on this terminal at this point, you should get a response showing list of knex commands, if not run the command again.
 
 ### Run on linux
 ```
+ At the application root (i.e back-end/)
+
  sudo npm install knex -g
  npm install knex --save
  npm install pg --save
 ``` 
-NB: if this command was properly executed , then is you run `Knex` on this terminal at this point, you should get a response showing list of knex commands, if not try installing again.
+NB: if this command was properly executed , then if you run `Knex` on this terminal at this point, you should get a response showing list of knex commands, if not run the command again.
 
 ## Build
 
