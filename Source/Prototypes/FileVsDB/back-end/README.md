@@ -22,6 +22,7 @@ also install pgAdmin4, see link https://www.pgadmin.org/download/pgadmin-4-apt/.
 ### Creating a user: 
 ```
 At the command line, run the following command:
+
 sudo service postgresql start
 sudo -u postgres createuser postgres
 sudo -u postgres createdb postgres
@@ -39,6 +40,7 @@ grant all privileges on database postgres to postgres ;
  npm install knex -g
  npm install knex --save
  npm install pg --save
+ npm install
 ``` 
 NB: if this command was properly executed , then if you run `Knex` on this terminal at this point, you should get a response showing list of knex commands, if not run the command again.
 
@@ -49,6 +51,7 @@ NB: if this command was properly executed , then if you run `Knex` on this termi
  sudo npm install knex -g
  npm install knex --save
  npm install pg --save
+ npm install
 ``` 
 NB: if this command was properly executed , then if you run `Knex` on this terminal at this point, you should get a response showing list of knex commands, if not run the command again.
 
