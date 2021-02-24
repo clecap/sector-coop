@@ -14,7 +14,9 @@
     "browserify": "^17.0.0",
     "express": "^4.17.1",
     "file-server": "^2.1.0",
+    "node-cookie": "^2.1.2",
     "nodemon": "^2.0.7",
+    "pg": "^8.5.1",
     "socket.io": "3.1.1"
   }
 }
