@@ -30,7 +30,7 @@ var roomCodes = {"__inv__":{}}; // keys are patron auth tokens, values are patro
 
 // serving the static html pages
 app.use('/', express.static(path.join(__dirname, '/pages')));
-
+app.use('/config', express.static(path.join(__dirname, '/config')));
 app.use('/script', express.static(path.join(__dirname, '/scripts')));
 const hostname = '127.0.0.1';
 const port = 3000;

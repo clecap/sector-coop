@@ -1,3 +1,4 @@
 node_modules/
 package-lock.json
 secret.json
+Source/User-Client/config/deploy/userclient.json
