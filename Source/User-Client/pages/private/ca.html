@@ -46,12 +46,13 @@
 					      {from:account_address},
 					      false,
 					      (result) => {
-						  $("#output").inner(result.toString());
+						  $("#output").html(JSON.stringify(result, null, '</br>'));
+						  console.log(result);
 						  sectorApi.functions.interact(sectorApi.smartContract.methods.getPatList(),
 									       {},
 									       true,
 									       (result)=>{
-										   $("#output2").inner(result.toString());
+										   $("#output2").html(JSON.stringify(result, null, '</br>'));
 						  });
 		 });
 	     }	

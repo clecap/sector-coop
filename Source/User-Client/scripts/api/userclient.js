@@ -24,11 +24,17 @@ $.getJSON('/config/contract/SecTor.json', (data) => {
 
 
 
-identityServerApi.datablob = {};
+identityServerApi.datablob = {"ethereum" :
+			      {
+				  "keystoreArray":[],
+				  "walletAccounts":{}
+			      },
+			      "bs" : {}
+			     };
 
 //SecTor Smart Contract API
 
-sectorApi.functions.interact = (methodObject, options, call=true, callback = (result){}) => {
+sectorApi.functions.interact = (methodObject, options, call=true, callback = (result)=>{}) => {
     _exec = methodObject.send;
     if (call){
 	_exec = methodObject.call;
@@ -54,24 +60,18 @@ sectorApi.functions.loadWallet = () => {
 sectorApi.functions.exportWallet = () => {
     _pass = $("#password").val();
     if ( _pass == "" ){
-	throw "Password field is empty";
+	alert("Please enter your password");
+	throw "Please enter your password";
     }
     identityServerApi.datablob.ethereum.keystoreArray = userclient.web3.accounts.wallet.encrypt(_pass);
 };
+
 // Identity Server API
-// {
-//     "ethereum" : {
-// 	"keystoreArray":[],
-// 	"walletAccounts":{}
-//     },
-//     "bs" : {}
-// }
+
 
 identityServerApi.functions.decryptDatablob= (datablob, password) => { //TODO
     
 };
-
-
 
 $("#datablob-button").click(()=>{
     fr = new FileReader();
@@ -84,3 +84,13 @@ $("#datablob-button").click(()=>{
 });
 
 //TODO: Datablob-export
+$("#datablob-export-button").click(()=> { //https://stackoverflow.com/a/34156339
+    function download(content, fileName, contentType) {
+	var a = document.createElement("a");
+	var file = new Blob([content], {type: contentType});
+	a.href = URL.createObjectURL(file);
+	a.download = fileName;
+	a.click();
+    }
+    download(JSON.stringify(identityServerApi.datablob), 'datablob.json', 'text/json');
+});

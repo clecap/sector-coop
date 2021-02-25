@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+    <head>
+	<title></title>
+	<meta charset="utf-8" />
+    </head>
+    <body>
+	<div>
+	    <input type="text" id="username" placeholder="Username"><br/>
+	    <input type="password" id="password" placeholder="Password"><br/><br/>
+	    
+	    <input type="file" id="datablob" value="Choose datablob to upload" /><br/>
+	    <button type="button" id="datablob-button" >Click to import datablob from file</button><br/>
+	    <button type="button" id="datablob-export-button" >Click to export datablob to file</button><br/>
+
+	</div>
+	<br/>
+	<div>
+	    <input type="text" id="account_name" placeholder="Enter new account name"><br/>
+	    <button type="button" id="account-create-button" >Click to create ethereum account</button>
+	</div>
+	
+	<div id="output">
+	    
+	</div>
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>       
+	<script src="https://cdn.jsdelivr.net/npm/web3@1.3.4/dist/web3.min.js"></script>
+	<script src="/script/sha1.js"></script>
+	<script src="/script/pbkdf2.js"></script>
+	<script src="/script/api/userclient.js"></script>
+        <!-- <script src="/file/demo-bundle.js"></script> -->
+	<script src="/script/rsablind-bundle.js"></script>
+	
+	<script>
+	 var updateWalletAccountsDisplay = () => {
+	     $("#output").html(JSON.stringify( identityServerApi.datablob.ethereum.walletAccounts, null, '<br/>' ));
+	 };
+	 
+	 $("#account-create-button").click(()=>{
+	     account_name = $("#account_name").val();
+	     if (account_name == "" ||
+		 identityServerApi.datablob.ethereum.walletAccounts[account_name] != undefined){
+		 alert("Please enter a unique account name");
+		 throw "Please enter a unique account name";
+	     }
+	     _pass = $("#password").val();
+	     if (_pass == ""){
+		 alert("Please enter your password");
+		 throw "Please enter your password";
+	     }
+	     new_eth_account = userclient.web3.eth.accounts.create();
+	     userclient.web3.eth.accounts.wallet.add(new_eth_account);
+	     new_account_address_stripped = userclient.web3.utils.stripHexPrefix(new_eth_account.address.toLowerCase());
+	     identityServerApi.datablob.ethereum.walletAccounts[account_name] = new_account_address_stripped;
+
+	     identityServerApi.datablob.ethereum.keystoreArray = userclient.web3.eth.accounts.wallet.encrypt(_pass);
+	     updateWalletAccountsDisplay();
+	     alert(`Succesfully created a new ethereum account with address ${new_account_address_stripped}`);
+	 });
+	</script>
+    </body>
+</html>
