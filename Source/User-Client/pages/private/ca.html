@@ -5,13 +5,61 @@
         <meta charset="utf-8" />
     </head>
     <body>
+	<div>
+	    <input type="text" id="username" placeholder="Username"><br/>
+	    <input type="password" id="password" placeholder="Password"><br/><br/>
+
+	    <input type="file" id="datablob" value="Choose datablob to upload" /><br/>
+	    <button type="button" id="datablob-button" >Click to import datablob from file</button><br/>
+
+	</div>
+	<br/>
+	
+	<div>
+	    <input type="text" id="patron_address" placeholder="Patron Address" width="20px"><br/>
+	    <textarea rows="10" cols="63" id="patron_pubkey" placeholder="Enter Patron's RSA Public Key (pkcs1-pem)"></textarea><br/>
+	    <input type="text" id="account_name" placeholder="Enter CA account name">
+	    <input type="button" id="patron_add-button" value="Create Patron"><br/>
+	    <div id="output"></div>
+	    <div id="output2"></div>
+
+	</div>
 	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>       
+	<script src="https://cdn.jsdelivr.net/npm/web3@1.3.4/dist/web3.min.js"></script>
+	<script src="/script/sha1.js"></script>
+	<script src="/script/pbkdf2.js"></script>
 	<script src="/script/api/userclient.js"></script>
         <!-- <script src="/file/demo-bundle.js"></script> -->
-	<script src="https://cdn.jsdelivr.net/npm/web3@1.3.4/dist/web3.min.js"></script>
 	<script src="/script/rsablind-bundle.js"></script>
         <script>
-	 //TODO
+	 $("#patron_add-button").click(()=>{
+	     try {
+		 patron_address = $("#patron_address").val();
+		 patron_pubkey_pkcs1_pem = $("#patron_pubkey").val();
+		 patron_pubkey = new window.myexports.NodeRSA(patron_pubkey_pkcs1_pem, 'pkcs1-public-pem');
+		 patron_pubkey_components = {n:"0x".concat( patron_pubkey.keyPair.n.toString(16) ),
+					     e:"0x".concat( patron_pubkey.keyPair.e.toString(16) )};
+		 account_address = "0x".concat(identityServerApi.datablob.ethereum.walletAccounts[$("#account_name").val()]);
+		 sectorApi.functions.interact(sectorApi.smartContract.methods.createPatron(patron_address,
+											   patron_pubkey_components.n,
+											   patron_pubkey_components.e),
+					      {from:account_address},
+					      false,
+					      (result) => {
+						  $("#output").inner(result.toString());
+						  sectorApi.functions.interact(sectorApi.smartContract.methods.getPatList(),
+									       {},
+									       true,
+									       (result)=>{
+										   $("#output2").inner(result.toString());
+						  });
+		 });
+	     }	
+	     catch(error){
+		 alert(error.toString());
+		 throw error;
+	     }
+	 });
 	</script>
         
     </body>

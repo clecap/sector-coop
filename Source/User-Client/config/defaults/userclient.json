@@ -1,12 +1,12 @@
 {
-    ethereum: {
-	providerAddress: "http://localhost:8545",
-	contractAddress: "0x0000000000000000000000000000000000000000"
+    "ethereum": {
+	"providerAddress": "http://localhost:8545",
+	"contractAddress": "0x0000000000000000000000000000000000000000"
     },
-    identityServer: {
-	address: "http://localhost:6000"
+    "identityServer": {
+	"address": "http://localhost:6000"
     },
-    documentServer: {
-	address: "http://localhost:8000"
+    "documentServer": {
+	"address": "http://localhost:8000"
     }
 }
