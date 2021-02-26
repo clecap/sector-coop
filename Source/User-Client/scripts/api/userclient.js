@@ -35,21 +35,18 @@ identityServerApi.datablob = {"ethereum" :
 //SecTor Smart Contract API
 
 sectorApi.functions.interact = (methodObject, options, call=true, callback = (result)=>{}) => {
-    _exec = methodObject.send;
-    if (call){
-	_exec = methodObject.call;
-    }
     options.gas = 1000000;
-
-    _exec(options=options,
-	  callback=(error, result) => {
-	      if (error){
-		  alert("An Error has occurred while attempting to interact with the SecTor Smart Contract");
-		  throw error;
-	      }
-	      callback(result);
-	      return result;
-	  });
+    if (call){
+	methodObject.call(options=options).then(callback);
+    }
+    else{
+	methodObject.send(options=options)
+	    .then(callback)
+	    .on("error", (error, receipt) => {
+		console.log(receipt);
+		throw error;
+	    });
+    }
 };
 
 sectorApi.functions.loadWallet = () => {

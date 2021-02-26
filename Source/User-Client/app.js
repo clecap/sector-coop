@@ -46,20 +46,22 @@ io.on('connection', (socket) => {
 	if (socket.handshake.auth.role=="patron"){
 	    console.log("Patron stuff"); //PATRON
 	    let roomCode = socket.handshake.auth.roomCode;
-	    let patronToken = socket.handshake.auth.token;
+	    let patronID = socket.id;
 	    let patronPubKey = socket.handshake.auth.publicKey;
-	    roomCodes[patronToken] = roomCode;
+	    let patronEthereum_address = socket.handshake.auth.ethereum_address;
+	    roomCodes[patronID] = roomCode;
 	    roomCodes[ "__inv__" ][roomCode] = {
-		patronToken: patronToken,
-		patronPubKey: patronPubKey
+		patronID: patronID,
+		patronPubKey: patronPubKey,
+		patronEthereum_address: patronEthereum_address
 	    };
 	    
 	    console.log(roomCodes);
 	    socket.join(roomCode);
 	    socket.on('disconnect', (reason) => {
-		console.log("Patron:" + patronToken + " disconnected. Reason: " + reason);
+		console.log("Patron:" + patronID + " disconnected. Reason: " + reason);
 		socket.leave(roomCode);
-		delete roomCodes[patronToken];
+		delete roomCodes[patronID];
 		delete roomCodes[ "__inv__" ][roomCode];
 	    });
 	    
@@ -69,14 +71,14 @@ io.on('connection', (socket) => {
 	}
 	else { //PSUEDONYM STUFF
 	    let roomCode = socket.handshake.auth.roomCode;
-	    let psuedonymToken = socket.handshake.auth.token;
+	    let psuedonymID = socket.id;
 	    
 	    socket.join(roomCode);
 	    console.log(socket.rooms);
 	    console.log("Sending Patron's public key to Psuedonym");
-	    io.to(roomCode).emit('patronPubKey', roomCodes[ "__inv__" ][roomCode].patronPubKey); //Send the psuedonym the patron's public key
+	    io.to(roomCode).emit('patronPubKey', roomCodes[ "__inv__" ][roomCode].patronPubKey, roomCodes[ "__inv__" ][roomCode].patronEthereum_address); //Send the psuedonym the patron's public key
 	    socket.on('disconnect', (reason) => {
-		console.log("Psuedonym:" + psuedonymToken + " disconnected. Reason: " + reason);
+		console.log("Psuedonym:" + psuedonymID + " disconnected. Reason: " + reason);
 		socket.leave(roomCode);
 	    });
 	    
