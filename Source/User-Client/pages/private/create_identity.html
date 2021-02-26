@@ -16,8 +16,8 @@
 	</div>
 	<br/>
 	<div>
-	    <input type="text" id="account_name" placeholder="Enter new account name"><br/>
-	    <button type="button" id="account-create-button" >Click to create ethereum account</button>
+	    <input type="text" id="identity_name" placeholder="Enter new identity name"><br/>
+	    <button type="button" id="identuty-create-button" >Click to create ethereum account</button>
 	</div>
 	
 	<div id="output">
@@ -36,12 +36,12 @@
 	     $("#output").html(JSON.stringify( identityServerApi.datablob.ethereum.walletAccounts, null, '<br/>' ));
 	 };
 	 
-	 $("#account-create-button").click(()=>{
-	     account_name = $("#account_name").val();
-	     if (account_name == "" ||
-		 identityServerApi.datablob.ethereum.walletAccounts[account_name] != undefined){
-		 alert("Please enter a unique account name");
-		 throw "Please enter a unique account name";
+	 $("#identuty-create-button").click(()=>{
+	     identity_name = $("#identity_name").val();
+	     if (identity_name == "" ||
+		 identityServerApi.datablob.ethereum.walletAccounts[identity_name] != undefined){
+		 alert("Please enter a unique identity_name");
+		 throw "Please enter a unique identity_name";
 	     }
 	     _pass = $("#password").val();
 	     if (_pass == ""){
@@ -51,7 +51,7 @@
 	     new_eth_account = userclient.web3.eth.accounts.create();
 	     userclient.web3.eth.accounts.wallet.add(new_eth_account);
 	     new_account_address_stripped = userclient.web3.utils.stripHexPrefix(new_eth_account.address.toLowerCase());
-	     identityServerApi.datablob.ethereum.walletAccounts[account_name] = new_account_address_stripped;
+	     identityServerApi.datablob.ethereum.walletAccounts[identity_name] = new_account_address_stripped;
 
 	     identityServerApi.datablob.ethereum.keystoreArray = userclient.web3.eth.accounts.wallet.encrypt(_pass);
 	     updateWalletAccountsDisplay();

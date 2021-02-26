@@ -16,7 +16,7 @@
 	</div>
 	<br/>
 	<div>
-	    <input type="text" id="account_name" placeholder="Enter account name"><br/>
+	    <input type="text" id="identity_name" placeholder="Enter identity name"><br/>
 	    <button type="button" id="rsa_generate-button" >Generate RSA key</button>
 	</div>
 	
@@ -33,17 +33,21 @@
 	
 	<script>
 	 $("#rsa_generate-button").click(()=>{
-	     account_name = $("#account_name").val();
-	     if (account_name == "" ||
-		 identityServerApi.datablob.ethereum.walletAccounts[account_name] == undefined ){
-		 alert("Please enter an existing account name");
-		 throw "Please enter an existing account name";
+	     identity_name = $("#identity_name").val();
+	     if (identity_name == "" ||
+		 identityServerApi.datablob.ethereum.walletAccounts[identity_name] == undefined ){
+		 alert("Please enter an existing identity");
+		 throw "Please enter an existing identity";
+	     }
+	     else if(identityServerApi.datablob.bs[identity_name] != undefined){
+		 alert("This identity already has an rsa key associated to it");
+		 throw "This identity already has an rsa key associated to it";
 	     }
 	     new_rsa_key = new window.myexports.BlindSignature.keyGeneration({b:2048});
 	     new_rsa_pubkey_pem = new_rsa_key.exportKey("pkcs1-public-pem");
 	     new_rsa_privkey_pem = new_rsa_key.exportKey("pkcs1-private-pem");
 	     $("#new_rsa_public_key").val(new_rsa_pubkey_pem);
-	     identityServerApi.datablob.bs[account_name] = {public_key:new_rsa_pubkey_pem,
+	     identityServerApi.datablob.bs[identity_name] = {public_key:new_rsa_pubkey_pem,
 							    private_key:new_rsa_privkey_pem};
 	     alert("RSA key successfully generated");
 	 });

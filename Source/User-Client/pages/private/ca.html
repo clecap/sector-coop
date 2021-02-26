@@ -18,7 +18,7 @@
 	<div>
 	    <input type="text" id="patron_address" placeholder="Patron Address" width="20px"><br/>
 	    <textarea rows="10" cols="63" id="patron_pubkey" placeholder="Enter Patron's RSA Public Key (pkcs1-pem)"></textarea><br/>
-	    <input type="text" id="account_name" placeholder="Enter CA account name">
+	    <input type="text" id="identity_name" placeholder="Enter CA account name">
 	    <input type="button" id="patron_add-button" value="Create Patron"><br/>
 	    <div id="output"></div>
 	    <div id="output2"></div>
@@ -39,7 +39,7 @@
 		 patron_pubkey = new window.myexports.NodeRSA(patron_pubkey_pkcs1_pem, 'pkcs1-public-pem');
 		 patron_pubkey_components = {n:"0x".concat( patron_pubkey.keyPair.n.toString(16) ),
 					     e:"0x".concat( patron_pubkey.keyPair.e.toString(16) )};
-		 account_address = "0x".concat(identityServerApi.datablob.ethereum.walletAccounts[$("#account_name").val()]);
+		 account_address = "0x".concat(identityServerApi.datablob.ethereum.walletAccounts[$("#identity_name").val()]);
 		 sectorApi.functions.interact(sectorApi.smartContract.methods.createPatron(patron_address,
 											   patron_pubkey_components.n,
 											   patron_pubkey_components.e),
