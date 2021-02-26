@@ -19,8 +19,10 @@ $(function () {
             contentType: "application/json",
             dataType: "json",
             statusCode: {
-                200: function() {
-                    alert("Login was successful.");
+                201: function() {
+                    //successful login. redirecting to home page...
+                    location.href = '../../private/home.html';
+                    
                 },
                 401: function() {
                     alert("Login was unsuccessful. Please try again.");

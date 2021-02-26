@@ -3,18 +3,32 @@
 <head>
     <meta charset="utf-8"/>
     <title>Upload</title>
+    <script src="scripts/jQuery.js"></script>
+    <!-- <script src="scripts/requireLogin.js"></script> -->
 </head>
 <body>
-
-<div class="uplaoad-form">
-    Please select the document you wish to upload.
+<!-- USE THIS ONCE FORM DATA PARSING IS WORKING IN THE UPLOAD.JS FILE!!!
+<div>
+    Please select the PDF document you wish to upload.
     <form>
         <label for="file">Select a file:</label>
-        <input type="file" id="file" name="file">
+        <input type="file" id="file" name="uploaded-file" accept=".pdf" required>
+        <br><br>
+        <input type="button" id="upload-button" value="Upload">
+    </form>
+
+    <script src="scripts/upload.js"></script>
+</div> -->
+
+<div>
+    Please select the PDF document you wish to upload.
+    <form action="/upload-document" enctype="multipart/form-data" method="POST">
+        <label for="file">Select a file:</label>
+        <input type="file" id="file" name="uploaded-file" accept=".pdf" required>
+        <br><br>
+        <input type="submit" id="upload-button" value="Upload">
     </form>
 </div>
-
-<script src="scripts/upload.js"></script>
 
 </body>
 </html> 
