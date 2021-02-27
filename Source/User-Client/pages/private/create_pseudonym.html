@@ -51,7 +51,7 @@
 	     
 	     socket.on("disconnect", (reason) => {
 		 console.log("Socket Disconnected. Reason: "+reason)
-		 $("#log").append(`Socket Disconnected. Reason: ${reason}`)
+		 $("#log").append(`Socket Disconnected. Reason: ${reason}<br/>`)
 	     });
 
 	     socket.on("connect", () => {
@@ -95,6 +95,7 @@
 		 Psuedonym.signed = blindSignature;
 		 $("#log").append("Received Blind Signature from Patron<br/>");
 		 console.log("Recieved Blindly signed Signature");
+		 socket.close();
 		 const unblinded = window.myexports.BlindSignature.unblindHEX({
 		     signed: Psuedonym.signed,
 		     N: Psuedonym.N,

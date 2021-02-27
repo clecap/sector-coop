@@ -41,7 +41,7 @@ sectorApi.functions.interact = (methodObject, options, call=true, callback = (re
     }
     else{
 	methodObject.send(options=options)
-	    .then(callback)
+	    .on("receipt", callback)
 	    .on("error", (error, receipt) => {
 		console.log(receipt);
 		throw error;
@@ -51,7 +51,7 @@ sectorApi.functions.interact = (methodObject, options, call=true, callback = (re
 
 sectorApi.functions.loadWallet = () => {
     userclient.web3.eth.accounts.wallet.decrypt(identityServerApi.datablob.ethereum.keystoreArray,
-					    $("#password").val());
+						$("#password").val());
 };
 
 sectorApi.functions.exportWallet = () => {
