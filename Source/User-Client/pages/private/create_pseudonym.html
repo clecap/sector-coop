@@ -103,6 +103,7 @@
 		 }); // Psuedonym unblinds
 		 Psuedonym.unblinded = unblinded;
 		 $("#log").append("Unblinded Signature<br/>");
+		 $("#log").append("Sending signature to Smart Contract for Verification<br/>");
 		 SMART_CONTRACT_ARGS={PATRON_ADDRESS : patron_address,
 				      MODULUS_HEX : "0x".concat(Psuedonym.N.toString(16)),
 				      EXPONENT_HEX : "0x".concat(Psuedonym.E.toString(16)),
@@ -114,80 +115,20 @@
 					      {from:PSEUDONYM_ADDR},
 					      false,
 					      (result) => {
-						  $("#log").append("Pseudonymous address successfully accepted by SecTor Smart Contract<br/>");
+						  $("#log").append("<h2>Pseudonymous address successfully accepted by SecTor Smart Contract</h2><br/>");
+						  $("#log").append(JSON.stringify(result, null, '<br/>'));
+						  $("#log").append("Requesting Smart Contract for Initial Token Grant<br/>");
+						  sectorApi.functions.interact(sectorApi.smartContract.methods.grantInitialTokens(),
+									       {from:PSEUDONYM_ADDR},
+									       false,
+									       (result2) => {
+										   $("#log").append("<h2>Pseudonymous identity has been succesfully granted initial tokens</h2><br/>");
+										   $("#log").append(JSON.stringify(result2, null, '<br/>'));
+						  });
 		 });
 	     });
 	     
 	 }); 
 	</script>
-	<!-- <script>
-	     var BlindSignature = window.myexports.BlindSignature;
-	     var NodeRSA = window.myexports.NodeRSA;
-	     
-	     var patron1_ethraddress = "0x00000000000000000000000000000000000";
-	     var psuedo1_keystore =	{...};
-	     if (!confirm("Request for Signature?")){
-	     throw new Error("Cannot proceed without user's go.");
-	     }
-	     const socket = io({auth: {role:"psuedonym",
-	     token:"uniquePsuedonymToken",
-	     roomCode:"patronRoom"}}); // roomCode must be fetched from patron prior to this connection can proceed.
-	     PSUEDONYM_ADDR="0x".concat( psuedo1_keystore.address );
-	     const Psuedonym = {
-	     message: Web3.utils.hexToBytes(PSUEDONYM_ADDR),
-	     N: null,
-	     E: null,
-	     r: null,
-	     signed: null,
-	     unblinded: null,
-	     };
-	     
-	     socket.on("disconnect", (reason) => {
-	     console.log("Socket Disconnected. Reason: "+reason)
-	     });
-	     
-	     socket.on('patronPubKey', (patronPubKey) => {
-	     console.log("Recieved Patron's Public Key");
-	     
-	     Psuedonym.N = patronPubKey.n;
-	     Psuedonym.E = patronPubKey.e;
-	     /* console.log(Psuedonym.N.toString()); */
-	     // N, E
-	     const { blinded, r } = BlindSignature.blindHEX({
-	     message: Psuedonym.message,
-	     N: Psuedonym.N,
-	     E: Psuedonym.E,
-	     }); // Psuedonym blinds message
-	     Psuedonym.r = r;
-	     console.log("Sending Blinded Hash");
-	     socket.emit("signingRequest", blinded.toString(16));
-	     });
-
-	     socket.on('psuedonymSigningResponse', (blindSignature) => {
-	     Psuedonym.signed = blindSignature;
-	     console.log("Recieved Blindly signed Signature");
-	     const unblinded = BlindSignature.unblindHEX({
-	     signed: Psuedonym.signed,
-	     N: Psuedonym.N,
-	     r: Psuedonym.r,
-	     }); // Psuedonym unblinds
-	     Psuedonym.unblinded = unblinded;
-	     // Psuedonym verifies
-	     // N, E
-	     /* const result = BlindSignature.verifyHEX({
-	     unblinded: Psuedonym.unblinded,
-	     N: Psuedonym.N,
-	     E: Psuedonym.E,
-	     message: Psuedonym.message,
-	     }); */
-
-	     // Hex generation and outputs:
-
-	     SMART_CONTRACT_ARGS={PATRON_ADDRESS : patron1_ethraddress,
-	     MODULUS_HEX : "0x".concat(Psuedonym.N.toString(16)),
-	     EXPONENT_HEX : "0x".concat(Psuedonym.E.toString(16)),
-	     SIGNATURE_UNBLINDED_HEX : "0x".concat(Psuedonym.unblinded.toString(16)),
-	     MESSAGE_PLAIN : Psuedonym.message };
-	     </script> -->
-    </body>
+    /body>
 </html>
