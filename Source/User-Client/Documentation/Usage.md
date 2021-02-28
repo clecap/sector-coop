@@ -96,9 +96,12 @@ This function is limited to the *CA*.
    Here, `ca_keystore` and `ca_address` are the content of the
    keystore file associated with the *CA*, and the address associated
    with this ethereum account. `ca account name` can be any
-   identifiable string used to identify this account.  Following is an
-   example `json` file which gives an idea as to what this file should
-   look like:
+   identifiable string used to identify this account. This information
+   should have been saved while following the instructions in the
+   [Test Chain Installation Guide](../../../Documentation/Test Change Installation Guide.md).
+
+   Following is an example `json` file which gives an idea as to what
+   this file should look like:
    
    ```javascript
    
@@ -111,7 +114,8 @@ This function is limited to the *CA*.
    }
    ```
 
-2. Import this json file in the browser page.
+2. Import this json file in the browser page using the password used
+   when creating the *CA* account.
 3. Enter the identity name that represents the *CA's* account
 4. Enter their RSA public key encoded in a pkcs1-pem string into the
 5  textarea.
