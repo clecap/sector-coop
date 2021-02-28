@@ -61,7 +61,7 @@ app.use('/config', express.static(path.join(__dirname, '/config')));
 app.use('/script', express.static(path.join(__dirname, '/scripts')));
 const hostname = '127.0.0.1';
 const port = 3000;
-
+// Websocket implementation for BlindSignatures 
 io.on('connection', (socket) => {
     console.log("A socket has been connected");
     // Assume client sockets send auth tokens of the form:

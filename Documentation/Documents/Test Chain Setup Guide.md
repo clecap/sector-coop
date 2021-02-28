@@ -132,6 +132,7 @@ The hard coded line in the contract needs to replaced with one of the addresses 
 Open `./contracts/SeCTor.sol` with a text editor and scroll to line 138. Or in case this was changed, it is the very first line after `contract SeCTor {` and says `address ca = <some address>`.
 Replace the address with one of the initialized addresses.
 
+***Important*** This chosen address, the `ca_address` as well as the contents of the keystore file (Stored under `~/.ethereum/net2020/keystore/UTC-****-<ca_address>`) are required for creating patrons using the User-Client. So please keep them as well.
 To compile the contract run
 ```
 truffle compile

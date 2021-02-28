@@ -1,9 +1,7 @@
 node_modules/
 package-lock.json
 secret.json
-<<<<<<< HEAD
 Source/User-Client/config/deploy/userclient.json
-=======
 documentSecret.json
 identitySecret.json
->>>>>>> ee1a5288bfeae17d30dd140c97ed8c7d5709ed53
+Source/User-Client/scripts/rsablind-bundle.js

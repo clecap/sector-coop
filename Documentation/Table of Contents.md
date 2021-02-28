@@ -5,29 +5,30 @@
 
 ### Documentation
 
-| Title | Content | Authors| Last Modified | Link |
-| --- | --- | --- | --- | --- |
-| Sequence Diagram | Core System functionality, e.g. Account creation etc | Anant, Jonathan | 14.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphics/Sequence-Diagram/Sequence_Diagram_20201214.pdf) 
-| API | Identity API functions that need implementing | Anant, Jonathan | 04.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Documents/API%20functions%20for%20identity%20component.md) 
-| Data Structures | Data structures and types needed for the identity handling | Anant, Jonathan | 04.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Documents/Datastructures%20for%20Identity%20Component.md) 
-| Class Diagram | | Jonas | 06.01.2021 | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphics/UML/class%20diagram.png) 
-| Feature Progress | Current progress of planned features visualized with traffic lights | Jonathan, Anant, Dominik | 09.02.2021 | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Feature%20Progress.md)
-| Test setup instructions | Step by step guide for setting up a test environment with a private Ethereum blockchain | Jonathan | 09.02.2021 | [Link](https://github.com/clecap/sector-coop/blob/Documentation/Documents/Test%20Chain%20Setup%20Guide.md)
-| Entity Relationship Diagram | ER Diagram for storage node | Jonas | 01.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphics/UML/new%20entity%20relationship%20diagram.png) |
-| Block Diagram | System snapshot for rough system parts with functionality | Jonas | 09.12.2020 | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphichs/UML/block%20Diagram.png) 
-| Flow Diagram | Flow for various system use cases | Jonas | 06.01.2021 | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphics/UML/flowdiagram-new.svg) 
+| Title                       | Content                                                                                 | Authors                  | Last Modified | Link                                                                                                                            |
+| ---                         | ---                                                                                     | ---                      | ---           | ---                                                                                                                             |
+| Sequence Diagram            | Core System functionality, e.g. Account creation etc                                    | Anant, Jonathan          | 14.12.2020    | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphics/Sequence-Diagram/Sequence_Diagram_20201214.pdf)   |
+| API                         | Identity API functions that need implementing                                           | Anant, Jonathan          | 04.12.2020    | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Documents/API%20functions%20for%20identity%20component.md) |
+| Data Structures             | Data structures and types needed for the identity handling                              | Anant, Jonathan          | 04.12.2020    | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Documents/Datastructures%20for%20Identity%20Component.md)  |
+| Class Diagram               |                                                                                         | Jonas                    | 06.01.2021    | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphics/UML/class%20diagram.png)                          |
+| Feature Progress            | Current progress of planned features visualized with traffic lights                     | Jonathan, Anant, Dominik | 09.02.2021    | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Feature%20Progress.md)                                     |
+| Test setup instructions     | Step by step guide for setting up a test environment with a private Ethereum blockchain | Jonathan                 | 09.02.2021    | [Link](https://github.com/clecap/sector-coop/blob/Documentation/Documents/Test%20Chain%20Setup%20Guide.md)                      |
+| User Client Documentation   | Documentation for Installation, Usage and Copyright Notices for the User Client         | Anant                    | 28.02.2021    | [Link](https://github.com/clecap/sector-coop/blob/Source/User%20Client/README.md)                                               |
+| Entity Relationship Diagram | ER Diagram for storage node                                                             | Jonas                    | 01.12.2020    | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphics/UML/new%20entity%20relationship%20diagram.png)    |
+| Block Diagram               | System snapshot for rough system parts with functionality                               | Jonas                    | 09.12.2020    | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphichs/UML/block%20Diagram.png)                         |
+| Flow Diagram                | Flow for various system use cases                                                       | Jonas                    | 06.01.2021    | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphics/UML/flowdiagram-new.svg)                          |
 
 ### Informal thoughts
 
-| Topic | Authors | Link |
-| --- | --- | --- |
-| Reference Architecture | Clemens | [Link](https://www.overleaf.com/read/wvmrnhbrhxpb)
-| DSA Blind Signature Protocol | Anant | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Research%20and%20Brainstorming/DSA%20Blind%20Signature%20Protocol.md) 
-| How to sign blindly | Jonathan | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Research%20and%20Brainstorming/How%20to%20blind%20signature.md) 
-| Identity | Jonathan | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Research%20and%20Brainstorming/Identity%20notes.md) 
-| Self-certifying storage (SFS) | Dominik, Clemens | [Dominik](https://github.com/clecap/sector-coop/blob/main/Documentation/Research%20and%20Brainstorming/Self-certifying%20storage%20(SFS).md), [Clemens](https://www.overleaf.com/read/kmnhzctsszdk)
-| Possible issues with digital signatures | Dominik | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Research%20and%20Brainstorming/Possible%20issues%20with%20digital%20signatures.md) 
-| Of the Record private proof of identity | Anant | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Research%20and%20Brainstorming/OTR%20implementation%20for%20Private%20Linking.md)
+| Topic                                   | Authors          | Link                                                                                                                                                                                                |
+| ---                                     | ---              | ---                                                                                                                                                                                                 |
+| Reference Architecture                  | Clemens          | [Link](https://www.overleaf.com/read/wvmrnhbrhxpb)                                                                                                                                                  |
+| DSA Blind Signature Protocol            | Anant            | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Research%20and%20Brainstorming/DSA%20Blind%20Signature%20Protocol.md)                                                          |
+| How to sign blindly                     | Jonathan         | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Research%20and%20Brainstorming/How%20to%20blind%20signature.md)                                                                |
+| Identity                                | Jonathan         | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Research%20and%20Brainstorming/Identity%20notes.md)                                                                            |
+| Self-certifying storage (SFS)           | Dominik, Clemens | [Dominik](https://github.com/clecap/sector-coop/blob/main/Documentation/Research%20and%20Brainstorming/Self-certifying%20storage%20(SFS).md), [Clemens](https://www.overleaf.com/read/kmnhzctsszdk) |
+| Possible issues with digital signatures | Dominik          | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Research%20and%20Brainstorming/Possible%20issues%20with%20digital%20signatures.md)                                             |
+| Of the Record private proof of identity | Anant            | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Research%20and%20Brainstorming/OTR%20implementation%20for%20Private%20Linking.md)                                              |
 
 * * *
 
