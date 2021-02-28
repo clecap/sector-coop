@@ -98,7 +98,7 @@ This function is limited to the *CA*.
    with this ethereum account. `ca account name` can be any
    identifiable string used to identify this account. This information
    should have been saved while following the instructions in the
-   [Test Chain Installation Guide](../../../Documentation/Test Change Installation Guide.md).
+   [Test Chain Installation Guide](../../../Documentation/Test%20Change%20Installation%20Guide.md).
 
    Following is an example `json` file which gives an idea as to what
    this file should look like:

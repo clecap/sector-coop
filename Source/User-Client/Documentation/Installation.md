@@ -29,4 +29,4 @@ Change the values of the properties `providerAddress` and
 address of the SecTor smart contract deployed on the ethereum chain.
 
 Please refer to documentation for setting up the geth provider and
-smart contract [here](../../../Documentation/Documents/Test Chain Setup Guide.md)
+smart contract [here](../../../Documentation/Documents/Test%20Chain%20Setup%20Guide.md)
