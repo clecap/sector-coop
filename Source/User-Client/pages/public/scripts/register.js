@@ -23,7 +23,7 @@ $(function () {
                 dataType: "json",
                 statusCode: {
                     201: function() {
-                        alert("Registration process was succesful!");
+                        location.href = "../../private/home.html";
                     },
                     555: function() {
                         alert("This username already exists. Please try a different one.");

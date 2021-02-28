@@ -1,6 +1,6 @@
+//#region Essential Server Setup and DB Connections
 const http = require('http');
 const fs = require('fs');
-const url = require('url');
 const express = require('express');
 app = express();
 const server = http.createServer(app);
@@ -8,21 +8,48 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const {Pool, Client} = require('pg');   // the pool internally delegates queries to clients. Setting those up for every transaction is costly though. Hence, pools.
 const { restart } = require('nodemon');
-const cookie = require('node-cookie');
+const Cookie = require('node-cookie');
+const multer = require('multer');
+const hasha = require('hasha');
 
 app.use(express.json());
-let pooldata = require('./secret.json');
-let cookieSigning = require('./cookies.json');
 
+let identityDbPoolData = require('./identitySecret.json');
+let documentDbPoolData = require('./documentSecret.json');
+// this creates the database connection with the parameters set in ***secret.json -- alter them accordingly if necessary.
+// see https://node-postgres.com/features/connecting for instructions.
+const identityDatabase = new Pool(identityDbPoolData)
+const documentDatabase = new Pool(documentDbPoolData)
+
+let cookieSigning = require('./cookies.json');
+var cookieJar = [];
+
+// the file name under which each uploaded file is temporarily stored before self-certifying measures are taken.
+const temporaryFileName = "last.pdf"
+const fsPath = "../Database/Uploaded_Documents"
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, fsPath);
+    },
+
+    filename: function(req, file, cb) {
+        cb(null, temporaryFileName);
+    }
+});
 
 app.use(function(req, res, next) {
-    //allow connections from the user-client-served pages that we expect to deal with.
+    //allow connections that we expect to deal with.
     res.header("Access-Control-Allow-Origin", "http://localhost:3000"); 
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
     res.header("Access-Control-Allow-Headers", "content-type");
     next();
 });
 
+
+
+//#endregion
+
+//#region Sockets
 const io = require("socket.io")(server); // Socket connections
 
 
@@ -93,22 +120,9 @@ io.on('connection', (socket) => {
     }
 });
 
+//#endregion
 
-
-
-// this creates the database connection with the parameters set in secret.json -- alter them accordingly if necessary.
-// see https://node-postgres.com/features/connecting for instructions.
-const db = new Pool(pooldata)
-
-// make sure the server uses the appropriate schema name.
-const schemaName = "identities";
-db.query("SET search_path TO '" + schemaName + " ';", (err) => {
-    if(err) {
-        console.log(err);
-    } 
-});
-
-
+//#region User Client Routing
 app.post('/login', async(req, res) => {
 	console.log('----------------------------------------------------------------------');
 	console.log(Date());
@@ -118,11 +132,11 @@ app.post('/login', async(req, res) => {
     var req_password = req.body.password;
     let hashed_password;
 
-    var queryText = "SELECT hashed_password FROM \""+ schemaName +"\".users WHERE username = $1;";
+    var queryText = "SELECT hashed_password FROM \"identities\".users WHERE username = $1;";
     var values = [req_username];
 
     
-    var result = await db.query(queryText, values);
+    var result = await identityDatabase.query(queryText, values);
 
     //if a username is provided that does not exist, the resulting query will have 0 rows.
     //so code execution is aborted at this point
@@ -133,16 +147,20 @@ app.post('/login', async(req, res) => {
 
     //if and only if a matching username was found in the database, the code proceeds to compare the passwords.
     hashed_password = result.rows[0].hashed_password;
-    console.log("Hashed Password retrieved for user: " + hashed_password);
     
     try {
-        if(await bcrypt.compare(req_password, hashed_password)) {
+        var success = await bcrypt.compare(req_password, hashed_password);
+        if(success) {
             console.log("Login successful.");
 
-				//For cookies, first, a random value is established.
-				var cookieValue = Math.random();
+				//For cookie values, the username and a random string are established, separated by ":"
+                var cookieValue = req_username + ":" + Math.random().toString();
+
+                //This cookieValue is stored in the array of all currently active cookies.
+                cookieJar.push(cookieValue);
+
 				//The cookie "USER-AUTH" is created, signed ("cookieSigning.key") and encrypted ("true") 
-				cookie.create(res, 'USER-AUTH', cookieValue, {/* options */}, cookieSigning.key, true);
+				Cookie.create(res, 'USER-AUTH', cookieValue, {/* options */}, cookieSigning.key, true);
             
             res.sendStatus(201);
         } else {
@@ -152,6 +170,29 @@ app.post('/login', async(req, res) => {
 
     } catch (error) {
         console.error("Bcrypt Error: " + error);
+    }
+})
+
+app.get('/requireLogin', async(req,res) => {
+    console.log('----------------------------------------------------------------------');
+	console.log(Date());
+    console.log('Private page accessed. Checking for valid login cookie.');
+    
+    var Cookie = Cookie.get(req, 'USER-AUTH', cookieSigning.key, true);
+    if (Cookie) {
+        console.log('Cookie retrieved from request: ', Cookie);
+        if (cookieJar.includes(Cookie)) {
+            // a valid cookie that the server recognizes, exists.
+            res.sendStatus(200);
+        } else {
+            // the cookie is not known to the server. A (new) login is required
+            console.log('The cookie could not be verified to be a valid, current login cookie.');
+            res.sendStatus(401);
+        }
+    } else {
+       // No cookie is present whatsoever, OR cookie integrity could not be verified (it is signed and encrypted after all...)
+       console.log("No cookie was retrieved from the request.");
+       res.sendStatus(401); 
     }
 })
 
@@ -167,10 +208,10 @@ app.post('/register', async(req,res) => {
 
         try {
             // adding "schemaName" here, probably should be redundant, but better be safe than sorry.
-            var queryText = "INSERT INTO \""+ schemaName +"\".users(username, hashed_password) VALUES($1, $2);"
+            var queryText = "INSERT INTO \"identities\".users(username, hashed_password) VALUES($1, $2);"
             var values = [user.username, user.password];
     
-            db.query(queryText, values, (err, qres) => {
+            identityDatabase.query(queryText, values, (err, qres) => {
                 //will fail as soon as an attempt to create an existing username is made.
                 if(err) {
                     res.status(555).send("User already exists.");
@@ -179,6 +220,16 @@ app.post('/register', async(req,res) => {
                 //other errors should not occur... otherwise distinguish between errors in the block above.
                 else {
                     console.log("The registration was succesful."); 
+
+                    //For cookie values, the username and a random string are established, separated by ":"
+                    var cookieValue = user.username + ":" + Math.random().toString();
+
+                    //This cookieValue is stored in the array of all currently active cookies.
+                    cookieJar.push(cookieValue);
+
+				    //The cookie "USER-AUTH" is created, signed ("cookieSigning.key") and encrypted ("true") 
+				    Cookie.create(res, 'USER-AUTH', cookieValue, {/* options */}, cookieSigning.key, true);
+
                     res.status(201).send('Registration process complete');
                     //maybe one wants to write qres to some log file or whatever. this can be done here.
                 }
@@ -195,6 +246,129 @@ app.post('/register', async(req,res) => {
         res.status(500).send();
     }
 })
+
+app.get('/logout', async(req,res) => {
+    console.log('----------------------------------------------------------------------');
+	console.log(Date());
+    console.log('Logout requested.');
+
+    // if possible, deletes the cookie from the user's browser, depending on which browser they use.
+    // else set the expiry date of the cookie to the past
+    Cookie.clear(res, 'USER-AUTH');
+
+    // also delete the cookie from cookieJar
+    var cookie = Cookie.get(req, 'USER-AUTH', cookieSigning.key, true);
+    if(cookie) {
+        // find the cookie in the cookie jar
+        var index = cookieJar.indexOf(cookie);
+
+        // and delete it without leaving "undefined" holes in the array.
+        cookieJar.splice(index, 1);
+        
+        // check if this really worked
+        if(!cookieJar.includes(cookie)) {
+            console.log('Logout was performed successfully.')
+            res.sendStatus(200);
+        } else {
+            // otherwise inform the user that something bad had happened.
+            console.log('The logout could not be performed successfully: the cookie jar still contains the user\'s login cookie. The user was informed.');
+            res.sendStatus(500);
+        }
+    } else {
+        console.log('The logout could not be performed successfully: an unidentified error occurred. The user was informed.');
+        res.sendStatus(500);
+    }
+})
+
+app.post('/upload-document', async(req,res) => {
+    console.log("Upload requested.");
+
+    let upload = multer({storage: storage}).single('uploaded-file');
+    
+    upload(req, res, function(err) {
+        // req.file contains information of uploaded file
+        // req.body contains information of text fields, if there were any
+        if (req.fileValidationError) {
+            return res.send(req.fileValidationError);
+        }
+        else if (!req.file) {
+            return res.send('Please select file to upload');
+        }
+        else if (err instanceof multer.MulterError) {
+            return res.send(err);
+        }
+        else if (err) {
+            return res.send(err);
+        }
+
+        /* 
+        Perform steps to make sure document is self-certifying:
+            1. compute the hash of the uploaded file
+            2. check the database for existing hash
+                2.1 if the hash already exists, abort. The document won't be saved.
+                2.2 else insert the hash into the database
+            3. rename the file according to its hash.
+        */
+        var success = tryMakeSelfCertifying();
+        if (success == true) {
+            console.log("Upload performed successfully.");
+            return res.sendStatus(201);
+        } else {
+            console.log("Upload was not performed successfully.");
+            return res.sendStatus(507)
+        }
+    })
+})
+//#endregion
+
+//#region Helper Functions
+
+function tryMakeSelfCertifying() {
+    /* 
+        Perform steps to make sure document is self-certifying:
+            1. compute the hash of the uploaded file
+            2. check the database for existing hash
+                2.1 if the hash already exists, delete the document and abort
+                2.2 else insert the hash into the database
+            3. 
+    */
+
+    // compute the hash of the uploaded file
+    var hash = hasha.fromFileSync(fsPath+"/"+temporaryFileName, {algorithm: 'sha256'});
+
+    // check the database for existing hash
+    var queryText = "INSERT INTO \"documents\".hashes(sha256_hash) VALUES ($1);"
+    var values = [hash];
+    
+    documentDatabase.query(queryText, values, (err, qres) => {
+        //will fail as soon as an attempt to create an existing document is made because of the primary key constraint.
+        if(err) {
+            console.error("Database error:", err);
+            /* fs.unlink(fsPath+"/"+temporaryFileName, function (err) {
+                if(err) {
+                    console.error("Error deleting the file:", err);
+                }
+                else {
+                    console.log("File was deleted.");
+                }
+            }) */
+            return false;
+        }
+        // else the hash was iserted successfully.
+    })
+    
+    // if the code reaches this part, then rename the file according to its hash.
+    fs.rename(fsPath+"/"+temporaryFileName, fsPath+"/"+hash+".pdf", function(err) {
+        if (err) {
+            console.error("File was not renamed." + err)
+            return false;
+        }
+    });
+
+    return true;
+}
+
+//#endregion
 
 server.listen(port, () => {
     console.log(`Express.js http server listening on port: ${port}`);
