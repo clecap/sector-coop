@@ -285,7 +285,7 @@ app.post('/upload-document', async(req,res) => {
 
     let upload = multer({storage: storage}).single('uploaded-file');
     
-    upload(req, res, function(err) {
+    upload(req, res, async function(err) {
         // req.file contains information of uploaded file
         // req.body contains information of text fields, if there were any
         if (req.fileValidationError) {
@@ -309,7 +309,7 @@ app.post('/upload-document', async(req,res) => {
                 2.2 else insert the hash into the database
             3. rename the file according to its hash.
         */
-        var success = tryMakeSelfCertifying();
+        var success = await tryMakeSelfCertifying();
         if (success == true) {
             console.log("Upload performed successfully.");
             return res.sendStatus(201);
@@ -323,7 +323,7 @@ app.post('/upload-document', async(req,res) => {
 
 //#region Helper Functions
 
-function tryMakeSelfCertifying() {
+async function tryMakeSelfCertifying() {
     /* 
         Perform steps to make sure document is self-certifying:
             1. compute the hash of the uploaded file
@@ -340,18 +340,18 @@ function tryMakeSelfCertifying() {
     var queryText = "INSERT INTO \"documents\".hashes(sha256_hash) VALUES ($1);"
     var values = [hash];
     
-    documentDatabase.query(queryText, values, (err, qres) => {
+    await documentDatabase.query(queryText, values, (err, qres) => {
         //will fail as soon as an attempt to create an existing document is made because of the primary key constraint.
         if(err) {
             console.error("Database error:", err);
-            /* fs.unlink(fsPath+"/"+temporaryFileName, function (err) {
+            fs.unlink(fsPath+"/"+temporaryFileName, function (err) {
                 if(err) {
                     console.error("Error deleting the file:", err);
                 }
                 else {
                     console.log("File was deleted.");
                 }
-            }) */
+            })
             return false;
         }
         // else the hash was iserted successfully.
