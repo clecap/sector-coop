@@ -3,17 +3,19 @@
 <head>
     <meta charset="utf-8"/>
     <title>Search</title>
+    <script src="scripts/jQuery.js"></script>
 </head>
 <body>
 
 <div class="hashed_search">
-    Please provide the Hash for the document you are trying to retrieve.
+    Please provide the Hash for the document you are trying to retrieve. Note that at the moment, all this does is check on our local database whether a document with this exact hash exists or not. You will not be served said document.
 
-    <form action="/search-document" method="POST">
+    <form id="search-form" name="search-form">
         <label for="hash">Hash:</label>
         <input type="text" id="hash" name="hash">
-        <input type="submit" value="Search">
+        <input type="button" id="search-button" value="Search">
     </form>
+    <script src="scripts/search.js"></script>
 </div>
 
 </body>

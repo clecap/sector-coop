@@ -324,7 +324,19 @@ app.post('/upload-document', (req,res) => {
 
 app.post('/search-document', async(req, res) => {
     var hash = req.body.hash;
-    console.log(hash);
+    var queryText = "SELECT sha256_hash FROM \"documents\".hashes WHERE sha256_hash = $1";
+    var values = [hash]
+
+    var result = await documentDatabase.query(queryText, values);
+
+    if(result.rowCount == 0) {
+        // given hash was not found
+        console.log("Hash " + hash + " was not found in the database.");
+        res.sendStatus(404);
+    } 
+    // else the document exists. add code to serve the document below.
+    console.log("Hash " + hash + " exists.");
+    res.sendStatus(204);
 })
 //#endregion
 
