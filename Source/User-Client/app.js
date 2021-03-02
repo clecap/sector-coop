@@ -22,6 +22,7 @@ const identityDatabase = new Pool(identityDbPoolData)
 const documentDatabase = new Pool(documentDbPoolData)
 
 let cookieSigning = require('./cookies.json');
+const { async } = require('hasha');
 var cookieJar = [];
 
 // the file name under which each uploaded file is temporarily stored before self-certifying measures are taken.
@@ -178,10 +179,10 @@ app.get('/requireLogin', async(req,res) => {
 	console.log(Date());
     console.log('Private page accessed. Checking for valid login cookie.');
     
-    var Cookie = Cookie.get(req, 'USER-AUTH', cookieSigning.key, true);
-    if (Cookie) {
-        console.log('Cookie retrieved from request: ', Cookie);
-        if (cookieJar.includes(Cookie)) {
+    var cookie = Cookie.get(req, 'USER-AUTH', cookieSigning.key, true);
+    if (cookie) {
+        console.log('Cookie retrieved from request: ', cookie);
+        if (cookieJar.includes(cookie)) {
             // a valid cookie that the server recognizes, exists.
             res.sendStatus(200);
         } else {
@@ -319,6 +320,11 @@ app.post('/upload-document', (req,res) => {
         //deleteTheTempFile();
         return res.sendStatus(507)
     }
+})
+
+app.post('/search-document', async(req, res) => {
+    var hash = req.body.hash;
+    console.log(hash);
 })
 //#endregion
 
