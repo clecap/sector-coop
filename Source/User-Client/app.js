@@ -280,12 +280,12 @@ app.get('/logout', async(req,res) => {
     }
 })
 
-app.post('/upload-document', async(req,res) => {
+app.post('/upload-document', (req,res) => {
     console.log("Upload requested.");
 
     let upload = multer({storage: storage}).single('uploaded-file');
     
-    upload(req, res, async function(err) {
+    upload(req, res, function(err) {
         // req.file contains information of uploaded file
         // req.body contains information of text fields, if there were any
         if (req.fileValidationError) {
@@ -309,21 +309,22 @@ app.post('/upload-document', async(req,res) => {
                 2.2 else insert the hash into the database
             3. rename the file according to its hash.
         */
-        var success = await tryMakeSelfCertifying();
-        if (success == true) {
-            console.log("Upload performed successfully.");
-            return res.sendStatus(201);
-        } else {
-            console.log("Upload was not performed successfully.");
-            return res.sendStatus(507)
-        }
     })
+    var success = tryMakeSelfCertifying();
+    if (success) {
+        console.log("Upload performed successfully.");
+        return res.sendStatus(201);
+    } else {
+        console.log("Upload was not performed successfully.");
+        //deleteTheTempFile();
+        return res.sendStatus(507)
+    }
 })
 //#endregion
 
 //#region Helper Functions
 
-async function tryMakeSelfCertifying() {
+function tryMakeSelfCertifying() {
     /* 
         Perform steps to make sure document is self-certifying:
             1. compute the hash of the uploaded file
@@ -340,18 +341,10 @@ async function tryMakeSelfCertifying() {
     var queryText = "INSERT INTO \"documents\".hashes(sha256_hash) VALUES ($1);"
     var values = [hash];
     
-    await documentDatabase.query(queryText, values, (err, qres) => {
+    documentDatabase.query(queryText, values, (err, qres) => {
         //will fail as soon as an attempt to create an existing document is made because of the primary key constraint.
         if(err) {
-            console.error("Database error:", err);
-            fs.unlink(fsPath+"/"+temporaryFileName, function (err) {
-                if(err) {
-                    console.error("Error deleting the file:", err);
-                }
-                else {
-                    console.log("File was deleted.");
-                }
-            })
+            console.log("Database returned an error.");
             return false;
         }
         // else the hash was iserted successfully.
@@ -360,12 +353,22 @@ async function tryMakeSelfCertifying() {
     // if the code reaches this part, then rename the file according to its hash.
     fs.rename(fsPath+"/"+temporaryFileName, fsPath+"/"+hash+".pdf", function(err) {
         if (err) {
-            console.error("File was not renamed." + err)
             return false;
         }
     });
 
     return true;
+}
+
+function deleteTheTempFile() {
+    fs.unlink(fsPath+"/"+temporaryFileName, function (err) {
+        if(err) {
+            console.error("Error deleting the file:", err);
+        }
+        else {
+            console.log("File was deleted.");
+        }
+    })
 }
 
 //#endregion
