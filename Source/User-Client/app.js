@@ -25,18 +25,8 @@ let cookieSigning = require('./cookies.json');
 const { async } = require('hasha');
 var cookieJar = [];
 
-// the file name under which each uploaded file is temporarily stored before self-certifying measures are taken.
-const temporaryFileName = "last.pdf"
-const fsPath = "../Database/Uploaded_Documents"
-const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, fsPath);
-    },
-
-    filename: function(req, file, cb) {
-        cb(null, temporaryFileName);
-    }
-});
+// path on the file system where documents will be uploaded
+const fsPath = "../Database/Uploaded_Documents/"
 
 app.use(function(req, res, next) {
     //allow connections that we expect to deal with.
@@ -281,44 +271,34 @@ app.get('/logout', async(req,res) => {
     }
 })
 
-app.post('/upload-document', (req,res) => {
+app.post('/upload-document', multer({storage: multer.memoryStorage()}).single('uploaded-file'), async (req,res) => {
+    /* 
+        This writes the uploaded document to a memory buffer first before saving it on disk.
+        Beware that this might cause memory issues with EXTREMELY large files.
+        When writing to disk directly, the program would crash as soon as more than ~100 kB are uploaded because
+        there is no way to "wait" for an upload to finish using multer.
+        This was a problem because the function tryMakeSelfCertifying() relies on an upload to be finished.
+    */
+    console.log('----------------------------------------------------------------------');
+	console.log(Date());
     console.log("Upload requested.");
 
-    let upload = multer({storage: storage}).single('uploaded-file');
     
-    upload(req, res, function(err) {
-        // req.file contains information of uploaded file
-        // req.body contains information of text fields, if there were any
-        if (req.fileValidationError) {
-            return res.send(req.fileValidationError);
-        }
-        else if (!req.file) {
-            return res.send('Please select file to upload');
-        }
-        else if (err instanceof multer.MulterError) {
-            return res.send(err);
-        }
-        else if (err) {
-            return res.send(err);
+    var hash = await tryMakeSelfCertifying(req.file.buffer);
+    if (hash) {
+        // NOW save the file to disk
+        try{
+            fs.writeFileSync(fsPath + hash + ".pdf" , req.file.buffer);  
+        } catch (err) {
+            console.error(console.error(err));
+            req.sendStatus(500);
         }
 
-        /* 
-        Perform steps to make sure document is self-certifying:
-            1. compute the hash of the uploaded file
-            2. check the database for existing hash
-                2.1 if the hash already exists, abort. The document won't be saved.
-                2.2 else insert the hash into the database
-            3. rename the file according to its hash.
-        */
-    })
-    var success = tryMakeSelfCertifying();
-    if (success) {
-        console.log("Upload performed successfully.");
-        return res.sendStatus(201);
+        console.log("Upload performed successfully. Hash " + hash + " was inserted into the database.");
+        return res.status(201).send("Document successfully uploaded with hash " + hash);
     } else {
         console.log("Upload was not performed successfully.");
-        //deleteTheTempFile();
-        return res.sendStatus(507)
+        return res.status(507).send("The document upload did not perform successfully because this document already exists.");
     }
 })
 
@@ -342,51 +322,31 @@ app.post('/search-document', async(req, res) => {
 
 //#region Helper Functions
 
-function tryMakeSelfCertifying() {
+async function tryMakeSelfCertifying(upload) {
     /* 
         Perform steps to make sure document is self-certifying:
             1. compute the hash of the uploaded file
             2. check the database for existing hash
-                2.1 if the hash already exists, delete the document and abort
+                2.1 if the hash already exists, reject the request.
                 2.2 else insert the hash into the database
             3. 
     */
 
     // compute the hash of the uploaded file
-    var hash = hasha.fromFileSync(fsPath+"/"+temporaryFileName, {algorithm: 'sha256'});
+    var hash = hasha(upload, {algorithm: 'sha256'});
 
     // check the database for existing hash
     var queryText = "INSERT INTO \"documents\".hashes(sha256_hash) VALUES ($1);"
     var values = [hash];
     
-    documentDatabase.query(queryText, values, (err, qres) => {
-        //will fail as soon as an attempt to create an existing document is made because of the primary key constraint.
-        if(err) {
-            console.log("Database returned an error.");
-            return false;
-        }
-        // else the hash was iserted successfully.
-    })
-    
-    // if the code reaches this part, then rename the file according to its hash.
-    fs.rename(fsPath+"/"+temporaryFileName, fsPath+"/"+hash+".pdf", function(err) {
-        if (err) {
-            return false;
-        }
-    });
+    try {
+        await documentDatabase.query(queryText, values);
+    } catch (error) {
+        console.error("The database responded with an error, probably because the document with hash " + hash + " already exists.");
+        return false;
+    }
 
-    return true;
-}
-
-function deleteTheTempFile() {
-    fs.unlink(fsPath+"/"+temporaryFileName, function (err) {
-        if(err) {
-            console.error("Error deleting the file:", err);
-        }
-        else {
-            console.log("File was deleted.");
-        }
-    })
+    return hash;
 }
 
 //#endregion
