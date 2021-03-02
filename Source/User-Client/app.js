@@ -14,6 +14,9 @@ const hasha = require('hasha');
 
 app.use(express.json());
 
+// path on the file system where documents will be uploaded
+const fsPath = "../Database/Uploaded_Documents/"
+
 let identityDbPoolData = require('./identitySecret.json');
 let documentDbPoolData = require('./documentSecret.json');
 // this creates the database connection with the parameters set in ***secret.json -- alter them accordingly if necessary.
@@ -25,8 +28,6 @@ let cookieSigning = require('./cookies.json');
 const { async } = require('hasha');
 var cookieJar = [];
 
-// path on the file system where documents will be uploaded
-const fsPath = "../Database/Uploaded_Documents/"
 
 app.use(function(req, res, next) {
     //allow connections that we expect to deal with.

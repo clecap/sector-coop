@@ -34,6 +34,8 @@ The User-client needs to be configured to be able to connect to
 2. Postgres Database
 
 as well as signing and en-/decrypting cookies.
+Additionally, perhaps it is desired to set the file system path where uploaded documents are stored to a more desired value. 
+To do this, change the `fsPath` field in the `app.js` file.
 
 ## Ethereum web3 Provider
 
