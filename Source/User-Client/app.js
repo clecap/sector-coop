@@ -319,6 +319,58 @@ app.post('/search-document', async(req, res) => {
     console.log("Hash " + hash + " exists.");
     res.sendStatus(204);
 })
+
+app.post('/upload-datablob', async(req, res) => {
+    /* 
+        accepts (stringified) JSON object
+        with req.body === datablob
+    */
+
+    // identify the user the datablob belongs to
+    var cookie = Cookie.get(req, 'USER-AUTH', cookieSigning.key, true);
+    if (cookie) {
+        console.log('Cookie retrieved from request: ', cookie);
+        if (cookieJar.includes(cookie)) {
+            // a valid cookie that the server recognizes, exists.
+            // no action is needed
+        } else {
+            // the cookie is not known to the server. A (new) login is required
+            console.log('The cookie could not be verified to be a valid, current login cookie.');
+            res.sendStatus(401);
+        }
+    } else {
+       // No cookie is present whatsoever, OR cookie integrity could not be verified (it is signed and encrypted after all...)
+       console.log("No cookie was retrieved from the request.");
+       res.sendStatus(401); 
+    }
+
+    // (else): the cookie is valid and we can proceed:
+
+    var username = cookie.toString().split(":", 1); // remember: cookie is like "username:randomNumber". should be a string already but one can never be too sure.
+    var datablob = req.body;
+    
+    // check the database whether the user has already uploaded data:
+    var queryText = "SELECT * FROM \"identities\".datablobs WHERE username = $1;";
+    var values = [username];
+
+    var result = await identityDatabase.query(queryText, values);
+    
+    // if they have, than the query will have a nonzero row count (i.e.: 1)
+    if(result.rowCount != 0) {
+        // update the existing datablob
+        var success = await updateDatablob(username, datablob);
+    }
+    else {
+        // create a new one
+        var success = await insertNewDatablob(username, datablob);
+    }
+    
+    if (success) {
+        res.sendStatus(201);
+    } else {
+        res.sendStatus(500);
+    }
+})
 //#endregion
 
 //#region Helper Functions
@@ -348,6 +400,38 @@ async function tryMakeSelfCertifying(upload) {
     }
 
     return hash;
+}
+
+async function updateDatablob(username, datablob) {
+    // updates existing (username, datablob) pair in the database
+    // returns a boolean indicating success
+
+    var queryText = "UPDATE \"identities\".datablobs SET datablob = $2 WHERE username = $1;"
+    var values = [username, datablob];
+
+    try{
+        await identityDatabase.query(queryText, values);
+    } catch (err) {
+        console.error(err);
+        return false;
+    }
+    return true;
+} 
+
+async function insertNewDatablob(username, datablob) {
+    // inserts a new (username, datablob) pair into the database
+    // returning a boolean indicating success
+
+    var queryText = "INSERT INTO \"identities\".datablobs VALUES ($1, $2);"
+    var values = [username, datablob];
+
+    try{
+        await identityDatabase.query(queryText, values);
+    } catch (err) {
+        console.error(err);
+        return false;
+    }
+    return true;
 }
 
 //#endregion
