@@ -134,7 +134,7 @@ app.post('/login', async(req, res) => {
     //so code execution is aborted at this point
     if(result.rowCount == 0) {
         console.log("User could not be found.");
-        return res.status(401).send();
+        return res.status(401).send("The user could not be found in the database.");
     }
 
     //if and only if a matching username was found in the database, the code proceeds to compare the passwords.
@@ -157,7 +157,7 @@ app.post('/login', async(req, res) => {
             res.sendStatus(200);
         } else {
             console.log("Failed compairing " + req_password + " and " + hashed_password);
-            res.sendStatus(401);
+            res.status(401).send("The password entered does not match the password in the database.");
         }
 
     } catch (error) {
@@ -172,9 +172,9 @@ app.get('/requireLogin', async(req,res) => {
     
     var cookie = Cookie.get(req, 'USER-AUTH', cookieSigning.key, true);
     if (isValid(cookie)) {
-        res.sendStatus(200);
+        res.status(200).send("The cookie was successfully verified.");
     } else {
-        res.sendStatus(401);
+        res.status(401).send("The USER-AUTH cookie could not be verified on the server. It is either invalid or unbeknownst to the server. Perhaps the server was restarted recently?");
     }
 })
 
@@ -221,11 +221,11 @@ app.post('/register', async(req,res) => {
     // if the code gets to this part, SOMETHING went wrong.        
         } catch (err) {
             console.error(err);
-            res.status(500).send();
+            res.status(500).send("The user database returned an unhandled error. Please check the server log for details.");
         }
     } catch (err){
         console.error(err);
-        res.status(500).send();
+        res.status(500).send("There was an error with password encryption. Please check the server log for details.");
     }
 })
 
@@ -250,15 +250,15 @@ app.get('/logout', async(req,res) => {
         // check if this really worked
         if(!cookieJar.includes(cookie)) {
             console.log('Logout was performed successfully.')
-            res.sendStatus(200);
+            res.status(200).send("Logout performed successfully.");
         } else {
             // otherwise inform the user that something bad had happened.
             console.log('The logout could not be performed successfully: the cookie jar still contains the user\'s login cookie. The user was informed.');
-            res.sendStatus(500);
+            res.status(500).send("An error occurred on the server while trying to invalidate your current login cookie. Please delete it manually to ensure a future login is not possible with this cookie.");
         }
     } else {
         console.log('The logout could not be performed successfully: an unidentified error occurred. The user was informed.');
-        res.sendStatus(500);
+        res.status(500).send("An error occurred on the server. Please delete the cookie manually to ensure a future login is not possible with this cookie.");
     }
 })
 
@@ -276,7 +276,7 @@ app.post('/upload-document', multer({storage: multer.memoryStorage()}).single('u
 
     var cookie = Cookie.get(req, 'USER-AUTH', cookieSigning.key, true);
     if (!isValid(cookie)) {
-        res.sendStatus(401);
+        res.status(401).send("We could not verify your identification cookie. Please try logging in again to fix this issue.");
     }
     
     var hash = await tryMakeSelfCertifying(req.file.buffer);
@@ -286,14 +286,14 @@ app.post('/upload-document', multer({storage: multer.memoryStorage()}).single('u
             fs.writeFileSync(fsPath + hash + ".pdf" , req.file.buffer);  
         } catch (err) {
             console.error(console.error(err));
-            req.sendStatus(500);
+            req.status(500).send("An error occurred while saving the file on the server.");
         }
 
         console.log("Upload performed successfully. Hash " + hash + " was inserted into the database.");
         return res.status(201).send("Document successfully uploaded with hash " + hash);
     } else {
         console.log("Upload was not performed successfully.");
-        return res.status(507).send("The document upload did not perform successfully because this document already exists.");
+        return res.status(507).send("The document upload did not perform successfully because this document already exists. Please note that renaming the file will not fix this.");
     }
 })
 
@@ -307,11 +307,11 @@ app.post('/search-document', async(req, res) => {
     if(result.rowCount == 0) {
         // given hash was not found
         console.log("Hash " + hash + " was not found in the database.");
-        res.sendStatus(404);
+        res.status(404).send("A document that matches the given hash could not be found in the database.");
     } 
     // else the document exists. add code to serve the document below.
     console.log("Hash " + hash + " exists.");
-    res.sendStatus(204);
+    res.status(204).send("A document that matches the given hash was found.");
 })
 
 app.post('/upload-datablob', async(req, res) => {
@@ -323,7 +323,7 @@ app.post('/upload-datablob', async(req, res) => {
     // identify the user the datablob belongs to
     var cookie = Cookie.get(req, 'USER-AUTH', cookieSigning.key, true);
     if (!isValid(cookie)) {
-        res.sendStatus(401);
+        res.status(401).send("We could not verify your identification cookie. Please try logging in again to fix this issue.");
     }
 
     // (else): the cookie is valid and we can proceed:
@@ -340,25 +340,33 @@ app.post('/upload-datablob', async(req, res) => {
     // if they have, than the query will have a nonzero row count (i.e.: 1)
     if(result.rowCount != 0) {
         // update the existing datablob
-        var success = await updateDatablob(username, datablob);
+        try {
+            await updateDatablob(username, datablob);
+        } catch (err) {
+            console.error(err);
+            res.status(500).send("The datablob could not be updated in the database.");
+        }
+        res.status(201).send("The datablob was successfully updated in the database.");
     }
     else {
         // create a new one
-        var success = await insertNewDatablob(username, datablob);
+        try {
+            await insertNewDatablob(username, datablob);
+        } catch (err) {
+            console.error(err);
+            res.status(500).send("The datablob could not be saved into the database.");
+        }
+        res.status(201).send("The datablob was successfully inserted into the database.");
     }
     
-    if (success) {
-        res.sendStatus(201);
-    } else {
-        res.sendStatus(500);
-    }
+    res.status(500).send("Something went wrong with the database. Check the server log for further info.");
 })
 
 app.get('/download-datablob', async(req,res) => {
     // identify the user that wants to retrieve the datablob
     var cookie = Cookie.get(req, 'USER-AUTH', cookieSigning.key, true);
     if (!isValid(cookie)) {
-        res.sendStatus(401);
+        res.status(401).send("We could not verify your identification cookie. Please try logging in again to fix this issue.");
     }
     // (else): the cookie is valid and we can proceed:
 
@@ -371,13 +379,13 @@ app.get('/download-datablob', async(req,res) => {
         var result = await identityDatabase.query(queryText, values)
     } catch(err) {
         console.error(err);
-        res.sendStatus(500);
+        res.status(500).send("Something went wrong with the database. Check the server log for further info.");
     }
 
     if (result.rowCount == 0) {
         // this user has no datablob in the database
         console.log("For user " + username + ", no datablob was found in the database");
-        res.sendStatus(404);
+        res.status(404).send("For the given username, no datablob was found in the database.");
     }
     // else...
     var  datablob = result.rows[0].datablob;
