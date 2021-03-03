@@ -1,4 +1,4 @@
-ar identityServer = "http://localhost:3000/login";
+var identityServer = "http://localhost:3000/login";
 
 $(function () {
     $("#login-button").on('click', function(e) {
@@ -19,7 +19,7 @@ $(function () {
             contentType: "application/json",
             dataType: "json",
             statusCode: {
-                201: function() {
+                200: function() {
                     //successful login. redirecting to home page...
                     location.href = '../../private/home.html';
                     
