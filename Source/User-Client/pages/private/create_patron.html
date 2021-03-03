@@ -42,8 +42,8 @@
 		 account_address = "0x".concat(identityServerApi.datablob.ethereum.walletAccounts[$("#identity_name").val()]);
 		 console.log(patron_address, patron_pubkey_components.n, patron_pubkey_components.e);
 		 sectorApi.functions.interact(sectorApi.smartContract.methods.createPatron(patron_address,
-											   patron_pubkey_components.n,
-											   patron_pubkey_components.e),
+											   patron_pubkey_components.e,
+											   patron_pubkey_components.n),
 					      {from:account_address},
 					      false,
 					      (result) => {
