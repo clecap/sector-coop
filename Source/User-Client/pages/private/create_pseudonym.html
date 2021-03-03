@@ -36,98 +36,104 @@
 	
 	<script>
 	 $("#init_bs").click(() => {
-	     identity_name = $("#identity_name").val();
-	     if(identity_name == "" ||
-		identityServerApi.datablob.ethereum.walletAccounts[identity_name] == undefined){
-		 throw "Please Enter a valid Identity name";
-	     }
-	     randomRoomCode = $("#room_code").val();
-	     if(randomRoomCode == ""){
-		 throw "Please Enter the Room Code shared by the Patron";
-	     }
-	     const socket = io({auth: {role:"psuedonym",
-				       token:"uniquePsuedonymToken",
-				       roomCode:randomRoomCode}}); // roomCode must be fetched from patron prior to this
-	     
-	     socket.on("disconnect", (reason) => {
-		 console.log("Socket Disconnected. Reason: "+reason)
-		 $("#log").append(`Socket Disconnected. Reason: ${reason}<br/>`)
-	     });
-
-	     socket.on("connect", () => {
-		 $("#log").append("Connected to WebSocket<br/>");
-	     });
-	     
-	     var PSEUDONYM_ADDR="0x".concat(identityServerApi.datablob.ethereum.walletAccounts[identity_name]);
-	     var patron_address = undefined;
-	     const Psuedonym = {
-		 message: Web3.utils.hexToBytes(PSEUDONYM_ADDR),
-		 N: null,
-		 E: null,
-		 r: null,
-		 signed: null,
-		 unblinded: null,
-	     };
-	     
-	     socket.on('patronPubKey', (patronPubKey, patronEthereum_address) => {
-		 console.log("Recieved Patron's Public Key");
-		 $("#log").append("Connected to Patron<br/>");
+	     try
+	     {
+		 identity_name = $("#identity_name").val();
+		 if(identity_name == "" ||
+		    identityServerApi.datablob.ethereum.walletAccounts[identity_name] == undefined){
+		     throw "Please Enter a valid Identity name";
+		 }
+		 randomRoomCode = $("#room_code").val();
+		 if(randomRoomCode == ""){
+		     throw "Please Enter the Room Code shared by the Patron";
+		 }
+		 const socket = io({auth: {role:"psuedonym",
+					   token:"uniquePsuedonymToken",
+					   roomCode:randomRoomCode}}); // roomCode must be fetched from patron prior to this
 		 
-		 Psuedonym.N = patronPubKey.n;
-		 Psuedonym.E = patronPubKey.e;
-
-		 patron_address = "0x".concat(patronEthereum_address);
-		 /* console.log(Psuedonym.N.toString()); */
-		 // N, E
-		 $("#log").append("Generating Blinded Hash<br/>");
-		 const { blinded, r } = window.myexports.BlindSignature.blindHEX({
-		     message: Psuedonym.message,
-		     N: Psuedonym.N,
-		     E: Psuedonym.E,
-		 }); // Psuedonym blinds message
-		 Psuedonym.r = r;
-		 $("#log").append("Sending Blinded Hash to Patron<br/>");
-		 console.log("Sending Blinded Hash");
-		 socket.emit("signingRequest", blinded.toString(16));
-	     });
-	     
-	     socket.on('psuedonymSigningResponse', (blindSignature) => {
-		 Psuedonym.signed = blindSignature;
-		 $("#log").append("Received Blind Signature from Patron<br/>");
-		 console.log("Recieved Blindly signed Signature");
-		 socket.close();
-		 const unblinded = window.myexports.BlindSignature.unblindHEX({
-		     signed: Psuedonym.signed,
-		     N: Psuedonym.N,
-		     r: Psuedonym.r,
-		 }); // Psuedonym unblinds
-		 Psuedonym.unblinded = unblinded;
-		 $("#log").append("Unblinded Signature<br/>");
-		 $("#log").append("Sending signature to Smart Contract for Verification<br/>");
-		 SMART_CONTRACT_ARGS={PATRON_ADDRESS : patron_address,
-				      MODULUS_HEX : "0x".concat(Psuedonym.N.toString(16)),
-				      EXPONENT_HEX : "0x".concat(Psuedonym.E.toString(16)),
-				      SIGNATURE_UNBLINDED_HEX : "0x".concat(Psuedonym.unblinded.toString(16)),
-				      MESSAGE_PLAIN : Psuedonym.message };
-		 console.log(SMART_CONTRACT_ARGS.PATRON_ADDRESS, SMART_CONTRACT_ARGS.SIGNATURE_UNBLINDED_HEX, PSEUDONYM_ADDR);
-		 sectorApi.functions.interact(sectorApi.smartContract.methods.addPseudonym(SMART_CONTRACT_ARGS.PATRON_ADDRESS,
-											   SMART_CONTRACT_ARGS.SIGNATURE_UNBLINDED_HEX),
-					      {from:PSEUDONYM_ADDR},
-					      false,
-					      (result) => {
-						  $("#log").append("<h2>Pseudonymous address successfully accepted by SecTor Smart Contract</h2><br/>");
-						  $("#log").append(JSON.stringify(result, null, '<br/>'));
-						  $("#log").append("Requesting Smart Contract for Initial Token Grant<br/>");
-						  sectorApi.functions.interact(sectorApi.smartContract.methods.grantInitialTokens(),
-									       {from:PSEUDONYM_ADDR},
-									       false,
-									       (result2) => {
-										   $("#log").append("<h2>Pseudonymous identity has been succesfully granted initial tokens</h2><br/>");
-										   $("#log").append(JSON.stringify(result2, null, '<br/>'));
-						  });
+		 socket.on("disconnect", (reason) => {
+		     console.log("Socket Disconnected. Reason: "+reason)
+		     $("#log").append(`Socket Disconnected. Reason: ${reason}<br/>`)
 		 });
-	     });
-	     
+
+		 socket.on("connect", () => {
+		     $("#log").append("Connected to WebSocket<br/>");
+		 });
+		 
+		 var PSEUDONYM_ADDR="0x".concat(identityServerApi.datablob.ethereum.walletAccounts[identity_name]);
+		 var patron_address = undefined;
+		 const Psuedonym = {
+		     message: Web3.utils.hexToBytes(PSEUDONYM_ADDR),
+		     N: null,
+		     E: null,
+		     r: null,
+		     signed: null,
+		     unblinded: null,
+		 };
+		 
+		 socket.on('patronPubKey', (patronPubKey, patronEthereum_address) => {
+		     console.log("Recieved Patron's Public Key");
+		     $("#log").append("Connected to Patron<br/>");
+		     
+		     Psuedonym.N = patronPubKey.n;
+		     Psuedonym.E = patronPubKey.e;
+
+		     patron_address = "0x".concat(patronEthereum_address);
+		     /* console.log(Psuedonym.N.toString()); */
+		     // N, E
+		     $("#log").append("Generating Blinded Hash<br/>");
+		     const { blinded, r } = window.myexports.BlindSignature.blindHEX({
+			 message: Psuedonym.message,
+			 N: Psuedonym.N,
+			 E: Psuedonym.E,
+		     }); // Psuedonym blinds message
+		     Psuedonym.r = r;
+		     $("#log").append("Sending Blinded Hash to Patron<br/>");
+		     console.log("Sending Blinded Hash");
+		     socket.emit("signingRequest", blinded.toString(16));
+		 });
+		 
+		 socket.on('psuedonymSigningResponse', (blindSignature) => {
+		     Psuedonym.signed = blindSignature;
+		     $("#log").append("Received Blind Signature from Patron<br/>");
+		     console.log("Recieved Blindly signed Signature");
+		     socket.close();
+		     const unblinded = window.myexports.BlindSignature.unblindHEX({
+			 signed: Psuedonym.signed,
+			 N: Psuedonym.N,
+			 r: Psuedonym.r,
+		     }); // Psuedonym unblinds
+		     Psuedonym.unblinded = unblinded;
+		     $("#log").append("Unblinded Signature<br/>");
+		     $("#log").append("Sending signature to Smart Contract for Verification<br/>");
+		     SMART_CONTRACT_ARGS={PATRON_ADDRESS : patron_address,
+					  MODULUS_HEX : "0x".concat(Psuedonym.N.toString(16)),
+					  EXPONENT_HEX : "0x".concat(Psuedonym.E.toString(16)),
+					  SIGNATURE_UNBLINDED_HEX : "0x".concat(Psuedonym.unblinded.toString(16)),
+					  MESSAGE_PLAIN : Psuedonym.message };
+		     console.log(SMART_CONTRACT_ARGS.PATRON_ADDRESS, SMART_CONTRACT_ARGS.SIGNATURE_UNBLINDED_HEX, PSEUDONYM_ADDR);
+		     sectorApi.functions.interact(sectorApi.smartContract.methods.addPseudonym(SMART_CONTRACT_ARGS.PATRON_ADDRESS,
+											       SMART_CONTRACT_ARGS.SIGNATURE_UNBLINDED_HEX),
+						  {from:PSEUDONYM_ADDR},
+						  false,
+						  (result) => {
+						      $("#log").append("<h2>Pseudonymous address successfully accepted by SecTor Smart Contract</h2><br/>");
+						      $("#log").append(JSON.stringify(result, null, '<br/>'));
+						      $("#log").append("Requesting Smart Contract for Initial Token Grant<br/>");
+						      sectorApi.functions.interact(sectorApi.smartContract.methods.grantInitialTokens(),
+										   {from:PSEUDONYM_ADDR},
+										   false,
+										   (result2) => {
+										       $("#log").append("<h2>Pseudonymous identity has been succesfully granted initial tokens</h2><br/>");
+										       $("#log").append(JSON.stringify(result2, null, '<br/>'));
+						      });
+		     });
+		 });
+		 
+	     }
+	     catch(error){
+		 alert(error);
+	     }
 	 }); 
 	</script>
     </body>

@@ -70,6 +70,31 @@ identityServerApi.functions.decryptDatablob= (datablob, password) => { //TODO
     
 };
 
+identityServerApi.functions.fetchDatablob = () => {
+    $.getJSON('/download-datablob', (datablob) => {
+	console.log("Downloaded Datablob");
+	identityServerApi.datablob = datablob;
+	console.log("Successfully loaded data from Identity Server");
+	alert("Successfully loaded data from Indentity Server");
+    }); 
+};
+
+identityServerApi.functions.fetchDatablob();
+
+identityServerApi.functions.uploadDatablob = () => {
+    $.ajax({
+	type: "POST",
+	url: "/upload-datablob",
+	data: JSON.stringify(identityServerApi.datablob),
+	success: () => {alert("Success");},
+	contentType:"application/json"
+    });
+};
+
+$("#datablob-upload-button").click(()=>{
+    identityServerApi.functions.uploadDatablob();
+});
+
 $("#datablob-button").click(()=>{
     fr = new FileReader();
     fr.readAsText( $("#datablob")[0].files[0] ); 

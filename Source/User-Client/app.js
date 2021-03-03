@@ -328,9 +328,10 @@ app.post('/upload-datablob', async(req, res) => {
 
     // (else): the cookie is valid and we can proceed:
 
-    var username = cookie.toString().split(":", 1); // remember: cookie is like "username:randomNumber". should be a string already but one can never be too sure.
-    var datablob = req.body;
-    
+    var username = cookie.toString().split(":", 1)[0]; // remember: cookie is like "username:randomNumber". should be a string already but one can never be too sure.
+    console.log(username);
+    var datablob = JSON.stringify(req.body);
+    console.log(req);
     // check the database whether the user has already uploaded data:
     var queryText = "SELECT * FROM \"identities\".datablobs WHERE username = $1;";
     var values = [username];
@@ -347,6 +348,7 @@ app.post('/upload-datablob', async(req, res) => {
             res.status(500).send("The datablob could not be updated in the database.");
         }
         res.status(201).send("The datablob was successfully updated in the database.");
+	return;
     }
     else {
         // create a new one
@@ -357,6 +359,7 @@ app.post('/upload-datablob', async(req, res) => {
             res.status(500).send("The datablob could not be saved into the database.");
         }
         res.status(201).send("The datablob was successfully inserted into the database.");
+	return;
     }
     
     res.status(500).send("Something went wrong with the database. Check the server log for further info.");
@@ -370,7 +373,7 @@ app.get('/download-datablob', async(req,res) => {
     }
     // (else): the cookie is valid and we can proceed:
 
-    var username = cookie.toString().split(":", 1); // remember: cookie is like "username:randomNumber". should be a string already but one can never be too sure.
+    var username = cookie.toString().split(":", 1)[0]; // remember: cookie is like "username:randomNumber". should be a string already but one can never be too sure.
 
     var queryText = "SELECT datablob FROM \"identities\".datablobs WHERE username = $1;"
     var values = [username]
@@ -386,6 +389,7 @@ app.get('/download-datablob', async(req,res) => {
         // this user has no datablob in the database
         console.log("For user " + username + ", no datablob was found in the database");
         res.status(404).send("For the given username, no datablob was found in the database.");
+	return;
     }
     // else...
     var  datablob = result.rows[0].datablob;

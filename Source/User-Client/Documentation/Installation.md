@@ -92,7 +92,7 @@ ALTER TABLE identities.users
 CREATE TABLE identities.datablobs
 (
     username character varying(64) COLLATE pg_catalog."default" NOT NULL,
-    datablob bytea NOT NULL,
+    datablob text NOT NULL,
     CONSTRAINT datablobs_pkey PRIMARY KEY (username),
     CONSTRAINT "username-key" FOREIGN KEY (username)
         REFERENCES identities.users (username) MATCH SIMPLE
