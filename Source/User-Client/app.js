@@ -171,20 +171,10 @@ app.get('/requireLogin', async(req,res) => {
     console.log('Private page accessed. Checking for valid login cookie.');
     
     var cookie = Cookie.get(req, 'USER-AUTH', cookieSigning.key, true);
-    if (cookie) {
-        console.log('Cookie retrieved from request: ', cookie);
-        if (cookieJar.includes(cookie)) {
-            // a valid cookie that the server recognizes, exists.
-            res.sendStatus(200);
-        } else {
-            // the cookie is not known to the server. A (new) login is required
-            console.log('The cookie could not be verified to be a valid, current login cookie.');
-            res.sendStatus(401);
-        }
+    if (isValid(cookie)) {
+        res.sendStatus(200);
     } else {
-       // No cookie is present whatsoever, OR cookie integrity could not be verified (it is signed and encrypted after all...)
-       console.log("No cookie was retrieved from the request.");
-       res.sendStatus(401); 
+        res.sendStatus(401);
     }
 })
 
@@ -328,20 +318,8 @@ app.post('/upload-datablob', async(req, res) => {
 
     // identify the user the datablob belongs to
     var cookie = Cookie.get(req, 'USER-AUTH', cookieSigning.key, true);
-    if (cookie) {
-        console.log('Cookie retrieved from request: ', cookie);
-        if (cookieJar.includes(cookie)) {
-            // a valid cookie that the server recognizes, exists.
-            // no action is needed
-        } else {
-            // the cookie is not known to the server. A (new) login is required
-            console.log('The cookie could not be verified to be a valid, current login cookie.');
-            res.sendStatus(401);
-        }
-    } else {
-       // No cookie is present whatsoever, OR cookie integrity could not be verified (it is signed and encrypted after all...)
-       console.log("No cookie was retrieved from the request.");
-       res.sendStatus(401); 
+    if (!isValid(cookie)) {
+        res.sendStatus(401);
     }
 
     // (else): the cookie is valid and we can proceed:
@@ -371,9 +349,58 @@ app.post('/upload-datablob', async(req, res) => {
         res.sendStatus(500);
     }
 })
+
+app.get('/download-datablob', async(req,res) => {
+    // identify the user that wants to retrieve the datablob
+    var cookie = Cookie.get(req, 'USER-AUTH', cookieSigning.key, true);
+    if (!isValid(cookie)) {
+        res.sendStatus(401);
+    }
+    // (else): the cookie is valid and we can proceed:
+
+    var username = cookie.toString().split(":", 1); // remember: cookie is like "username:randomNumber". should be a string already but one can never be too sure.
+
+    var queryText = "SELECT datablob FROM \"identities\".datablobs WHERE username = $1;"
+    var values = [username]
+
+    try {
+        var result = await identityDatabase.query(queryText, values)
+    } catch(err) {
+        console.error(err);
+        res.sendStatus(500);
+    }
+
+    if (result.rowCount == 0) {
+        // this user has no datablob in the database
+        console.log("For user " + username + ", no datablob was found in the database");
+        res.sendStatus(404);
+    }
+    // else...
+    var  datablob = result.rows[0].datablob;
+    res.status(200).send(datablob);
+})
+
 //#endregion
 
 //#region Helper Functions
+
+function isValid(cookie) {
+    if (cookie) {
+        console.log('Cookie retrieved from request: ', cookie);
+        if (cookieJar.includes(cookie)) {
+            // a valid cookie that the server recognizes, exists.
+            return true;
+        } else {
+            // the cookie is not known to the server. A (new) login is required
+            console.log('The cookie could not be verified to be a valid, current login cookie.');
+            return false;
+        }
+    } else {
+       // No cookie is present whatsoever, OR cookie integrity could not be verified (it is signed and encrypted after all...)
+       console.log("No cookie was retrieved from the request.");
+       return false;
+    }
+}
 
 async function tryMakeSelfCertifying(upload) {
     /* 
