@@ -7,19 +7,32 @@ after each run, as each patron address, pseudonym address and document hash may 
 """
 
 from time import sleep
+import json
 
 from web3 import Web3
-import json
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA256
+
+
+# Update these to match the current setup
+ca_address = "0x7B5FB9A5535f2976cdc99c57d19111B2Ed3cB925"
+contract_address = "0xeABB62E71a36a9A3eD54c49e0aBAA3b786e55F99"
+patron_address = "0xD75d8c141b8643D25391ddbd7EF8ca3D93f70919"
+pseudonym_address = "0xb8d3CAF65Fe089fFd186283a6653A44292AA7AC3"
+document = "I am a document."
+ca_passphrase = "test"
+pseudonym_passphrase = "test"
+ethereum_http_address = "http://127.0.0.1:8545/"
+path_to_contract_abi = "./build/contracts/SecTor.json"
 
 
 def getDocumentUploadCostAndInitalTokenGrant(contract):
     # two ways of calling functions that don't require transactions
     print("Document upload cost: " + str(contract.caller.getDocumentUploadCost()))
     print("Initial token grant: " + str(contract.functions.getInitialTokenGrant().call()))
-    print("--------------------------------------------------------------------------------------------------------------------------------------")
+    print(
+        "--------------------------------------------------------------------------------------------------------------------------------------")
 
 
 def unlockAccount(address, password):
@@ -27,7 +40,6 @@ def unlockAccount(address, password):
 
 
 def createPatron(contract, key):
-
     # Prepare the exponent e and the modulus n
     key_e_bytes = key.e.to_bytes(4, "big")
     key_n_bytes = key.n.to_bytes(256, "big")
@@ -39,7 +51,8 @@ def createPatron(contract, key):
     print("Modulus:")
     print(key_n_bytes)
     print(key_n_hex)
-    print("--------------------------------------------------------------------------------------------------------------------------------------")
+    print(
+        "--------------------------------------------------------------------------------------------------------------------------------------")
 
     # add the patron
     response = contract.functions.createPatron(patron_address, key_e_hex, key_n_hex).transact({"from": ca_address})
@@ -56,7 +69,8 @@ def createPatron(contract, key):
     print("CA: " + patron_pseudo[1])
     print("patronRSApubkeyExponent: " + Web3.toHex(patron_pseudo[2]))
     print("patronRSApubkeyModulus: " + Web3.toHex(patron_pseudo[3]))
-    print("--------------------------------------------------------------------------------------------------------------------------------------")
+    print(
+        "--------------------------------------------------------------------------------------------------------------------------------------")
     return key
 
 
@@ -71,7 +85,8 @@ def addPseudonym(contract, key):
     print("Signature:")
     print(signature_bytes)
     print(signature_hex)
-    print("--------------------------------------------------------------------------------------------------------------------------------------")
+    print(
+        "--------------------------------------------------------------------------------------------------------------------------------------")
 
     # Prepare the exponent e and the modulus n
     key_e_bytes = key.e.to_bytes(4, "big")
@@ -83,10 +98,12 @@ def addPseudonym(contract, key):
     constructed_key = RSA.construct((int.from_bytes(key_n_bytes, "big"), int.from_bytes(key_e_bytes, "big")))
     print("Verify signature: " + str(
         PKCS1_v1_5.new(constructed_key).verify(SHA256.new(pseudonym_address_bytes), signature_bytes)))
-    constructed_key = RSA.construct((int.from_bytes(bytes.fromhex(key_n_hex), "big"), int.from_bytes(bytes.fromhex(key_e_hex), "big")))
+    constructed_key = RSA.construct(
+        (int.from_bytes(bytes.fromhex(key_n_hex), "big"), int.from_bytes(bytes.fromhex(key_e_hex), "big")))
     print("Verify signature: " + str(
         PKCS1_v1_5.new(constructed_key).verify(SHA256.new(pseudonym_address_bytes), signature_bytes)))
-    print("--------------------------------------------------------------------------------------------------------------------------------------")
+    print(
+        "--------------------------------------------------------------------------------------------------------------------------------------")
 
     response = contract.functions.addPseudonym(patron_address, signature_hex).transact(
         {"from": pseudonym_address})
@@ -104,7 +121,8 @@ def addPseudonym(contract, key):
     print("patronBlindSignature: " + Web3.toHex(pseudo[2]))
     print("tokens: " + str(pseudo[3]))
     print("gotInitialTokens: " + str(pseudo[4]))
-    print("--------------------------------------------------------------------------------------------------------------------------------------")
+    print(
+        "--------------------------------------------------------------------------------------------------------------------------------------")
 
 
 def grantInitialTokens(contract):
@@ -122,7 +140,8 @@ def grantInitialTokens(contract):
     print("patronBlindSignature: " + Web3.toHex(pseudo[2]))
     print("tokens: " + str(pseudo[3]))
     print("gotInitialTokens: " + str(pseudo[4]))
-    print("--------------------------------------------------------------------------------------------------------------------------------------")
+    print(
+        "--------------------------------------------------------------------------------------------------------------------------------------")
 
 
 def proveAuthorship(contract):
@@ -140,7 +159,8 @@ def proveAuthorship(contract):
     key_e_hex = key_e_bytes.hex()
     key_n_hex = key_n_bytes.hex()
 
-    response = contract.functions.proveAuthorship(identity_key.publickey().export_key().hex(), signature_hex, key_e_hex, key_n_hex).transact({"from": pseudonym_address})
+    response = contract.functions.proveAuthorship(identity_key.publickey().export_key().hex(), signature_hex, key_e_hex,
+                                                  key_n_hex).transact({"from": pseudonym_address})
 
     print("proveAuthorship transaction: " + str(Web3.toJSON(response)))
 
@@ -156,11 +176,11 @@ def proveAuthorship(contract):
     print("gotInitialTokens: " + str(pseudo[4]))
     print("publicIdentity: " + str(Web3.toHex(pseudo[5])))
     print("publicIdentitySignature " + str(Web3.toHex(pseudo[6])))
-    print("--------------------------------------------------------------------------------------------------------------------------------------")
+    print(
+        "--------------------------------------------------------------------------------------------------------------------------------------")
 
 
 def addDocumentHash(contract, document):
-
     document_enc = document.encode()
     document_hash = SHA256.new(document_enc).digest()
 
@@ -201,7 +221,8 @@ def verifyRSATest(contract, key):
 
     code = contract.caller.verifyRSATest(data_bytes, signature_hex, key_e_hex, key_n_hex)
     print("Code: " + str(code))
-    print("--------------------------------------------------------------------------------------------------------------------------------------")
+    print(
+        "--------------------------------------------------------------------------------------------------------------------------------------")
 
 
 def addressToBytesTest(contract):
@@ -212,18 +233,13 @@ def addressToBytesTest(contract):
     print(pseudonym_address.encode())
     print(Web3.toHex(response))
     print(pseudonym_address.encode().hex())
-    print("--------------------------------------------------------------------------------------------------------------------------------------")
+    print(
+        "--------------------------------------------------------------------------------------------------------------------------------------")
 
 
-ca_address = "0x7B5FB9A5535f2976cdc99c57d19111B2Ed3cB925"
-contract_address = "0xeABB62E71a36a9A3eD54c49e0aBAA3b786e55F99"
-patron_address = "0xD75d8c141b8643D25391ddbd7EF8ca3D93f70919"
-pseudonym_address = "0xb8d3CAF65Fe089fFd186283a6653A44292AA7AC3"
-document = "I am a document."
+w3 = Web3(Web3.HTTPProvider(ethereum_http_address))
 
-w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545/"))
-
-with open("./build/contracts/SecTor.json") as f:
+with open(path_to_contract_abi) as f:
     info_json = json.load(f)
 abi = info_json["abi"]
 
@@ -243,12 +259,12 @@ verifyRSATest(contract, key)
 addressToBytesTest(contract)
 
 # unlock CA Account using passphrase test to allow transactions
-unlockAccount(ca_address, "test")
+unlockAccount(ca_address, ca_passphrase)
 
 createPatron(contract, key)
 
 # unlock pseudonym Account using passphrase test to allow transactions
-unlockAccount(pseudonym_address, "test")
+unlockAccount(pseudonym_address, pseudonym_passphrase)
 
 addPseudonym(contract, key)
 
