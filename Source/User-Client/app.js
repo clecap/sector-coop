@@ -154,7 +154,7 @@ app.post('/login', async(req, res) => {
 				//The cookie "USER-AUTH" is created, signed ("cookieSigning.key") and encrypted ("true") 
 				Cookie.create(res, 'USER-AUTH', cookieValue, {/* options */}, cookieSigning.key, true);
             
-            res.sendStatus(201);
+            res.sendStatus(200);
         } else {
             console.log("Failed compairing " + req_password + " and " + hashed_password);
             res.sendStatus(401);
@@ -274,6 +274,10 @@ app.post('/upload-document', multer({storage: multer.memoryStorage()}).single('u
 	console.log(Date());
     console.log("Upload requested.");
 
+    var cookie = Cookie.get(req, 'USER-AUTH', cookieSigning.key, true);
+    if (!isValid(cookie)) {
+        res.sendStatus(401);
+    }
     
     var hash = await tryMakeSelfCertifying(req.file.buffer);
     if (hash) {
