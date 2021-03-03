@@ -39,3 +39,4 @@ Currently, most features listed in the API above are tested and stable. However,
 * Right now there is **no way to reset a password**. It is debatable whether this is a desired feature at all since it requires some manner of contacting the user via email for example. 
 * If further information is collected, the database needs upgrading accordingly.
 * **Uploading a document** at the moment accepts no document metadata such as author (if desired).
+* At the moment the server does not check whether an uploaded document really *is* a pdf file. It is however, always saved as a pdf file. Some additional checks to ensure system security might be required.

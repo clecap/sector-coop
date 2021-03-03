@@ -10,7 +10,7 @@ $(function () {
          },
          401: function() {
             console.log("Verification of login cookie failed. Redirecting to login page.");
-            location.href = '../../public/login.html';
+            location.replace = '../../public/login.html';
          }
       }
    })

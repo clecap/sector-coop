@@ -14,11 +14,11 @@ $.ajax({
     statusCode: {
         200: function() {
             //successful logout. redirecting to main page...
-            location.href = '../../index.html';
+            location.replace = '../../index.html';
         },
         500: function() {
           alert("We are very sorry, but we encountered some issues on our side. To make sure your request has the intended consequences, please clear your cookies for our website. We apologize for the inconvenience.");
-          location.href = '../../index.html';
+          location.replace = '../../index.html';
         }
     }
 })
