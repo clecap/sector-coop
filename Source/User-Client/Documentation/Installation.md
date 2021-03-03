@@ -84,6 +84,26 @@ TABLESPACE pg_default;
 
 ALTER TABLE identities.users
     OWNER to postgres;
+
+
+
+-- and the datablobs table:
+
+CREATE TABLE identities.datablobs
+(
+    username character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    datablob bytea NOT NULL,
+    CONSTRAINT datablobs_pkey PRIMARY KEY (username),
+    CONSTRAINT "username-key" FOREIGN KEY (username)
+        REFERENCES identities.users (username) MATCH SIMPLE
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE identities.datablobs
+    OWNER to postgres;
 ```
 
 Now that the idenitity database is set up, it is time to create the document database. Right now this will contain nothing more than the SHA256 hash of the documents that are uploaded to the system. This, at this point in time, makes sure that duplicates of documents can be recognized and rejected easily. In the future, the database could include document metadata in (presumably) different tables.
