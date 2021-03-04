@@ -4,8 +4,8 @@ $(function () {
     $("#register-button").on('click', function(e) {
         e.preventDefault();
         var username = $('#username').val();
-        var password = $('#password').val();
-        var repeated_password = $('#repeat-password').val();
+        var password = window.myexports.BlindSignature.messageToHash($('#password').val());
+	var repeated_password = window.myexports.BlindSignature.messageToHash($('#repeat-password').val());
 
         if(password === repeated_password) {
             var payload = JSON.stringify(

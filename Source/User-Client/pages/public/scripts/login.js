@@ -4,7 +4,7 @@ $(function () {
     $("#login-button").on('click', function(e) {
         e.preventDefault();
         var username = $('#username').val();
-        var password = $('#password').val();
+        var password = window.myexports.BlindSignature.messageToHash($('#password').val());
         var payload = JSON.stringify(
             {
                 "username" : username.toString(), 
