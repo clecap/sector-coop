@@ -30,5 +30,14 @@ $(function() {
             }
          }
       });
+       $("#log").html("");
+       sectorApi.functions.interact(sectorApi.smartContract.methods.getDocument("0x".concat( hash )), {}, true, callback=(result)=>{
+	   $("#log").append(JSON.stringify(result, null, "<br/>"));
+	   $("#log").append("<br/>")
+       });
+       sectorApi.functions.interact(sectorApi.smartContract.methods.getDocHashes(), {}, true, callback=(result)=>{
+	   $("#log").append(JSON.stringify(result, null, "<br/>"));
+       });
+      
    })
 })

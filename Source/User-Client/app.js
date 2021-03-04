@@ -281,12 +281,12 @@ app.post('/upload-document', multer({storage: multer.memoryStorage()}).single('u
     if (!isValid(cookie)) {
         return res.status(401).send("We could not verify your identification cookie. Please try logging in again to fix this issue.");
     }
-    checkDocHashOnBlockchain(req.file.buffer, (doccheck) => {
+    checkDocHashOnBlockchain(req.file.buffer, (doccheck, hash) => {
 	if (doccheck == false) {
 	    return res.status(500).send("Document Hash not found on SecTor Contract");
 	}
-	var hash = await tryMakeSelfCertifying(req.file.buffer);
-	if (hash) {
+	var hash2 = (async()=> await tryMakeSelfCertifying(req.file.buffer) )();
+	if (hash2) {
             // NOW save the file to disk
             try{
 		fs.writeFileSync(fsPath + hash + ".pdf" , req.file.buffer);  
@@ -433,12 +433,12 @@ async function checkDocHashOnBlockchain(file, cb){
 	sector_contract.methods.getDocument("0x".concat( hash )).call().then((doc) => {
 	    console.log(doc);
 	    console.log(hash);
-	    cb(doc[0].isValue);
+	    cb(doc[0].isValue, hash);
 	});
     }    
     catch(error){
 	console.log(error);
-	cb(false);
+	cb(false, undefined);
     }
 }
 async function tryMakeSelfCertifying(upload) {

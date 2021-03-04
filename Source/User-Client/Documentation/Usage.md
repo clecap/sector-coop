@@ -3,6 +3,9 @@
 Run the express.js web server by running `> node app.js`
 	
 # Using the Features
+The User-client pages currently are only tested using the `Chromium`
+browser. Firefox currently will not work proerly, since CORS policies
+are not properly set for the user-client server.
 
 The following sections require the user to import their data from
 file, or from the identity server.
@@ -118,8 +121,8 @@ This function is limited to the *CA*.
    
    {"ethereum" :
 	   {
-	   "keystoreArray":[{"version":3,"id":"0d35e06d-db96-4ccb-87ff-2983323bd5b7","address":"308da72f4a4f37a18ae6c5eb1d5bf79e8265dcc8","crypto":{"ciphertext":"78d88e63969552eb80c2062b9a21ef1aaf4e2bea8572b112424661b962ae744b","cipherparams":{"iv":"1999a35a0feda93ff75e056377320443"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"c57a8b50bb21b5aae7ee7f85b785a406737d3863bfdae7e226a65a03388a3ebb","n":8192,"r":8,"p":1},"mac":"6a4a248005caa279c4d473ab7dac88e65c02fea3a36421f11c160708d76c3bb3"}}],
-	   "walletAccounts":{"my_ca_account":"308da72f4a4f37a18ae6c5eb1d5bf79e8265dcc8"}
+	   "keystoreArray":[{"version":3,"id":"ca685b25-d8c8-4a41-8fe0-228bd710b566","address":"7b5fb9a5535f2976cdc99c57d19111b2ed3cb925","crypto":{"ciphertext":"f8098d27a5759e97fb30371e7a066cf3673db400ebd61f39d622a309fda293ae","cipherparams":{"iv":"b8ed9a456b099a74f0ab1a920ab4875f"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"50bc999daa71af24124642f46d374c0dc2ece5da275eadd1b9fa7e2378cbdebb","n":8192,"r":8,"p":1},"mac":"4d79b198a17337833f9df21e2de4d07ba13856b977ffa53f3727f277a9b8c230"}}],
+	   "walletAccounts":{"ca_account":"7b5fb9a5535f2976cdc99c57d19111b2ed3cb925"}
 	   },
    "bs" : {}
    }

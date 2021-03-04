@@ -111,6 +111,7 @@ $("#datablob-button").click(()=>{
 	datablob = JSON.parse(fr.result);
 	identityServerApi.datablob = datablob;
 	sectorApi.functions.loadWallet();
+	alert("Datablob loaded");
     };
 });
 
