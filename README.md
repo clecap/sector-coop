@@ -48,6 +48,9 @@ Finally, the sub folder **Prototypes** holds code demonstrations and proof of wo
 The code for the smart contract and the configuration for the private Ethereum blockchain can be found as described in the 'Map to the repository' section.
 The first step to start working on either of those should be to set up a test environemt. Instruction for this can be found [here](https://github.com/clecap/sector-coop/blob/main/Documentation/Documents/Test%20Chain%20Setup%20Guide.md).
 
+### Contributing to the User-Client 
+The User-Client Documentation, Usage, Copyright Notices and Contribution Guide can be found [ here ](/Source/User-Client/README.md).
+
 The smart contract still needs to be expanded to cover further use cases such as patrons making claims about pseudonyms and linking comments or reviews to existing documents. 
 For the Ethereum blockchain, only single node networks have been tested so far, instructions and automation for setting up multi-node private Ethereum networks still need to be developed.
 
