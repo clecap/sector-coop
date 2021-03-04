@@ -11,6 +11,7 @@ const { restart } = require('nodemon');
 const Cookie = require('node-cookie');
 const multer = require('multer');
 const hasha = require('hasha');
+const Web3 = require('web3');
 
 app.use(express.json());
 
@@ -19,6 +20,8 @@ const fsPath = "../Database/Uploaded_Documents/"
 
 let identityDbPoolData = require('./identitySecret.json');
 let documentDbPoolData = require('./documentSecret.json');
+let userclient_config = require('./config/deploy/userclient.json');
+let sector_contract_config = require('./config/contract/SecTor.json');
 // this creates the database connection with the parameters set in ***secret.json -- alter them accordingly if necessary.
 // see https://node-postgres.com/features/connecting for instructions.
 const identityDatabase = new Pool(identityDbPoolData)
@@ -157,7 +160,7 @@ app.post('/login', async(req, res) => {
             res.sendStatus(200);
         } else {
             console.log("Failed compairing " + req_password + " and " + hashed_password);
-            res.status(401).send("The password entered does not match the password in the database.");
+            return res.status(401).send("The password entered does not match the password in the database.");
         }
 
     } catch (error) {
@@ -172,9 +175,9 @@ app.get('/requireLogin', async(req,res) => {
     
     var cookie = Cookie.get(req, 'USER-AUTH', cookieSigning.key, true);
     if (isValid(cookie)) {
-        res.status(200).send("The cookie was successfully verified.");
+        return res.status(200).send("The cookie was successfully verified.");
     } else {
-        res.status(401).send("The USER-AUTH cookie could not be verified on the server. It is either invalid or unbeknownst to the server. Perhaps the server was restarted recently?");
+        return res.status(401).send("The USER-AUTH cookie could not be verified on the server. It is either invalid or unbeknownst to the server. Perhaps the server was restarted recently?");
     }
 })
 
@@ -196,7 +199,7 @@ app.post('/register', async(req,res) => {
             identityDatabase.query(queryText, values, (err, qres) => {
                 //will fail as soon as an attempt to create an existing username is made.
                 if(err) {
-                    res.status(555).send("User already exists.");
+                    return res.status(555).send("User already exists.");
                     console.error("A username was tried that already exists in the database. Rejecting...");
                 }
                 //other errors should not occur... otherwise distinguish between errors in the block above.
@@ -212,7 +215,7 @@ app.post('/register', async(req,res) => {
 				    //The cookie "USER-AUTH" is created, signed ("cookieSigning.key") and encrypted ("true") 
 				    Cookie.create(res, 'USER-AUTH', cookieValue, {/* options */}, cookieSigning.key, true);
 
-                    res.status(201).send('Registration process complete');
+                    return res.status(201).send('Registration process complete');
                     //maybe one wants to write qres to some log file or whatever. this can be done here.
                 }
             });
@@ -221,11 +224,11 @@ app.post('/register', async(req,res) => {
     // if the code gets to this part, SOMETHING went wrong.        
         } catch (err) {
             console.error(err);
-            res.status(500).send("The user database returned an unhandled error. Please check the server log for details.");
+            return res.status(500).send("The user database returned an unhandled error. Please check the server log for details.");
         }
     } catch (err){
         console.error(err);
-        res.status(500).send("There was an error with password encryption. Please check the server log for details.");
+        return res.status(500).send("There was an error with password encryption. Please check the server log for details.");
     }
 })
 
@@ -250,15 +253,15 @@ app.get('/logout', async(req,res) => {
         // check if this really worked
         if(!cookieJar.includes(cookie)) {
             console.log('Logout was performed successfully.')
-            res.status(200).send("Logout performed successfully.");
+            return res.status(200).send("Logout performed successfully.");
         } else {
             // otherwise inform the user that something bad had happened.
             console.log('The logout could not be performed successfully: the cookie jar still contains the user\'s login cookie. The user was informed.');
-            res.status(500).send("An error occurred on the server while trying to invalidate your current login cookie. Please delete it manually to ensure a future login is not possible with this cookie.");
+            return res.status(500).send("An error occurred on the server while trying to invalidate your current login cookie. Please delete it manually to ensure a future login is not possible with this cookie.");
         }
     } else {
         console.log('The logout could not be performed successfully: an unidentified error occurred. The user was informed.');
-        res.status(500).send("An error occurred on the server. Please delete the cookie manually to ensure a future login is not possible with this cookie.");
+        return res.status(500).send("An error occurred on the server. Please delete the cookie manually to ensure a future login is not possible with this cookie.");
     }
 })
 
@@ -276,25 +279,30 @@ app.post('/upload-document', multer({storage: multer.memoryStorage()}).single('u
 
     var cookie = Cookie.get(req, 'USER-AUTH', cookieSigning.key, true);
     if (!isValid(cookie)) {
-        res.status(401).send("We could not verify your identification cookie. Please try logging in again to fix this issue.");
+        return res.status(401).send("We could not verify your identification cookie. Please try logging in again to fix this issue.");
     }
-    
-    var hash = await tryMakeSelfCertifying(req.file.buffer);
-    if (hash) {
-        // NOW save the file to disk
-        try{
-            fs.writeFileSync(fsPath + hash + ".pdf" , req.file.buffer);  
-        } catch (err) {
-            console.error(console.error(err));
-            req.status(500).send("An error occurred while saving the file on the server.");
-        }
-
-        console.log("Upload performed successfully. Hash " + hash + " was inserted into the database.");
-        return res.status(201).send("Document successfully uploaded with hash " + hash);
-    } else {
-        console.log("Upload was not performed successfully.");
-        return res.status(507).send("The document upload did not perform successfully because this document already exists. Please note that renaming the file will not fix this.");
-    }
+    checkDocHashOnBlockchain(req.file.buffer, (doccheck) => {
+	if (doccheck == false) {
+	    return res.status(500).send("Document Hash not found on SecTor Contract");
+	}
+	var hash = await tryMakeSelfCertifying(req.file.buffer);
+	if (hash) {
+            // NOW save the file to disk
+            try{
+		fs.writeFileSync(fsPath + hash + ".pdf" , req.file.buffer);  
+            } catch (err) {
+		console.error(console.error(err));
+		return req.status(500).send("An error occurred while saving the file on the server.");
+            }
+	    
+            console.log("Upload performed successfully. Hash " + hash + " was inserted into the database.");
+            return res.status(201).send("Document successfully uploaded with hash " + hash);
+	} else {
+            console.log("Upload was not performed successfully.");
+            return res.status(507).send("The document upload did not perform successfully because this document already exists. Please note that renaming the file will not fix this.");
+	}
+	
+    });
 })
 
 app.post('/search-document', async(req, res) => {
@@ -307,11 +315,11 @@ app.post('/search-document', async(req, res) => {
     if(result.rowCount == 0) {
         // given hash was not found
         console.log("Hash " + hash + " was not found in the database.");
-        res.status(404).send("A document that matches the given hash could not be found in the database.");
+        return res.status(404).send("A document that matches the given hash could not be found in the database.");
     } 
     // else the document exists. add code to serve the document below.
     console.log("Hash " + hash + " exists.");
-    res.status(204).send("A document that matches the given hash was found.");
+    return res.status(204).send("A document that matches the given hash was found.");
 })
 
 app.post('/upload-datablob', async(req, res) => {
@@ -323,7 +331,7 @@ app.post('/upload-datablob', async(req, res) => {
     // identify the user the datablob belongs to
     var cookie = Cookie.get(req, 'USER-AUTH', cookieSigning.key, true);
     if (!isValid(cookie)) {
-        res.status(401).send("We could not verify your identification cookie. Please try logging in again to fix this issue.");
+        return res.status(401).send("We could not verify your identification cookie. Please try logging in again to fix this issue.");
     }
 
     // (else): the cookie is valid and we can proceed:
@@ -345,10 +353,9 @@ app.post('/upload-datablob', async(req, res) => {
             await updateDatablob(username, datablob);
         } catch (err) {
             console.error(err);
-            res.status(500).send("The datablob could not be updated in the database.");
+            return res.status(500).send("The datablob could not be updated in the database.");
         }
-        res.status(201).send("The datablob was successfully updated in the database.");
-	return;
+        return res.status(201).send("The datablob was successfully updated in the database.");
     }
     else {
         // create a new one
@@ -356,20 +363,19 @@ app.post('/upload-datablob', async(req, res) => {
             await insertNewDatablob(username, datablob);
         } catch (err) {
             console.error(err);
-            res.status(500).send("The datablob could not be saved into the database.");
+            return res.status(500).send("The datablob could not be saved into the database.");
         }
-        res.status(201).send("The datablob was successfully inserted into the database.");
-	return;
+        return res.status(201).send("The datablob was successfully inserted into the database.");
     }
     
-    res.status(500).send("Something went wrong with the database. Check the server log for further info.");
+    return res.status(500).send("Something went wrong with the database. Check the server log for further info.");
 })
 
 app.get('/download-datablob', async(req,res) => {
     // identify the user that wants to retrieve the datablob
     var cookie = Cookie.get(req, 'USER-AUTH', cookieSigning.key, true);
     if (!isValid(cookie)) {
-        res.status(401).send("We could not verify your identification cookie. Please try logging in again to fix this issue.");
+        return res.status(401).send("We could not verify your identification cookie. Please try logging in again to fix this issue.");
     }
     // (else): the cookie is valid and we can proceed:
 
@@ -382,18 +388,17 @@ app.get('/download-datablob', async(req,res) => {
         var result = await identityDatabase.query(queryText, values)
     } catch(err) {
         console.error(err);
-        res.status(500).send("Something went wrong with the database. Check the server log for further info.");
+        return res.status(500).send("Something went wrong with the database. Check the server log for further info.");
     }
 
     if (result.rowCount == 0) {
         // this user has no datablob in the database
         console.log("For user " + username + ", no datablob was found in the database");
-        res.status(404).send("For the given username, no datablob was found in the database.");
-	return;
+        return res.status(404).send("For the given username, no datablob was found in the database.");
     }
     // else...
     var  datablob = result.rows[0].datablob;
-    res.status(200).send(datablob);
+    return res.status(200).send(datablob);
 })
 
 //#endregion
@@ -417,7 +422,25 @@ function isValid(cookie) {
        return false;
     }
 }
+async function checkDocHashOnBlockchain(file, cb){
 
+    //Check if document's hash exists on the blockchain
+    var hash = hasha(file, {algorithm:'sha256'});
+    try{  
+	web3 = new Web3(userclient_config.ethereum.providerAddress);
+	sector_contract = new web3.eth.Contract(sector_contract_config.abi,
+						userclient_config.ethereum.contractAddress);
+	sector_contract.methods.getDocument("0x".concat( hash )).call().then((doc) => {
+	    console.log(doc);
+	    console.log(hash);
+	    cb(doc[0].isValue);
+	});
+    }    
+    catch(error){
+	console.log(error);
+	cb(false);
+    }
+}
 async function tryMakeSelfCertifying(upload) {
     /* 
         Perform steps to make sure document is self-certifying:

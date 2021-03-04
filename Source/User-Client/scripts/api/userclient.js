@@ -8,22 +8,6 @@ var identityServerApi = {config:undefined,
 var documentServerApi = {config:undefined};
 
 
-$.getJSON('/config/contract/SecTor.json', (data) => {
-    console.log("Loaded SecTor SmartContract abi");
-    sectorApi.config = data;
-    $.getJSON('/config/deploy/userclient.json', (data) => {
-	console.log("Loaded Userclient Configuration");
-	userclient.config = data;
-	userclient.web3 = new Web3(userclient.config.ethereum.providerAddress);
-	sectorApi.smartContract = new userclient.web3.eth.Contract(sectorApi.config.abi,
-								   userclient.config.ethereum.contractAddress);
-	identityServerApi.config = userclient.config.identityServer;
-	documentServerApi.config = userclient.config.documentServer;
-    });
-});
-
-
-
 identityServerApi.datablob = {"ethereum" :
 			      {
 				  "keystoreArray":[],
@@ -74,12 +58,11 @@ identityServerApi.functions.fetchDatablob = () => {
     $.getJSON('/download-datablob', (datablob) => {
 	console.log("Downloaded Datablob");
 	identityServerApi.datablob = datablob;
+	sectorApi.functions.loadWallet();
 	console.log("Successfully loaded data from Identity Server");
 	alert("Successfully loaded data from Indentity Server");
     }); 
 };
-
-identityServerApi.functions.fetchDatablob();
 
 identityServerApi.functions.uploadDatablob = () => {
     $.ajax({
@@ -91,9 +74,35 @@ identityServerApi.functions.uploadDatablob = () => {
     });
 };
 
+
+
+window.onload = () => {
+    $.getJSON('/config/contract/SecTor.json', (data) => {
+	console.log("Loaded SecTor SmartContract abi");
+	sectorApi.config = data;
+	$.getJSON('/config/deploy/userclient.json', (data) => {
+	    console.log("Loaded Userclient Configuration");
+	    userclient.config = data;
+	    userclient.web3 = new Web3(userclient.config.ethereum.providerAddress);
+	    sectorApi.smartContract = new userclient.web3.eth.Contract(sectorApi.config.abi,
+								       userclient.config.ethereum.contractAddress);
+	    identityServerApi.config = userclient.config.identityServer;
+	    documentServerApi.config = userclient.config.documentServer;
+    });
+});
+
+
+};
+
 $("#datablob-upload-button").click(()=>{
     identityServerApi.functions.uploadDatablob();
 });
+
+$("#datablob-download-button").click(()=>{
+    identityServerApi.functions.fetchDatablob();
+});
+
+
 
 $("#datablob-button").click(()=>{
     fr = new FileReader();

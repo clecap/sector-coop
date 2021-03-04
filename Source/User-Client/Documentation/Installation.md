@@ -152,6 +152,13 @@ The server application requires by default two documents in the same directory a
 * `password` should contain the password for either database.
 * `port` is the port that the postgres server runs on, `5432` by default. Again, not the port of the user client server application.
 
+### Document Upload Directory
+
+Please create an empty directory
+`Source/Database/Uploaded_Documents/`. Relative to the `User-Client`
+directory, this is `../Database/Uploaded_Documents/`.
+
+
 ## Cookie validation
 The application is set up to use cookies for user authentification to access private pages after they logged in. To provide an additional layer of security, the cookies are signed and encrypted before being sent to the user. This requires a key set in `cookies.json` in the application folder. The content should look like this:
 ```
