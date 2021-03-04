@@ -54,10 +54,6 @@ For the Ethereum blockchain, only single node networks have been tested so far, 
 ### Contributing to the User-Client 
 The User-Client Documentation, Usage, Copyright Notices and Contribution Guide can be found [ here ](/Source/User-Client/README.md).
 
-
-### Current Feature Progress
-
-
 ## Copyright notices
 This project uses the [SolRsaVerifiy](https://github.com/adria0/SolRsaVerify) project in an adapted version as it has been turned into an internal library for the main smart contract of the project. SolRsaVerify is published under GPL-3.0.
 This project uses a custom binary of [geth](https://github.com/ethereum/go-ethereum) where the calculation of block difficulty has been simplified to always return 1. go-ethereum is published under LGPL-3.0.
