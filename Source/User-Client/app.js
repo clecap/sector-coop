@@ -199,8 +199,8 @@ app.post('/register', async(req,res) => {
             identityDatabase.query(queryText, values, (err, qres) => {
                 //will fail as soon as an attempt to create an existing username is made.
                 if(err) {
-                    return res.status(555).send("User already exists.");
                     console.error("A username was tried that already exists in the database. Rejecting...");
+                    return res.status(555).send("User already exists.");
                 }
                 //other errors should not occur... otherwise distinguish between errors in the block above.
                 else {

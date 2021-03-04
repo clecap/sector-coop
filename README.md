@@ -36,13 +36,14 @@ In its final version, SecTor shall be a decentralized system where nodes may joi
 ### Map to the repository
 This repository consists of the major two sections **Documentation** and **Source**, where **Documentation** holds all the documents and notes and **Source**, which holds all the code and configuration files.
 
-Under **Documentation** in the sub folder **Documents** are files describing existing or planned features as well as guides on how to set up parts of the system.
-The **Research and Brainstorming** sub folder is a place for archiving organized thoughts and less concrete plans.
-The **Documentation** folder also holds the **Feature progress.md** which shows the current state of planned features of the system as well as the **Table of Contents.md** which lists all documents, gives an idea what they are about as well as a glossary that explains the jargon of this project.
+Under **Documentation** in the sub directory **Documents** are files describing existing or planned features as well as guides on how to set up parts of the system.
+The **Research and Brainstorming** sub directory is a place for archiving organized thoughts and less concrete plans.
+The **Documentation** directory also holds the **Feature progress.md** which shows the current state of planned features of the system as well as the **Table of Contents.md** which lists all documents, gives an idea what they are about as well as a glossary that explains the jargon of this project.
 Both of those files should be kept up to date as the project develops.
 
-Under **Source** in the sub folder **Solidity Smart Contract** is the truffle environment for developing and deploying the smart contract. In the **Test Ethereum Chain** sub folder are some scripts for controlling an Ethereum chain as well as the genesis block configuration. Further, **User-Client**, **Identity-Server** and **Database** hold the code for the respective system parts.
-Finally, the sub folder **Prototypes** holds code demonstrations and proof of works that are similar to the **Research and Brainstorming** section but in code.
+Under **Source** in the sub directory **Solidity Smart Contract** is the truffle environment for developing and deploying the smart contract. In the **Test Ethereum Chain** sub directory are some scripts for controlling an Ethereum chain as well as the genesis block configuration. Furthermore, **User Client** contains all code related to what the user sees and interacts with, i.e. the HTML pages and scripts as well as the `app.js` file that is the server application and code that the user client requires in order to communicate with the other system parts. 
+The **Database** directory contains several SQL queries that can be used to set up the document and identity databases. It is also the directory where uploaded documents are saved in **Uploaded Documents**. This path can be easily changed in the User client application though.
+Finally, the sub directory **Prototypes** holds code demonstrations and proof of works that are similar to the **Research and Brainstorming** section but in code.
 
 ### Contributing to the smart contract and blockchain development
 The code for the smart contract and the configuration for the private Ethereum blockchain can be found as described in the 'Map to the repository' section.
