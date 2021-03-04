@@ -5,8 +5,14 @@
    
 # Dependencies
 
-In the `User Client` directory, run `npm install`. This will
-install the javascript libraries required to run the User-Client
+In the `User-Client` directory, run `npm install`. This will install
+the javascript libraries required to run the User-Client. In some
+instances, this fails to install dependencies properly due to existing
+system configuration unrelated to the User Client. Running `npm
+update` instead of install can sometimes fix these errors.
+
+Run `npm install --global browserify` (`--local` can be used in place
+of `--global`).
 
 Run `browserify scripts/rsablind-node.js -o scripts/rsablind-bundle.js`.
 
