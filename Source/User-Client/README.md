@@ -7,7 +7,7 @@
 * [ Installation ](Documentation/Installation.md)
 * [ Usage ](Documentation/Usage.md)
 * [ Copyright Notices ](Documentation/Copyright.md)
-
+* [ Contributing ](Documentation/Contributing.md)
 # API
 Where no type is specified, all requests shall be made using stringified JSON with the keys named in the Request column to ensure the program will behave as expected.
 For example: the `/login` route expects the following stringified JSON object as payload of the POST request:

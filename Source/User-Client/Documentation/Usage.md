@@ -4,16 +4,27 @@ Run the express.js web server by running `> node app.js`
 	
 # Using the Features
 
-In all of the following sections, please enter your password, select
-the file required for importing your datablob, and click on *Click to
-import datablob from file*. 
+The following sections require the user to import their data from
+file, or from the identity server.
 
-This import must be done before any other operations are completed.
+To import from the identity server, make sure you are logged in first
+using `http(s)://xxx:3000/public/login.html`. One can register using
+`http(s)://xx:3000/public/register.html`. After the login, clicking on
+*Click to download Datablob from Identity Server* will load the data
+and ethereum wallet into the web-page for usage. Make sure to
+additionally add your password in the password field, since this is
+necessary to decrypt the ethereum wallet.
+
+The user can also upload a datablob from file by clicking on *Click to
+import datablob from file*.
+
+This import must be done before any other operations are initiated.
 
 If you have made any modifations to your data, it is vital to click on
-*Click to export datablob to file* after such operations, otherwise
-any changes made will not be accessable on any other page/after a
-reload/page redirection.
+*Click to export datablob to file* or *Click to upload datablob to
+identity server* after such operations, otherwise any changes made
+will not be accessable on any other page/after a reload/page
+redirection.
 
 ## Creating an Identity
 
@@ -151,7 +162,7 @@ This section documents how a user can Blindly Sign a Pseudonym address.
 ## Request Patron for Signature and add Identity as Pseudonym
 	
 Using the browser, navigate to
-`http(s)://xxx:3000/private/create_identity.html`
+`http(s)://xxx:3000/private/create_pseudonym.html`
 
 This section documents how a user can ask a Patron to Blindly Sign
 their identity and add this identity to the SecTor smart contract as a
@@ -163,3 +174,39 @@ pseudonym.
 4. This will initiate the Blind Signature process.
 
 Please check the log below for more details on the progress.
+The browser client will automatically request for tokens as well.
+
+## Upload a Document by Spending Tokens
+
+Using the browser, navigate to 
+`http(s)://xxx:3000/private/upload.html`
+
+This section documents how a user can upload a document to the
+document server, after spending tokens on the smart contract.
+
+1. Import your datablob
+2. Enter the Identity Name that has the tokens necessary to upload the
+   document.
+3. Choose a document that you would like to upload using the *Choose
+   File* button.
+4. Finally, click on *Click to Upload Document* to initiate the process.
+
+Subsequently, the user-client will attempt to spend tokens on the
+smart contract, and then attempt to upload the document to the
+document server.
+
+Refer the the log below for updates.
+
+Once the process is complete, the user is shown the uploaded
+document's hash. This can be saved for using in the next section
+
+## Search for a Document using a hash
+
+This section allows the user to confirm that a document has been
+uploaded to the document server.
+
+Using the browser, navigate to 
+`http(s)://xxx:3000/public/search.html`
+
+Enter the Document Hash in the text box and click on *Search*.
+
