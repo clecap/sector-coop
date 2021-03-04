@@ -292,7 +292,7 @@ app.post('/upload-document', multer({storage: multer.memoryStorage()}).single('u
 		fs.writeFileSync(fsPath + hash + ".pdf" , req.file.buffer);  
             } catch (err) {
 		console.error(console.error(err));
-		return req.status(500).send("An error occurred while saving the file on the server.");
+		return res.status(500).send("An error occurred while saving the file on the server.");
             }
 	    
             console.log("Upload performed successfully. Hash " + hash + " was inserted into the database.");
