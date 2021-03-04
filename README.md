@@ -51,9 +51,8 @@ The first step to start working on either of those should be to set up a test en
 
 The smart contract still needs to be expanded to cover further use cases such as patrons making claims about pseudonyms and linking comments or reviews to existing documents. 
 For the Ethereum blockchain, only single node networks have been tested so far, instructions and automation for setting up multi-node private Ethereum networks still need to be developed.
-
-### Current Feature Progress
-
+### Contributing to the User-Client 
+The User-Client Documentation, Usage, Copyright Notices and Contribution Guide can be found [ here ](/Source/User-Client/README.md).
 
 ## Copyright notices
 This project uses the [SolRsaVerifiy](https://github.com/adria0/SolRsaVerify) project in an adapted version as it has been turned into an internal library for the main smart contract of the project. SolRsaVerify is published under GPL-3.0.
