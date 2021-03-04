@@ -1,6 +1,6 @@
 # Table of Contents
 1. Links to installation, usage and copyright notices for the user client server application
-2. API documentation
+2. API documentation for server routes
 3. Some notes on how to contribute
 
 # Links
