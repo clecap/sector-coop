@@ -1,7 +1,8 @@
-# SecTor-Coop
+# SecTor-Coop and Blogchain Publishing
 
 SecTor-Coop is a student project where students from the universtities **Clausthal**, **Göttingen** and **Rostock** cooperate.
-The goal of the project is to develop a prototype of a blockchain based publishing system.
+The goal of the project is to develop a prototype of a blockchain based publishing system, according to the Blogchain concept
+describe below. The acronym SecTor has historical roots, only.
 
 ## Use Case
 Imagine a scientist publishes his or her thoughts **on a blog** and gets good reviews on this. From a _research point of view_, this sounds great! From an _academic perspective_, traditional journal and conference-type of publications are expected, as only they are considered reliable, peer-reviewed proofs of academic achievements. The owner of a science blog could easily fake positive reviews and manipulate the texts in many ways.
