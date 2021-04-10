@@ -16,7 +16,7 @@
 | User Client Documentation   | Documentation for Installation, Usage and Copyright Notices for the User Client         | Anant, Dominik                    | 04.03.2021    | [Link](https://github.com/clecap/sector-coop/blob/main/Source/User-Client/README.md)                                               |
 | Database Documentation | Statements to help set up the databases | Dominik | 04.03.2021 | [Link](https://github.com/clecap/sector-coop/blob/main/Source/Database/README.md)
 | Entity Relationship Diagram | ER Diagram for storage node                                                             | Jonas                    | 01.12.2020    | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphics/UML/new%20entity%20relationship%20diagram.png)    |
-| Block Diagram               | System snapshot for rough system parts with functionality                               | Jonas                    | 09.12.2020    | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphics/UML/block%20Diagram.png)                         |
+| Block Diagram               | System snapshot for rough system parts with functionality                               | Jonas                    | 09.12.2020    | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphics/UML/block%20Diagram-new.png)                         |
 | Flow Diagram                | Flow for various system use cases                                                       | Jonas                    | 06.01.2021    | [Link](https://github.com/clecap/sector-coop/blob/main/Documentation/Graphics/UML/flowdiagram-new.svg)                          |
 
 ### Informal thoughts
